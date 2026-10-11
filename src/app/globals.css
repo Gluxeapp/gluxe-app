@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+/* Palette G LUXE: nero e oro, come il logo. L'app ha un solo tema (scuro). */
+:root {
+  --nero: #0a0a0a;
+  --superficie: #15130f;
+  --superficie-alta: #1e1b15;
+  --bordo: #2e281d;
+  --oro: #c9a24b;
+  --oro-chiaro: #e7cb80;
+  --testo: #f3ede1;
+  --testo-tenue: #a59d8c;
+  --errore: #e0786a;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-nero: var(--nero);
+  --color-superficie: var(--superficie);
+  --color-superficie-alta: var(--superficie-alta);
+  --color-bordo: var(--bordo);
+  --color-oro: var(--oro);
+  --color-oro-chiaro: var(--oro-chiaro);
+  --color-testo: var(--testo);
+  --color-testo-tenue: var(--testo-tenue);
+  --color-errore: var(--errore);
+  --font-titoli: var(--font-cormorant);
+  --font-sans: var(--font-montserrat);
+}
+
+body {
+  background: var(--nero);
+  color: var(--testo);
+}
+
+.testo-oro {
+  background: linear-gradient(180deg, var(--oro-chiaro), var(--oro) 60%, #9c7a2e);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
