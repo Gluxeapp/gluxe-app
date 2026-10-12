@@ -83,7 +83,7 @@ Il progetto vive in `C:\Progetti\gluxe-app`, **fuori da OneDrive** (la sincroniz
 
 | Fase | Contenuto | Stato |
 | --- | --- | --- |
-| 0 | Fondamenta: progetto, database, hosting di prova, PWA, grafica base | in corso: app locale pronta; mancano collegamento a GitHub, Supabase e Vercel |
+| 0 | Fondamenta: progetto, database, hosting di prova, PWA, grafica base | completata |
 | 1 | Accessi (codice + password, primo accesso, recupero), anagrafica incaricati, sponsor, codice automatico, audit log | da fare |
 | 2 | Catalogo: prodotti, listini, punti, promozioni | da fare |
 | 3 | Ordini degli incaricati con pagamento Stripe (carta, PayPal, Klarna): inserimento, stati, storico, spedizioni, conferma riordino 70% | da fare |

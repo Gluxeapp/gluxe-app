@@ -23,7 +23,7 @@ Tutto il piano gira sui punti: 1 punto = 1 € pagato all'azienda al prezzo inca
 | Punti di gruppo (PG) | PPQ proprio + PPQ di tutti i discendenti, a ogni profondità, compresi i rami con leader al 20% | vedi Casi di test |
 | Attivo | PP ≥ 50 nel mese | 50 punti = 100 € netti di listino |
 | Linea | Un incaricato diretto (primo livello) con tutta la sua discendenza | — |
-| Leader | Incaricato attivo con PG ≥ 7.000 nel mese (percentuale di qualifica 20%). Il flag Leader Fondatore non rende Leader | — |
+| Leader | Incaricato attivo con PG ≥ 7.000 nel mese (percentuale di qualifica 20%). Il flag Leader Fondatore e la qualifica bloccata non rendono Leader | — |
 | Mese di competenza | Mese in cui Stripe conferma il pagamento dell'ordine (ora italiana). Gli ordini si pagano solo con carta, PayPal o Klarna: niente bonifici | — |
 
 Arrotondamento: ogni voce si calcola a 2 decimali con arrotondamento commerciale (0,005 va in su). Il totale è la somma delle voci già arrotondate. Esempio: 211,48 × 4% = 8,4592 → 8,46 €.
@@ -59,7 +59,8 @@ Percentuale pagata (P) = percentuale di qualifica se l'incaricato è attivo e no
 - fa da **minimo**: P = la più alta tra la percentuale bloccata e la P calcolata normalmente;
 - vale **anche se l'incaricato è inattivo** nel mese;
 - dura **finché l'amministrazione non lo toglie**; ogni attivazione e rimozione va nel registro modifiche;
-- non vale per gli incaricati sospesi (la sospensione prevale: P = 0%).
+- non vale per gli incaricati sospesi (la sospensione prevale: P = 0%);
+- non rende Leader per linee al 20%, titoli manager e generazioni (né per sé né per chi sta sopra): la zona manager richiede i punti reali.
 
 ### 3. Bonus qualifica e differenza
 
@@ -193,6 +194,7 @@ Il motore è pronto quando tutti questi casi danno esattamente questi importi. "
 | T17 Fondatore con squadra | F Leader Fondatore nel periodo, attivo, 400 ON. Sotto F: G 1.600 ON | G: PG 1.600 → Expert 12%, qualifica 192. F: PG 2.000 → Expert, P reale 12%; online 400; qualifica 48; differenza su G 0. Con P 20%: qualifica 80 + differenza (20% − 12%) × 1.600 = 128 → 208. Integrazione 208 − 48 = 160; bonus avvio 3% × 2.000 = 60 | F: 668,00 € |
 | T18 Qualifica bloccata | S 1.000 ON. Sotto S: B, bloccato a Director 16%, 200 ON | B: PG 200 (sarebbe New Star) → P 16%; online 200; qualifica 32. S: PG 1.200 → Partner 8%; online 1.000; qualifica 80; differenza su B 0 (8% − 16% è negativo) | B: 232,00 €; S: 1.080,00 € |
 | T19 Bloccato e inattivo | B bloccato a Partner 8%, 30 ON (inattivo). Sotto B: C 300 ON | B: P 8% anche se inattivo; online 30; qualifica 2,40; differenza su C (8% − 4%) × 300 = 12. C: New Star, qualifica 12 | B: 44,40 €; C: 312,00 € |
+| T20 Bloccato a Leader sotto un Leader | S 7.000 ON. Sotto S: B, bloccato a Leader 20%, 500 ON | B: P 20%; online 500; qualifica 100; non è Leader per la zona manager. S: PG 7.500 → Leader; linee al 20%: 0 (B non conta) → nessun titolo, nessuna generazione; online 7.000; qualifica 1.400; differenza su B 0 (20% − 20%) | B: 600,00 €; S: 8.400,00 € |
 
 ## Decisioni prese
 
@@ -219,11 +221,8 @@ Il motore è pronto quando tutti questi casi danno esattamente questi importi. "
 | 19 | Ritenuta | 23% sul 78%; senza partita IVA la versa l'azienda, con partita IVA l'incaricato |
 | 20 | Negozio online | Pagina personale dentro l'app |
 | 21 | Pagamento ordini | Solo carta, PayPal, Klarna tramite Stripe; nessun bonifico. Il mese di competenza è dato dalla conferma di Stripe |
-| 22 | Qualifica bloccata | Fino a Leader 20%, dentro il piano, fa da minimo, vale anche da inattivo, finché l'amministrazione non la toglie; la sospensione prevale |
+| 22 | Qualifica bloccata | Fino a Leader 20%, dentro il piano, fa da minimo, vale anche da inattivo, finché l'amministrazione non la toglie; la sospensione prevale; non dà accesso alla zona manager |
 
-## Da confermare
-
-- **Bloccato a Leader 20% e zona manager**: un incaricato bloccato a Leader conta come Leader per le linee al 20%, i titoli manager e le generazioni (suoi e di chi sta sopra)? Proposta: no, il blocco cambia solo la percentuale P; la zona manager richiede i punti reali, come per il Leader Fondatore.
 
 ## Verifiche esterne prima del lancio
 
