@@ -40,5 +40,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# l'esempio delle variabili si può condividere
+# l'esempio delle variabili si puï¿½ condividere
 !.env.example
+.vercel
+.env*
