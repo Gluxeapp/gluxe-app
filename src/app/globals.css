@@ -31,6 +31,8 @@
 body {
   background: var(--nero);
   color: var(--testo);
+  /* Numeri "moderni": nel carattere dei titoli gli zeri altrimenti sembrano lettere o (GL000002). */
+  font-variant-numeric: lining-nums;
 }
 
 .testo-oro {

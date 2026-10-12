@@ -14,8 +14,8 @@ App per gli incaricati alle vendite di G LUXE (haircare, vendita diretta multili
 
 - **Next.js** (App Router) in **TypeScript** con `strict: true`. Un solo progetto per interfaccia e logica server.
 - **PWA** installabile da smartphone (manifest + service worker). Mobile first.
-- **PostgreSQL** su **Supabase**, regione UE (Francoforte). Accesso al database solo dal server.
-- **Vercel**, regione UE, per l'hosting dell'app.
+- **PostgreSQL** su **Supabase**, regione UE (Irlanda, eu-west-1). Accesso al database solo dal server.
+- **Vercel**, regione UE (Dublino, dub1, vicino al database), per l'hosting dell'app.
 - **Stripe** per tutti i pagamenti degli ordini (acquisti personali e negozio online): carta, PayPal, Klarna. Lo stato "pagato" arriva solo dal webhook di Stripe, mai impostato a mano.
 - **Postmark** o **Resend** per le email (recupero password, notifiche).
 - **Vitest** per i test.
@@ -59,13 +59,16 @@ App per gli incaricati alle vendite di G LUXE (haircare, vendita diretta multili
 
 ## Ruoli
 
-- **Incaricato**: accede con codice incaricato + password personale (impostata al primo accesso, con recupero via email).
+- **Incaricato**: si registra da solo e accede con codice incaricato + password personale (scelta in registrazione, con recupero via email).
 - **Amministrazione**: incaricati, sponsor e struttura della rete, flag Leader Fondatore, blocco manuale della qualifica (fino a Leader 20%), sospensioni, prodotti, listini, promozioni, stati ordini, parametri del piano, anteprima del calcolo.
 - **Contabilità**: richieste di pagamento (approva/rifiuta), pagamenti, ritenute, export per bonifici e commercialista.
+- **Accesso amministrazione e contabilità**: email + password + codice di 6 cifre inviato via email a ogni accesso.
 
 ## Decisioni di prodotto
 
 - **Codice incaricato**: generato in automatico, formato `GL` + 6 cifre progressive (es. `GL000123`). Non si riutilizza mai.
+- **Registrazione incaricato**: self-service. Dati: nome, cognome, codice fiscale, data di nascita, indirizzo, telefono, email, IBAN, partita IVA (sì/no + numero), password, **codice sponsor** obbligatorio (l'app mostra nome e iniziale del cognome dello sponsor per conferma). Nessuna approvazione: l'incaricato è attivo subito. **Start kit (59,90 €) obbligatorio** in registrazione: finché non c'è il pagamento (Fase 3) la registrazione funziona senza; da allora l'attivazione avviene alla conferma di Stripe.
+- **Senza codice sponsor**: avviso "Se non hai un codice sponsor chiedilo all'azienda" con un modulo di sola richiesta di contatto (nome, cognome, telefono, email, città). La richiesta arriva all'amministrazione come notifica (area admin + email); l'amministrazione contatta la persona e le comunica un codice sponsor.
 - **Pagine incaricato**: Prodotti a listino, Promozioni, Ordini (nuovo ordine + elenco con stato), Carriera (qualifica, requisiti per la successiva, avanzamento in %, rete con **rappresentazione grafica ad albero**), Provvigioni (maturate, disponibili, richieste, pagate, dettaglio voce per voce, pulsante "Richiedi pagamento").
 - **Stati ordine**: inserito, pagato, in preparazione, spedito, consegnato, annullato, reso.
 - **Negozio personale online**: pagina pubblica di ogni incaricato dentro l'app (es. `/negozio/GL000123`), curata nella grafica. Gli ordini sono attribuiti all'incaricato con certezza e generano punti ON.
@@ -84,7 +87,7 @@ Il progetto vive in `C:\Progetti\gluxe-app`, **fuori da OneDrive** (la sincroniz
 | Fase | Contenuto | Stato |
 | --- | --- | --- |
 | 0 | Fondamenta: progetto, database, hosting di prova, PWA, grafica base | completata |
-| 1 | Accessi (codice + password, primo accesso, recupero), anagrafica incaricati, sponsor, codice automatico, audit log | da fare |
+| 1 | Registrazione con codice sponsor, richieste di contatto, accesso incaricati (codice + password) e admin (email + password + codice), recupero password, anagrafica incaricati, codice automatico, audit log | pronta da provare: manca la configurazione email (Resend) |
 | 2 | Catalogo: prodotti, listini, punti, promozioni | da fare |
 | 3 | Ordini degli incaricati con pagamento Stripe (carta, PayPal, Klarna): inserimento, stati, storico, spedizioni, conferma riordino 70% | da fare |
 | 4 | Motore provvigioni: prima i test di `docs/piano-compensi.md`, poi il codice; configurazione parametri; anteprima | da fare |

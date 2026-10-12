@@ -3,6 +3,8 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
+  // Le azioni ricevono dati personali (codice fiscale, IBAN): non vanno scritti nel registro del server.
+  logging: { serverFunctions: false },
   turbopack: {
     rules: {
       "*.css": {

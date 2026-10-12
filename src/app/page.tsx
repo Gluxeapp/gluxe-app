@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Collegamento } from "@/components/ui";
 import { SuggerimentoInstallazione } from "@/components/suggerimento-installazione";
+import { ModuloAccesso } from "./modulo-accesso";
 
 export default function Accesso() {
   return (
@@ -15,58 +17,28 @@ export default function Accesso() {
           className="mx-auto w-full max-w-xs"
         />
 
-        <h1 className="mt-6 text-center font-titoli text-3xl font-semibold testo-oro">
-          Area Incaricati
-        </h1>
+        <h1 className="mt-6 text-center font-titoli text-3xl font-semibold testo-oro">Area Incaricati</h1>
 
-        <form className="mt-8 space-y-5" aria-describedby="avviso-fase">
-          <div>
-            <label htmlFor="codice" className="block text-sm text-testo-tenue">
-              Codice incaricato
-            </label>
-            <input
-              id="codice"
-              name="codice"
-              autoComplete="username"
-              autoCapitalize="characters"
-              placeholder="GL000123"
-              disabled
-              className="mt-1 w-full rounded-lg border border-bordo bg-superficie px-4 py-3 text-testo placeholder:text-testo-tenue/60 focus:border-oro focus:outline-none disabled:opacity-60"
-            />
-          </div>
-          <div>
-            <label htmlFor="password" className="block text-sm text-testo-tenue">
-              Password
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              autoComplete="current-password"
-              disabled
-              className="mt-1 w-full rounded-lg border border-bordo bg-superficie px-4 py-3 text-testo focus:border-oro focus:outline-none disabled:opacity-60"
-            />
-          </div>
-          <button
-            type="button"
-            disabled
-            className="w-full rounded-lg bg-oro py-3 font-semibold tracking-wide text-nero disabled:opacity-50"
-          >
-            Accedi
-          </button>
-          <p id="avviso-fase" className="text-center text-xs text-testo-tenue">
-            L&apos;accesso sarà attivo dalla Fase 1.
-          </p>
-        </form>
+        <div className="mt-8">
+          <ModuloAccesso />
+        </div>
+
+        <p className="mt-4 text-center text-sm">
+          <Collegamento href="/recupero-password">Password dimenticata?</Collegamento>
+        </p>
 
         <Link
-          href="/anteprima"
+          href="/registrazione"
           className="mt-8 block rounded-lg border border-oro/60 py-3 text-center text-oro-chiaro"
         >
-          Guarda l&apos;anteprima dell&apos;app
+          Diventa incaricata: registrati
         </Link>
 
         <SuggerimentoInstallazione />
+
+        <p className="mt-10 text-center text-xs text-testo-tenue">
+          <Link href="/staff/accesso">Accesso amministrazione</Link>
+        </p>
       </div>
     </main>
   );
