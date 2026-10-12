@@ -31,16 +31,15 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # env files (can opt-in for committing if needed)
-.env*
 
 # vercel
-.vercel
 
 # typescript
 *.tsbuildinfo
 next-env.d.ts
 
-# l'esempio delle variabili si pu� condividere
-!.env.example
-.vercel
 .env*
+.vercel
+
+# l'esempio delle variabili si può condividere
+!.env.example

@@ -1,6 +1,6 @@
 # G LUXE · Specifiche motore provvigioni
 
-Versione: 11 ottobre 2026 · rev. 3 (decisioni del fondatore integrate; Leader Fondatore extra piano)
+Versione: 12 ottobre 2026 · rev. 4 (qualifica bloccata, quote fondatrici Giovanna Di Lillo e Margherita Suma)
 
 Questo documento traduce il piano compensi in regole univoche per il motore di calcolo dell'app G LUXE. Ogni regola deve dare un solo risultato possibile, senza interpretazioni. È la fonte ufficiale: se il codice non coincide con il documento, vale il documento.
 
@@ -99,7 +99,7 @@ Il titolo si ricalcola ogni mese. Nessun titolo è permanente, tranne il nome "L
 ### 6. Pool manager e bonus auto
 
 - Fondo del mese = 3% della **somma dei PPQ di tutti gli incaricati** nel mese (acquisti personali fino a 300 punti a persona + tutti gli ordini online).
-- Valore di una quota = fondo ÷ somma delle quote di tutti i manager qualificati quel mese.
+- Valore di una quota = fondo ÷ somma delle quote di tutti i manager qualificati quel mese. I manager esclusi dal pool (regola 8) non contano: le loro quote non entrano nella somma.
 - Ogni manager incassa fondo × sue quote ÷ quote totali, calcolato in modo esatto e arrotondato al centesimo solo alla fine. I centesimi avanzati restano all'azienda.
 - Bonus auto: importo fisso del titolo, solo nei mesi in cui il titolo è raggiunto.
 
@@ -117,6 +117,19 @@ Il Leader Fondatore è una qualifica **aggiuntiva, fuori dal piano**. Il piano (
 - Requisito: almeno 1.000 punti di gruppo nei primi 90 giorni, contando i PPQ degli ordini pagati dal giorno di ingresso al 90° giorno compreso. Se non lo raggiungono, perdono garanzia e bonus dal mese successivo.
 - Il titolo "Leader Fondatore" resta per sempre, ma è solo un'etichetta.
 
+### 8. Quote fondatrici (extra piano)
+
+Due persone ricevono ogni mese una **quota sui punti di tutta l'azienda**. La base è la stessa del pool: somma dei PPQ di tutti gli incaricati nel mese (regola 6). La quota si arrotonda al centesimo. Le quote sono **extra piano**: non cambiano i guadagni di nessun altro e non riducono il fondo del pool.
+
+| Persona | Codice | Quota | Condizione | Altre regole |
+| --- | --- | --- | --- | --- |
+| Giovanna Di Lillo, fondatrice | GL000001 | 2% | Sempre, anche se inattiva | Qualifica bloccata a Leader 20% per sempre (regola 2). Titoli e generazioni come tutti, fino a Diamond President, in base a punti e linee reali. **Esclusa dal pool manager e dal bonus auto**. Etichetta "Master President" (solo un nome) |
+| Margherita Suma, Leader Fondatrice | — | 1% | Solo nei mesi in cui è attiva (PP ≥ 50) | Leader Fondatrice (regola 7). Titoli, generazioni, pool e bonus auto come tutti, fino a Diamond President |
+
+- Le quote durano finché l'amministrazione non le toglie.
+- Nell'app sono parametri della scheda incaricato (percentuale, condizione di attività, esclusione da pool e bonus auto), modificabili solo dall'amministrazione e registrati nel registro modifiche.
+- Come il pool, le quote **non si ricalcolano per i resi**.
+
 ## Algoritmo mensile
 
 Il calcolo gira sul server, in quest'ordine. Durante il mese si può rilanciare quante volte si vuole come anteprima.
@@ -129,12 +142,13 @@ Il calcolo gira sul server, in quest'ordine. Durante il mese si può rilanciare 
 6. Calcola la provvigione negozio online.
 7. Calcola bonus qualifica e differenza, punto per punto, risalendo gli sponsor.
 8. Calcola le generazioni per ogni manager.
-9. Calcola il pool: fondo, valore quota, importo per manager.
-10. Aggiungi bonus auto e, per i Leader Fondatori, integrazione Fondatore e bonus avvio.
-11. Salva ogni voce come riga del registro provvigioni: beneficiario, tipo voce, mese, base punti, percentuale, importo, da chi provengono i punti, versione del piano.
-12. Il mese si chiude sempre **l'ultimo giorno del mese** (23:59:59, ora italiana). Il calcolo definitivo gira automaticamente subito dopo e congela il mese. Da qui nessuna riga si modifica: ogni correzione diventa una rettifica nel mese in corso.
-13. Calcola il saldo richiedibile: importi non richiesti dei mesi precedenti + voci pagabili del mese chiuso (tutte tranne il margine).
-14. Il pulsante "Richiedi pagamento" è attivo **dal 10 al 13 di ogni mese** se il saldo è almeno 50 €. Le richieste vanno alla contabilità e si pagano **il 20 del mese** con bonifico all'IBAN del profilo. Ciò che non viene richiesto resta nel saldo per il mese dopo.
+9. Calcola il pool: fondo, valore quota, importo per manager (esclusi i manager esclusi dal pool).
+10. Aggiungi bonus auto (non a chi ne è escluso) e, per i Leader Fondatori, integrazione Fondatore e bonus avvio.
+11. Calcola le quote fondatrici (regola 8).
+12. Salva ogni voce come riga del registro provvigioni: beneficiario, tipo voce, mese, base punti, percentuale, importo, da chi provengono i punti, versione del piano.
+13. Il mese si chiude sempre **l'ultimo giorno del mese** (23:59:59, ora italiana). Il calcolo definitivo gira automaticamente subito dopo e congela il mese. Da qui nessuna riga si modifica: ogni correzione diventa una rettifica nel mese in corso.
+14. Calcola il saldo richiedibile: importi non richiesti dei mesi precedenti + voci pagabili del mese chiuso (tutte tranne il margine).
+15. Il pulsante "Richiedi pagamento" è attivo **dal 10 al 13 di ogni mese** se il saldo è almeno 50 €. Le richieste vanno alla contabilità e si pagano **il 20 del mese** con bonifico all'IBAN del profilo. Ciò che non viene richiesto resta nel saldo per il mese dopo.
 
 ## Rettifiche (resi, recessi, riacquisti, correzioni)
 
@@ -142,7 +156,7 @@ Quando un ordine di un mese già chiuso viene reso, riacquistato, rimborsato tra
 
 1. Si rifà il calcolo completo di quel mese **come se l'ordine non ci fosse mai stato** (o con l'ordine corretto), ricalcolando anche qualifiche, titoli e generazioni.
 2. Per ogni beneficiario e ogni voce, la differenza tra il calcolo originale e il ricalcolo diventa una riga di rettifica nel mese in cui avviene il reso.
-3. Il **pool non si ricalcola** per i resi.
+3. Il **pool** e le **quote fondatrici** non si ricalcolano per i resi.
 4. Il mese originale resta congelato e invariato.
 
 Se un ordine viene reso nello stesso mese in cui è stato pagato, prima della chiusura, si annulla e basta: il calcolo del mese non lo conta.
@@ -195,6 +209,9 @@ Il motore è pronto quando tutti questi casi danno esattamente questi importi. "
 | T18 Qualifica bloccata | S 1.000 ON. Sotto S: B, bloccato a Director 16%, 200 ON | B: PG 200 (sarebbe New Star) → P 16%; online 200; qualifica 32. S: PG 1.200 → Partner 8%; online 1.000; qualifica 80; differenza su B 0 (8% − 16% è negativo) | B: 232,00 €; S: 1.080,00 € |
 | T19 Bloccato e inattivo | B bloccato a Partner 8%, 30 ON (inattivo). Sotto B: C 300 ON | B: P 8% anche se inattivo; online 30; qualifica 2,40; differenza su C (8% − 4%) × 300 = 12. C: New Star, qualifica 12 | B: 44,40 €; C: 312,00 € |
 | T20 Bloccato a Leader sotto un Leader | S 7.000 ON. Sotto S: B, bloccato a Leader 20%, 500 ON | B: P 20%; online 500; qualifica 100; non è Leader per la zona manager. S: PG 7.500 → Leader; linee al 20%: 0 (B non conta) → nessun titolo, nessuna generazione; online 7.000; qualifica 1.400; differenza su B 0 (20% − 20%) | B: 600,00 €; S: 8.400,00 € |
+| T21 Quota Giovanna | Somma PPQ dell'azienda nel mese: 300.000. Giovanna inattiva (PP 0) | Quota 2% = 6.000,00 €, pagata anche se inattiva | Giovanna: 6.000,00 € |
+| T22 Pool senza Giovanna | Somma PPQ 300.000 → fondo 9.000. Manager del mese: Giovanna Prestige Director (2 quote), M1 Prestige Director (2 quote), M2 President (3 quote) | Giovanna esclusa: quote totali 5, valore quota 1.800. M1 pool 3.600 + auto 300; M2 pool 5.400 + auto 500. Giovanna: pool 0, auto 0 (più la sua quota 2% = 6.000) | M1: 3.900,00 €; M2: 5.900,00 € |
+| T23 Quota Margherita | Somma PPQ 50.000. Mese A: Margherita attiva (PP 120). Mese B: inattiva (PP 30) | Mese A: quota 1% = 500,00 €. Mese B: quota 0 | A: 500,00 €; B: 0,00 € |
 
 ## Decisioni prese
 
@@ -222,9 +239,12 @@ Il motore è pronto quando tutti questi casi danno esattamente questi importi. "
 | 20 | Negozio online | Pagina personale dentro l'app |
 | 21 | Pagamento ordini | Solo carta, PayPal, Klarna tramite Stripe; nessun bonifico. Il mese di competenza è dato dalla conferma di Stripe |
 | 22 | Qualifica bloccata | Fino a Leader 20%, dentro il piano, fa da minimo, vale anche da inattivo, finché l'amministrazione non la toglie; la sospensione prevale; non dà accesso alla zona manager |
+| 23 | Giovanna Di Lillo (GL000001) | Quota 2% sui PPQ dell'azienda anche se inattiva; qualifica bloccata a Leader 20%; titoli e generazioni fino a Diamond President; esclusa da pool e bonus auto; etichetta Master President |
+| 24 | Margherita Suma | Leader Fondatrice; quota 1% sui PPQ dell'azienda solo se attiva; per il resto piano normale, pool e bonus auto compresi |
+| 25 | Quote fondatrici e resi | Come il pool, non si ricalcolano |
 
 
 ## Verifiche esterne prima del lancio
 
-- Commercialista: trattamento IVA sugli acquisti degli incaricati, ritenute sulle provvigioni, contributi INPS per gli incaricati occasionali oltre la soglia annua.
+- Commercialista: trattamento IVA sugli acquisti degli incaricati, ritenute sulle provvigioni, contributi INPS per gli incaricati occasionali oltre la soglia annua, trattamento fiscale delle quote fondatrici (2% Giovanna Di Lillo, socia fondatrice; 1% Margherita Suma).
 - Legale: conformità del piano alla Legge 173/2005.
