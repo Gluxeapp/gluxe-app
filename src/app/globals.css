@@ -2,12 +2,12 @@
 
 /* Palette G LUXE: nero e oro, come il logo. L'app ha un solo tema (scuro). */
 :root {
-  --nero: #0a0a0a;
-  --superficie: #15130f;
-  --superficie-alta: #1e1b15;
+  --nero: #000000;
+  --superficie: #12110e;
+  --superficie-alta: #1b1915;
   --bordo: #2e281d;
-  --oro: #c9a24b;
-  --oro-chiaro: #e7cb80;
+  --oro: #dbad54;
+  --oro-chiaro: #f2d593;
   --testo: #f3ede1;
   --testo-tenue: #a59d8c;
   --errore: #e0786a;
@@ -34,7 +34,7 @@ body {
 }
 
 .testo-oro {
-  background: linear-gradient(180deg, var(--oro-chiaro), var(--oro) 60%, #9c7a2e);
+  background: linear-gradient(180deg, var(--oro-chiaro), var(--oro) 60%, #a8802f);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;

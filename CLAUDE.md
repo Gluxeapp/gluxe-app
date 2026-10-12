@@ -73,7 +73,7 @@ App per gli incaricati alle vendite di G LUXE (haircare, vendita diretta multili
 - **Pagamento provvigioni**: bonifico all'IBAN indicato nel profilo dell'incaricato.
 - **Leader Fondatore**: qualifica extra piano. Il piano si calcola come se il flag non esistesse; il Fondatore riceve in più un'integrazione separata. Diventa manager solo quando raggiunge i requisiti reali in punti.
 - **Ritenuta**: 23% sul 78% dell'importo (17,94% effettivo). Incaricati senza partita IVA: la trattiene e la versa l'azienda. Incaricati con partita IVA: l'azienda paga il lordo, la versano loro.
-- **Grafica**: nero e oro, caratteri con grazie eleganti, come il logo in `assets/brand/logo-g-luxe.jpg`.
+- **Grafica**: nero e oro, caratteri con grazie eleganti, come il logo in `assets/brand/logo-g-luxe.png`.
 
 ## Cartella del progetto
 

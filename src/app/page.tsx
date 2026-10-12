@@ -7,12 +7,12 @@ export default function Accesso() {
     <main className="flex flex-1 flex-col items-center justify-center px-6 py-10">
       <div className="w-full max-w-sm">
         <Image
-          src="/brand/logo-g-luxe.jpg"
-          alt="G LUXE by Giovanna Di Lillo"
-          width={1280}
-          height={853}
+          src="/brand/logo-g-luxe.png"
+          alt="G LUXE · Nata per brillare"
+          width={1779}
+          height={899}
           priority
-          className="mx-auto w-full max-w-xs rounded-lg"
+          className="mx-auto w-full max-w-xs"
         />
 
         <h1 className="mt-6 text-center font-titoli text-3xl font-semibold testo-oro">
