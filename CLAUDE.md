@@ -88,7 +88,7 @@ Il progetto vive in `C:\Progetti\gluxe-app`, **fuori da OneDrive** (la sincroniz
 | Fase | Contenuto | Stato |
 | --- | --- | --- |
 | 0 | Fondamenta: progetto, database, hosting di prova, PWA, grafica base | completata |
-| 1 | Registrazione con codice sponsor, richieste di contatto, accesso incaricati (codice + password) e admin (email + password + codice), recupero password, anagrafica incaricati, codice automatico, audit log | pronta da provare: manca la configurazione email (Resend) |
+| 1 | Registrazione con codice sponsor, richieste di contatto, accesso incaricati (codice + password) e admin (email + password + codice), recupero password, anagrafica incaricati, codice automatico, audit log | completata (le email alle incaricate partiranno quando sarà verificato il dominio aziendale su Resend) |
 | 2 | Catalogo: prodotti, listini, punti, promozioni | da fare |
 | 3 | Ordini degli incaricati con pagamento Stripe (carta, PayPal, Klarna): inserimento, stati, storico, spedizioni, conferma riordino 70% | da fare |
 | 4 | Motore provvigioni: prima i test di `docs/piano-compensi.md`, poi il codice; configurazione parametri; anteprima | da fare |
