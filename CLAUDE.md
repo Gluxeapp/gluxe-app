@@ -61,27 +61,36 @@ App per gli incaricati alle vendite di G LUXE (haircare, vendita diretta multili
 
 - **Incaricato**: si registra da solo e accede con codice incaricato + password personale (scelta in registrazione, con recupero via email).
 - **Amministrazione**: incaricati, sponsor e struttura della rete, flag Leader Fondatore, blocco manuale della qualifica (fino a Leader 20%), sospensioni, prodotti, listini, promozioni, stati ordini, parametri del piano, anteprima del calcolo.
-- **Contabilità**: richieste di pagamento (approva/rifiuta), pagamenti, ritenute, export per bonifici e commercialista.
-- **Accesso amministrazione e contabilità**: email + password + codice di 6 cifre inviato via email a ogni accesso.
+- **Contabilità**: richieste di pagamento (approva/rifiuta), pagamenti, ritenute, IVA e INPS, export per bonifici e commercialista.
+- **Ordini** (terzo ruolo staff): solo gestione degli stati degli ordini e delle spedizioni.
+- **Accesso staff** (amministrazione, contabilità, ordini): email + password + codice di 6 cifre inviato via email a ogni accesso.
 
 ## Decisioni di prodotto
 
 - **Codice incaricato**: generato in automatico, formato `GL` + 6 cifre progressive (es. `GL000123`). Non si riutilizza mai.
-- **Registrazione incaricato**: self-service. Dati: nome, cognome, codice fiscale, data di nascita, indirizzo, telefono, email, IBAN, partita IVA (sì/no + numero), password, **codice sponsor** obbligatorio (l'app mostra nome e iniziale del cognome dello sponsor per conferma). Nessuna approvazione: l'incaricato è attivo subito. **Start kit (59,90 €) obbligatorio** in registrazione: finché non c'è il pagamento (Fase 3) la registrazione funziona senza; da allora l'attivazione avviene alla conferma di Stripe.
+- **Registrazione incaricato**: self-service. Dati: nome, cognome, codice fiscale, data di nascita, indirizzo, telefono, email, IBAN, partita IVA (sì/no + numero), password, **codice sponsor** obbligatorio (l'app mostra nome e iniziale del cognome dello sponsor per conferma). Nessuna approvazione: l'incaricato è attivo subito. **Start kit (59,90 €, 33 punti fissi) obbligatorio** in registrazione: attiva l'account; sconto 40% e negozio online dall'ordine successivo; finché non c'è il pagamento (Fase 3) la registrazione funziona senza; da allora l'attivazione avviene alla conferma di Stripe.
 - **Senza codice sponsor**: avviso "Se non hai un codice sponsor chiedilo all'azienda" con un modulo di sola richiesta di contatto (nome, cognome, telefono, email, città). La richiesta arriva all'amministrazione come notifica (area admin + email); l'amministrazione contatta la persona e le comunica un codice sponsor.
 - **Pagine incaricato**: Prodotti a listino, Promozioni, Ordini (nuovo ordine + elenco con stato), Carriera (qualifica, requisiti per la successiva, avanzamento in %, rete con **rappresentazione grafica ad albero**), Provvigioni (maturate, disponibili, richieste, pagate, dettaglio voce per voce, pulsante "Richiedi pagamento").
 - **Stati ordine**: inserito, pagato, in preparazione, spedito, consegnato, annullato, reso.
 - **Negozio personale online**: pagina pubblica di ogni incaricato dentro l'app (es. `/negozio/GL000123`), curata nella grafica. Gli ordini sono attribuiti all'incaricato con certezza e generano punti ON.
 - **Pagamento ordini**: solo carta, PayPal e Klarna tramite Stripe. **Il bonifico non è ammesso per gli ordini.** Mese di competenza = momento in cui Stripe conferma il pagamento. Rimborsi Stripe → rettifiche.
-- **Pagamento provvigioni**: bonifico all'IBAN indicato nel profilo dell'incaricato.
-- **Leader Fondatore**: qualifica extra piano. Il piano si calcola come se il flag non esistesse; il Fondatore riceve in più un'integrazione separata. Diventa manager solo quando raggiunge i requisiti reali in punti.
-- **Quote fondatrici (extra piano)**: Giovanna Di Lillo (GL000001, fondatrice, "Master President") 2% sui punti dell'azienda anche se inattiva, qualifica bloccata a Leader 20%, esclusa da pool e bonus auto; Margherita Suma (Leader Fondatrice) 1% solo se attiva. Dettagli nella regola 8 di `docs/piano-compensi.md`.
-- **Ritenuta**: 23% sul 78% dell'importo (17,94% effettivo). Incaricati senza partita IVA: la trattiene e la versa l'azienda. Incaricati con partita IVA: l'azienda paga il lordo, la versano loro.
+- **Prezzi e punti**: listino IVA inclusa; punti = 0,80 × prezzo pagato IVA esclusa; acquisti personali con sconto 40%; provvigione negozio online = 50% dei punti; spedizione 6,90 € per ogni ordine, senza punti. Tutti parametri (vedi `docs/piano-compensi.md`).
+- **Pagamento provvigioni**: pulsante "Richiedi pagamento" dal 1° al 4 del mese successivo, minimo 50 €; pagamento il 20 (o primo giorno lavorativo successivo) con bonifico all'IBAN del profilo.
+- **Leader Fondatori**: per 12 mesi qualifica bloccata al 16% (dentro il piano) + bonus 3% sui punti di gruppo reali, se attive.
+- **Figure speciali**: Giovanna Di Lillo (GL000001, fondatrice) Master President 2% dell'incasso aziendale anche se inattiva, bloccata al 20%, esclusa da pool e bonus auto; Margherita Suma (Leader Fondatrice) quota riservata del pool 1% dell'incasso solo se attiva. Dettagli nella sezione 6 di `docs/piano-compensi.md`.
+- **Fisco**: ritenuta d'imposta 23% sul 78% su tutti i pagamenti, per tutte le incaricate. IVA (partita IVA sì/no) e INPS (a carico azienda sì/no) come parametri, in attesa del commercialista.
 - **Grafica**: nero e oro, caratteri con grazie eleganti, come il logo in `assets/brand/logo-g-luxe.png`.
 
 ## Cartella del progetto
 
 Il progetto vive in `C:\Progetti\gluxe-app`, **fuori da OneDrive** (la sincronizzazione di `node_modules` rallenta e blocca i file). Il backup del codice si fa con Git/GitHub. I materiali del brand restano in `OneDrive\Desktop\G Luxe`.
+
+## Come si lavora sul codice
+
+- Ogni modifica si fa su un **branch** dedicato su GitHub, si prova su un'**anteprima Vercel** e solo dopo si unisce a `main` (che va online).
+- Anteprime e computer di sviluppo devono usare un **database di prova** separato (progetto Supabase "gluxe-test"), mai quello di produzione.
+- Le modifiche al database (migrazioni) devono essere **reversibili**: per ognuna va previsto come tornare indietro.
+- Il database di produzione si modifica solo dopo l'ok del fondatore.
 
 ## Piano di sviluppo
 
@@ -89,12 +98,12 @@ Il progetto vive in `C:\Progetti\gluxe-app`, **fuori da OneDrive** (la sincroniz
 | --- | --- | --- |
 | 0 | Fondamenta: progetto, database, hosting di prova, PWA, grafica base | completata |
 | 1 | Registrazione con codice sponsor, richieste di contatto, accesso incaricati (codice + password) e admin (email + password + codice), recupero password, anagrafica incaricati, codice automatico, audit log | completata (le email alle incaricate partiranno quando sarà verificato il dominio aziendale su Resend) |
-| 2 | Catalogo: prodotti, listini, punti, promozioni | da fare |
-| 3 | Ordini degli incaricati con pagamento Stripe (carta, PayPal, Klarna): inserimento, stati, storico, spedizioni, conferma riordino 70% | da fare |
-| 4 | Motore provvigioni: prima i test di `docs/piano-compensi.md`, poi il codice; configurazione parametri; anteprima | da fare |
+| 2 | Catalogo: prodotti, listino, punti con coefficiente, sconto 40%, start kit, promozioni | da fare |
+| 3 | Ordini con pagamento Stripe (carta, PayPal, Klarna): start kit in registrazione, spedizione 6,90 €, stati, storico, conferma riordino 70%, ruolo staff "ordini" | da fare |
+| 4 | Motore provvigioni (rev. 5): prima i test di `docs/piano-compensi.md`, poi il codice; parametri versionati; qualifiche bloccate, Leader Fondatori, figure speciali; anteprima | da fare |
 | 5 | Carriera e rete: qualifica, avanzamento, albero grafico della rete | da fare |
-| 6 | Chiusura mese, registro provvigioni, rettifiche, richieste di pagamento, area contabilità, ritenute, export | da fare |
-| 7 | Negozio personale online | da fare |
+| 6 | Chiusura mese, registro provvigioni, storni, richieste di pagamento (1–4), area contabilità, ritenute, report IVA/INPS, export | da fare |
+| 7 | Negozio personale online, clienti legati, controllo clienti fittizi, indicatore vendite a clienti finali | da fare |
 | 8 | API e webhook per siti esterni | da fare |
 | 9 | Collaudo con dati simulati, sicurezza, GDPR, backup, pilota con 5–10 incaricati | da fare |
 

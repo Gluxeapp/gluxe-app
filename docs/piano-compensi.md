@@ -1,250 +1,218 @@
-# G LUXE · Specifiche motore provvigioni
+# G LUXE · Piano Compensi (specifiche del motore di calcolo)
 
-Versione: 12 ottobre 2026 · rev. 4 (qualifica bloccata, quote fondatrici Giovanna Di Lillo e Margherita Suma)
+Versione: 16 ottobre 2026 · **rev. 5 "Piano Compensi G LUXE"**. Sostituisce tutte le versioni precedenti (la rev. 4 resta solo nello storico di Git e non è mai stata applicata a ordini reali).
 
-Questo documento traduce il piano compensi in regole univoche per il motore di calcolo dell'app G LUXE. Ogni regola deve dare un solo risultato possibile, senza interpretazioni. È la fonte ufficiale: se il codice non coincide con il documento, vale il documento.
+Questo documento traduce il piano compensi in regole univoche per il motore di calcolo dell'app G LUXE. Ogni regola deve dare un solo risultato possibile. È la fonte ufficiale: se il codice non coincide con il documento, vale il documento.
 
 Per lo sviluppo: scrivere prima i test della sezione "Casi di test", poi il codice, finché passano tutti. Se una regola sembra ambigua o in conflitto con un'altra, fermarsi e chiedere.
 
-## Definizioni
+**Entrata in vigore:** dal primo ordine dell'app. Non esistono ordini o compensi calcolati con regole precedenti.
 
-Tutto il piano gira sui punti: 1 punto = 1 € pagato all'azienda al prezzo incaricato, IVA esclusa. I € del cliente servono solo per ricavarli.
+**Parametri:** tutti i numeri di questo documento (percentuali, soglie, importi, coefficienti, regole fiscali) sono parametri modificabili dall'area sede, salvati in versioni con data di efficacia. I valori indicati sono quelli iniziali.
 
-| Termine | Regola | Esempio |
+## 1. Definizioni
+
+| Termine | Regola | Valore iniziale |
 | --- | --- | --- |
-| Prezzo al pubblico | Prezzo di listino IVA 22% inclusa | 129,00 € |
-| Prezzo netto | Prezzo al pubblico ÷ 1,22, arrotondato al centesimo | 105,74 € |
-| Prezzo incaricato | Prezzo netto × 50% | 52,87 € |
-| Punti di un ordine | Somma dei prezzi incaricato × quantità, sul prezzo realmente pagato (anche per i prodotti scontati). Spedizioni e start kit: 0 punti | 52,87 punti |
-| Acquisti personali (AP) | Punti degli ordini che l'incaricato paga a prezzo incaricato | 300 punti |
-| Ordini negozio online (ON) | Punti degli ordini pagati dal cliente sul negozio personale dell'incaricato | 52,87 punti |
-| Punti personali (PP) | AP + ON del mese, senza limiti | 352,87 punti |
-| Punti personali per qualifica (PPQ) | min(AP; 300) + ON | AP 500, ON 100 → 400 |
-| Punti di gruppo (PG) | PPQ proprio + PPQ di tutti i discendenti, a ogni profondità, compresi i rami con leader al 20% | vedi Casi di test |
-| Attivo | PP ≥ 50 nel mese | 50 punti = 100 € netti di listino |
-| Linea | Un incaricato diretto (primo livello) con tutta la sua discendenza | — |
-| Leader | Incaricato attivo con PG ≥ 7.000 nel mese (percentuale di qualifica 20%). Il flag Leader Fondatore e la qualifica bloccata non rendono Leader | — |
-| Mese di competenza | Mese in cui Stripe conferma il pagamento dell'ordine (ora italiana). Gli ordini si pagano solo con carta, PayPal o Klarna: niente bonifici | — |
+| Listino | Prezzo al pubblico IVA inclusa | Shampoo 32,90 €, maschera 32,90 €, spray 12in1 39,90 €, olio capelli al caramello 44,90 €, kit routine 139,00 € |
+| Aliquota IVA | Parametro | 22% |
+| Prezzo IVA esclusa | Prezzo IVA inclusa ÷ (1 + IVA), arrotondato al centesimo, **per unità** | 139,00 → 113,93 € |
+| Prezzo pagato | Quanto viene pagato all'azienda per una riga d'ordine, IVA esclusa, spedizione esclusa | — |
+| Punti di una riga | Coefficiente × prezzo pagato IVA esclusa **di un'unità**, arrotondato a 2 decimali, × quantità | Coefficiente 0,80. Kit routine: 0,80 × 113,93 = 91,14 punti |
+| Punti AP | Punti degli acquisti personali dell'incaricata nel mese | — |
+| Punti ON | Punti degli ordini dei suoi clienti sul negozio online nel mese | — |
+| Punti KIT | 33 punti fissi dello start kit, solo nel mese in cui è pagato | 33 |
+| Punti personali (PP) | AP + ON + KIT | — |
+| Punti personali per qualifica (PPQ) | ON + MIN(AP; 250) + KIT | Tetto 250 |
+| Punti di gruppo per qualifica (PGQ) | PPQ propri + PPQ di tutta la downline, a ogni profondità, attive o no | — |
+| Punti di gruppo reali (PGR) | PP propri + PP di tutta la downline, senza tetto | — |
+| Attiva | PP ≥ 33 nel mese | 33 |
+| Incasso aziendale del mese | Somma dei prezzi pagati IVA esclusa di **tutti** gli ordini del mese (start kit compresi), spedizioni escluse | — |
+| Mese di competenza | Mese in cui Stripe conferma il pagamento dell'ordine (ora italiana) | — |
 
-Arrotondamento: ogni voce si calcola a 2 decimali con arrotondamento commerciale (0,005 va in su). Il totale è la somma delle voci già arrotondate. Esempio: 211,48 × 4% = 8,4592 → 8,46 €.
+Arrotondamento: ogni voce si calcola a 2 decimali con arrotondamento commerciale (0,005 va in su). Il totale è la somma delle voci già arrotondate. Esempio: 364,56 × 4% = 14,5824 → 14,58 €.
 
-Codici sconto sull'intero ordine: lo sconto si ripartisce in proporzione sulle righe dell'ordine; i punti si calcolano sul prezzo realmente pagato da ogni riga.
+Codici sconto sull'intero ordine: lo sconto si ripartisce in proporzione sulle righe; i punti si calcolano sul prezzo realmente pagato da ogni riga.
 
-## Regole di calcolo
+## 2. Tipi di ordine
 
-Ogni mese un incaricato può avere fino a sette voci: provvigione negozio online, margine, bonus qualifica, differenza, generazioni, pool, bonus auto. I Leader Fondatori possono avere in più due voci extra piano: integrazione Fondatore e bonus avvio. Solo il margine non lo paga l'azienda.
-
-### 1. Margine e provvigione negozio online (50%)
-
-- **Acquisti personali**: l'incaricato guadagna rivendendo. L'azienda non paga nulla. L'app mostra il margine solo come informazione ("margine stimato" = punti AP), fuori dal totale da pagare.
-- **Ordini negozio online**: l'azienda paga una provvigione pari ai punti ON (50% del netto). È dovuta sempre, anche se l'incaricato non è attivo o è sospeso.
-
-### 2. Qualifica (percentuale del mese)
-
-La percentuale dipende dai punti di gruppo (PG) del mese. Soglie con "maggiore o uguale".
-
-| Punti di gruppo | Qualifica | Percentuale |
-| --- | --- | --- |
-| 0 – 99,99 | Nessuna | 0% |
-| 100 | New Star | 4% |
-| 600 | Partner | 8% |
-| 1.500 | Expert | 12% |
-| 3.500 | Director | 16% |
-| 7.000 | Leader | 20% |
-
-Percentuale pagata (P) = percentuale di qualifica se l'incaricato è attivo e non sospeso, altrimenti 0%. Il flag Leader Fondatore non cambia P (regola 7).
-
-**Qualifica bloccata.** L'amministrazione può bloccare manualmente un incaricato a una qualifica, al massimo Leader 20%. Il blocco:
-- è **dentro il piano**: la percentuale bloccata vale anche per il calcolo della differenza di chi sta sopra;
-- fa da **minimo**: P = la più alta tra la percentuale bloccata e la P calcolata normalmente;
-- vale **anche se l'incaricato è inattivo** nel mese;
-- dura **finché l'amministrazione non lo toglie**; ogni attivazione e rimozione va nel registro modifiche;
-- non vale per gli incaricati sospesi (la sospensione prevale: P = 0%);
-- non rende Leader per linee al 20%, titoli manager e generazioni (né per sé né per chi sta sopra): la zona manager richiede i punti reali.
-
-### 3. Bonus qualifica e differenza
-
-Si calcola punto per punto. Base: i punti personali per qualifica (PPQ). Gli ordini online, pagati dal cliente a prezzo pieno, valgono tutti. Gli acquisti personali con lo sconto valgono fino a 300 punti al mese; oltre danno solo il margine. Esempio: 500 punti di acquisti personali + 200 di ordini online → base 300 + 200 = 500 punti.
-
-Il tetto vale anche verso l'alto: a ogni sponsor, per qualifica e differenza, arrivano al massimo 300 punti di acquisti personali di ciascuna persona della squadra (caso T11).
-
-1. Chi genera i punti incassa la propria P sui propri punti ("qualifica sui suoi punti").
-2. Si risale la catena degli sponsor. Ogni sponsor incassa la propria P meno la P più alta già pagata sotto di lui su quel percorso, se positiva.
-3. Quando la P più alta pagata arriva al 20%, sopra non si paga più differenza su quei punti.
-
-Chi è inattivo o sospeso (P = 0%) non blocca chi sta sopra: lo sponsor incassa la differenza come se quella persona fosse al 0%. I punti di inattivi e sospesi contano comunque nei punti di gruppo di chi sta sopra.
-
-### 4. Titoli manager
-
-Un Leader (vedi Definizioni) riceve un titolo in base al numero di linee al 20%. Una linea conta se contiene almeno un Leader nel mese, a qualsiasi profondità. Ogni linea conta una volta sola, anche se contiene più Leader. Un Leader Fondatore entra nella zona manager solo quando è Leader con i suoi punti reali.
-
-| Titolo | Linee al 20% | Generazioni pagate | Quote pool | Bonus auto |
-| --- | --- | --- | --- | --- |
-| Leader in crescita | 1 | 1ª 3% | 0 | 0 € |
-| Gold Leader | 2 | 1ª 4% | 1 | 0 € |
-| Prestige Director | 3 | 1ª 4%, 2ª 3% | 2 | 300 € |
-| President | 4 | 1ª 4%, 2ª 3%, 3ª 2% | 3 | 500 € |
-| Diamond President | 5 o più | 1ª 4%, 2ª 3%, 3ª 2%, 4ª 2%, 5ª 1,5% | 5 | 800 € |
-
-Il titolo si ricalcola ogni mese. Nessun titolo è permanente, tranne il nome "Leader Fondatore".
-
-### 5. Generazioni
-
-- **Volume di un Leader**: i suoi PPQ più quelli della sua discendenza, esclusi i rami guidati da un altro Leader.
-- **1ª generazione** di un manager: il primo Leader che si incontra scendendo lungo ogni percorso della sua discendenza.
-- **2ª generazione**: il primo Leader sotto ciascun Leader di 1ª generazione, e così via.
-- Il manager incassa la percentuale della generazione sul volume di ogni Leader di quella generazione.
-- Anche qui contano solo i Leader con PG ≥ 7.000; il flag Leader Fondatore non conta.
-
-### 6. Pool manager e bonus auto
-
-- Fondo del mese = 3% della **somma dei PPQ di tutti gli incaricati** nel mese (acquisti personali fino a 300 punti a persona + tutti gli ordini online).
-- Valore di una quota = fondo ÷ somma delle quote di tutti i manager qualificati quel mese. I manager esclusi dal pool (regola 8) non contano: le loro quote non entrano nella somma.
-- Ogni manager incassa fondo × sue quote ÷ quote totali, calcolato in modo esatto e arrotondato al centesimo solo alla fine. I centesimi avanzati restano all'azienda.
-- Bonus auto: importo fisso del titolo, solo nei mesi in cui il titolo è raggiunto.
-
-### 7. Leader Fondatori (qualifica extra piano)
-
-Il Leader Fondatore è una qualifica **aggiuntiva, fuori dal piano**. Il piano (regole 1–6) si calcola per tutti come se il flag non esistesse: il Fondatore ha la sua qualifica e la sua P reali, e chi sta sopra incassa la differenza sulla sua P reale. Quando il Fondatore raggiunge davvero i requisiti in punti, entra anche nella zona manager come chiunque altro.
-
-- Massimo 10, entrati nei primi 12 mesi dal lancio, con flag assegnato da amministrazione.
-- Periodo: il mese di ingresso più gli 11 mesi successivi.
-- Nel periodo, **se attivo** (PP ≥ 50), riceve due voci extra piano:
-  - **Integrazione Fondatore** = (qualifica + differenza che incasserebbe con P = 20%) − (qualifica + differenza che incassa con la P reale). Per il calcolo "con P = 20%" si usano le P reali di chi sta sotto. Se la P reale è già 20%, l'integrazione è 0.
-  - **Bonus avvio** = 3% dei suoi punti di gruppo.
-- Se inattivo nel mese: nessuna integrazione e nessun bonus avvio.
-- Le voci extra piano non cambiano i guadagni di nessun altro.
-- Requisito: almeno 1.000 punti di gruppo nei primi 90 giorni, contando i PPQ degli ordini pagati dal giorno di ingresso al 90° giorno compreso. Se non lo raggiungono, perdono garanzia e bonus dal mese successivo.
-- Il titolo "Leader Fondatore" resta per sempre, ma è solo un'etichetta.
-
-### 8. Quote fondatrici (extra piano)
-
-Due persone ricevono ogni mese una **quota sui punti di tutta l'azienda**. La base è la stessa del pool: somma dei PPQ di tutti gli incaricati nel mese (regola 6). La quota si arrotonda al centesimo. Le quote sono **extra piano**: non cambiano i guadagni di nessun altro e non riducono il fondo del pool.
-
-| Persona | Codice | Quota | Condizione | Altre regole |
-| --- | --- | --- | --- | --- |
-| Giovanna Di Lillo, fondatrice | GL000001 | 2% | Sempre, anche se inattiva | Qualifica bloccata a Leader 20% per sempre (regola 2). Titoli e generazioni come tutti, fino a Diamond President, in base a punti e linee reali. **Esclusa dal pool manager e dal bonus auto**. Etichetta "Master President" (solo un nome) |
-| Margherita Suma, Leader Fondatrice | — | 1% | Solo nei mesi in cui è attiva (PP ≥ 50) | Leader Fondatrice (regola 7). Titoli, generazioni, pool e bonus auto come tutti, fino a Diamond President |
-
-- Le quote durano finché l'amministrazione non le toglie.
-- Nell'app sono parametri della scheda incaricato (percentuale, condizione di attività, esclusione da pool e bonus auto), modificabili solo dall'amministrazione e registrati nel registro modifiche.
-- Come il pool, le quote **non si ricalcolano per i resi**.
-
-## Algoritmo mensile
-
-Il calcolo gira sul server, in quest'ordine. Durante il mese si può rilanciare quante volte si vuole come anteprima.
-
-1. Prendi gli ordini con mese di competenza uguale al mese calcolato, pagati e non annullati. I resi di ordini di mesi già chiusi **non** entrano qui: si gestiscono solo con le rettifiche (vedi "Rettifiche").
-2. Per ogni incaricato calcola AP, ON, PP, PPQ e se è attivo.
-3. Calcola i punti di gruppo dal basso verso l'alto dell'albero, in una sola passata.
-4. Assegna qualifica e percentuale pagata P, applicando le sospensioni.
-5. Per ogni Leader conta le linee al 20% e assegna il titolo manager.
-6. Calcola la provvigione negozio online.
-7. Calcola bonus qualifica e differenza, punto per punto, risalendo gli sponsor.
-8. Calcola le generazioni per ogni manager.
-9. Calcola il pool: fondo, valore quota, importo per manager (esclusi i manager esclusi dal pool).
-10. Aggiungi bonus auto (non a chi ne è escluso) e, per i Leader Fondatori, integrazione Fondatore e bonus avvio.
-11. Calcola le quote fondatrici (regola 8).
-12. Salva ogni voce come riga del registro provvigioni: beneficiario, tipo voce, mese, base punti, percentuale, importo, da chi provengono i punti, versione del piano.
-13. Il mese si chiude sempre **l'ultimo giorno del mese** (23:59:59, ora italiana). Il calcolo definitivo gira automaticamente subito dopo e congela il mese. Da qui nessuna riga si modifica: ogni correzione diventa una rettifica nel mese in corso.
-14. Calcola il saldo richiedibile: importi non richiesti dei mesi precedenti + voci pagabili del mese chiuso (tutte tranne il margine).
-15. Il pulsante "Richiedi pagamento" è attivo **dal 10 al 13 di ogni mese** se il saldo è almeno 50 €. Le richieste vanno alla contabilità e si pagano **il 20 del mese** con bonifico all'IBAN del profilo. Ciò che non viene richiesto resta nel saldo per il mese dopo.
-
-## Rettifiche (resi, recessi, riacquisti, correzioni)
-
-Quando un ordine di un mese già chiuso viene reso, riacquistato, rimborsato tramite Stripe o corretto:
-
-1. Si rifà il calcolo completo di quel mese **come se l'ordine non ci fosse mai stato** (o con l'ordine corretto), ricalcolando anche qualifiche, titoli e generazioni.
-2. Per ogni beneficiario e ogni voce, la differenza tra il calcolo originale e il ricalcolo diventa una riga di rettifica nel mese in cui avviene il reso.
-3. Il **pool** e le **quote fondatrici** non si ricalcolano per i resi.
-4. Il mese originale resta congelato e invariato.
-
-Se un ordine viene reso nello stesso mese in cui è stato pagato, prima della chiusura, si annulla e basta: il calcolo del mese non lo conta.
-
-## Ritenuta e pagamento
-
-| Incaricato | Regola |
-| --- | --- |
-| Senza partita IVA | Ritenuta = importo richiesto × 78% × 23% (17,94%), arrotondata al centesimo. L'azienda la trattiene e la versa. Bonifico del netto |
-| Con partita IVA | Bonifico del lordo. Gli adempimenti fiscali sono a carico dell'incaricato |
-
-La ritenuta si calcola su ogni pagamento, non sulle singole voci.
-
-## Regole operative
-
-| Tema | Regola per l'app |
-| --- | --- |
-| Pagamenti | Pulsante attivo dal 10 al 13 di ogni mese se il saldo è almeno 50 €. Pagamento il 20. Sotto 50 €, o se non richiesto, il saldo si riporta senza scadenza |
-| Recesso cliente (14 giorni) | Rettifica con il metodo della sezione "Rettifiche" |
-| Riacquisto dall'incaricato (90%, entro 12 mesi) | Rimborso del 90% del prezzo pagato per merce integra. Si tolgono il 100% dei punti dell'acquisto originale, con il metodo della sezione "Rettifiche" |
-| Spedizioni | 6 € per ordine, gratis sopra 75 € pagati IVA inclusa. Non generano punti |
-| Start kit | 59,90 €, restituibile, 0 punti |
-| Riordino al 70% | L'app non può verificarlo. A ogni acquisto personale chiede una conferma ("ho venduto o consumato almeno il 70% dell'ordine precedente") e la salva con data e ora |
-| Inattività | Dopo 6 mesi di fila con 0 punti personali l'incaricato diventa cliente. I suoi diretti passano al suo sponsor. Operazione automatica il primo del mese, registrata nel log. Il saldo provvigioni residuo resta richiedibile. Se riprende a comprare come incaricato riparte da capo con lo stesso sponsor, salvo diversa richiesta approvata dall'amministrazione |
-| Marketplace vietati | Nessun calcolo. L'amministrazione può sospendere un incaricato: chi è sospeso non matura voci, tranne la provvigione online |
-
-## Casi di test
-
-Il motore è pronto quando tutti questi casi danno esattamente questi importi. "Da pagare" esclude il margine sugli acquisti personali, che non paga l'azienda. Tutti gli incaricati sono attivi, salvo dove indicato.
-
-| Caso | Dati in ingresso | Voci attese | Da pagare |
+| Tipo | Prezzo | Punti | Chi guadagna |
 | --- | --- | --- | --- |
-| T1 Anna, primo mese | 211,48 punti ON (4 kit), nessuna squadra | PG 211,48 → New Star. Provvigione online 211,48 €; qualifica 8,46 € | 219,94 € |
-| T2 Luca, piccola squadra | Luca 300 AP. Due diretti con 200 AP ciascuno | PG 700 → Partner. Margine 300 € (informativo); qualifica 24,00 €; differenza 400 × 4% = 16,00 €. Ogni diretto: New Star, qualifica 8,00 € | 40,00 € |
-| T3 Sara, tre linee | Sara 400 ON. Diretti: A 900 ON, B 1.600 ON, C 700 ON | PG 3.600 → Director. Online 400 €; qualifica 64 €; differenze 72 + 64 + 56 = 192 €. A: Partner, 72 € di qualifica; B: Expert, 192 €; C: Partner, 56 € | 656,00 € |
-| T4 Paola, manager | Paola 500 ON. Linee L1, L2, L3: un Leader con 8.000 ON e sotto un Leader con 7.000 ON. Linee D1, D2: un Director con 3.500 ON ciascuno. Azienda: 300.000 PPQ nel mese, altri manager con 10 quote | PG 52.500 → Leader, 3 linee al 20% → Prestige Director. Online 500; qualifica 100; differenza D1+D2 7.000 × 4% = 280; 1ª gen 24.000 × 4% = 960; 2ª gen 21.000 × 3% = 630; pool 9.000 ÷ 12 × 2 = 1.500; auto 300 | 4.270,00 € |
-| T5 Tetto acquisti | Marco 700 AP, nessuna squadra | PPQ 300 → New Star (non Partner). Margine 700 informativo; qualifica 300 × 4% = 12,00 € | 12,00 € |
-| T6 Inattivo in mezzo | S 100 ON. Sotto S: M 30 ON. Sotto M: X e Y, 400 ON ciascuno | M: PG 830 ma inattivo → P 0%, solo online 30 €. S: PG 930 → Partner; qualifica 8 €; differenza su M 2,40 €; su X e Y 800 × 4% = 32 €. X e Y: New Star, 16 € di qualifica ciascuno | S: 142,40 € |
-| T7 Soglia esatta | Un incaricato con PG esattamente 600 | Partner, 8% | — |
-| T8 Reso dopo chiusura | Settembre come T1 (Anna 4 ordini ON da 52,87 punti). Uno dei 4 ordini viene reso a ottobre | Ricalcolo di settembre senza l'ordine: PG 158,61 → New Star, online 158,61, qualifica 6,34. Ottobre: rettifiche −52,87 € online e −2,12 € qualifica (8,46 − 6,34). Settembre resta invariato | −54,99 € a ottobre |
-| T9 Soglia 50 € | Luca come T2 (40 €); mese dopo matura 15 € | Mese 1: pulsante non attivo, 40 € riportati. Mese 2: saldo 55 €, richiedibile dal 10 al 13 | Mese 1: 0 €; mese 2: 55,00 € se richiesti |
-| T10 Richiesta mancata | Saldo 80 €, nessuna richiesta tra il 10 e il 13; il mese dopo matura 30 € | Gli 80 € restano nel saldo; il mese dopo il saldo è 110 € | 0 €, poi 110,00 € se richiesti |
-| T11 Tetto verso lo sponsor | Mario 1.000 ON. Sotto Mario: Giulia 800 AP | Giulia: PPQ 300 → New Star, qualifica 12 €, margine 800 informativo. Mario: PG 1.000 + 300 = 1.300 → Partner (non Expert); online 1.000 €; qualifica 80 €; differenza 300 × 4% = 12 € | Mario: 1.092,00 € |
-| T12 Riacquisto che fa perdere la qualifica | Settembre come T2 (Luca 300 AP; diretti A e B con 200 AP ciascuno). A ottobre l'azienda riacquista l'intero ordine di B | Ricalcolo di settembre senza l'ordine di B: B inattivo, PPQ 0. Luca PG 500 → New Star; qualifica 12 €; differenza su A 0 €. Ottobre: Luca −12,00 € qualifica, −16,00 € differenza; B −8,00 € qualifica. A invariato | Luca −28,00 €; B −8,00 € a ottobre |
-| T13 Fondatore inattivo | F Leader Fondatore nel periodo, 30 ON. Sotto F: Z 470 ON | F: PP 30 → inattivo, P 0%, niente integrazione né bonus avvio; online 30 €. Z: PG 470 → New Star, qualifica 18,80 € | F: 30,00 € |
-| T14 Fondatore sotto un Leader | S 7.000 ON. Sotto S: F Leader Fondatore nel periodo, attivo, 200 ON | F: PG 200 → New Star, P reale 4%; online 200; qualifica 8; integrazione Fondatore 40 − 8 = 32; bonus avvio 3% × 200 = 6. S: PG 7.200 → Leader; linee al 20%: 0 → nessun titolo; online 7.000; qualifica 1.400; differenza su F (20% − 4%) × 200 = 32 | F: 246,00 €; S: 8.432,00 € |
-| T15 Ritenuta | Richiesta di 100,00 € | Senza partita IVA: ritenuta 17,94 €, bonifico 82,06 €. Con partita IVA: bonifico 100,00 € | — |
-| T16 Base del pool | Azienda con solo due incaricati: A 1.000 AP, B 200 ON | Somma PPQ = 300 + 200 = 500 → fondo 3% = 15,00 € | — |
-| T17 Fondatore con squadra | F Leader Fondatore nel periodo, attivo, 400 ON. Sotto F: G 1.600 ON | G: PG 1.600 → Expert 12%, qualifica 192. F: PG 2.000 → Expert, P reale 12%; online 400; qualifica 48; differenza su G 0. Con P 20%: qualifica 80 + differenza (20% − 12%) × 1.600 = 128 → 208. Integrazione 208 − 48 = 160; bonus avvio 3% × 2.000 = 60 | F: 668,00 € |
-| T18 Qualifica bloccata | S 1.000 ON. Sotto S: B, bloccato a Director 16%, 200 ON | B: PG 200 (sarebbe New Star) → P 16%; online 200; qualifica 32. S: PG 1.200 → Partner 8%; online 1.000; qualifica 80; differenza su B 0 (8% − 16% è negativo) | B: 232,00 €; S: 1.080,00 € |
-| T19 Bloccato e inattivo | B bloccato a Partner 8%, 30 ON (inattivo). Sotto B: C 300 ON | B: P 8% anche se inattivo; online 30; qualifica 2,40; differenza su C (8% − 4%) × 300 = 12. C: New Star, qualifica 12 | B: 44,40 €; C: 312,00 € |
-| T20 Bloccato a Leader sotto un Leader | S 7.000 ON. Sotto S: B, bloccato a Leader 20%, 500 ON | B: P 20%; online 500; qualifica 100; non è Leader per la zona manager. S: PG 7.500 → Leader; linee al 20%: 0 (B non conta) → nessun titolo, nessuna generazione; online 7.000; qualifica 1.400; differenza su B 0 (20% − 20%) | B: 600,00 €; S: 8.400,00 € |
-| T21 Quota Giovanna | Somma PPQ dell'azienda nel mese: 300.000. Giovanna inattiva (PP 0) | Quota 2% = 6.000,00 €, pagata anche se inattiva | Giovanna: 6.000,00 € |
-| T22 Pool senza Giovanna | Somma PPQ 300.000 → fondo 9.000. Manager del mese: Giovanna Prestige Director (2 quote), M1 Prestige Director (2 quote), M2 President (3 quote) | Giovanna esclusa: quote totali 5, valore quota 1.800. M1 pool 3.600 + auto 300; M2 pool 5.400 + auto 500. Giovanna: pool 0, auto 0 (più la sua quota 2% = 6.000) | M1: 3.900,00 €; M2: 5.900,00 € |
-| T23 Quota Margherita | Somma PPQ 50.000. Mese A: Margherita attiva (PP 120). Mese B: inattiva (PP 30) | Mese A: quota 1% = 500,00 €. Mese B: quota 0 | A: 500,00 €; B: 0,00 € |
+| **Start kit** (ingresso) | 59,90 € IVA inclusa. Contiene shampoo, spray 12in1, licenza account incaricata, borsa campionario e materiale formativo | **33 punti fissi** (non con il coefficiente) | La nuova incaricata **non guadagna nulla** sui 33 punti, ma valgono per la sua attività e per le sue soglie di qualifica. **L'upline guadagna** su questi punti con le regole normali (differenza, generazioni) |
+| **Acquisto personale** | Listino − **40%** (sconto calcolato sul prezzo IVA inclusa; parametro `sconto_su_prezzo_ivato`, iniziale vero, da confermare con il commercialista) | Coefficiente × prezzo pagato IVA esclusa | Nessuna provvigione per l'incaricata: lo sconto è il suo guadagno (margine, mostrato solo come informazione) |
+| **Ordine cliente dal negozio online** | Listino pieno, pagato dal cliente legato all'incaricata del link | Coefficiente × prezzo pagato IVA esclusa, attribuiti all'incaricata | **Provvigione online = 50% dei punti** dell'ordine (= 40% del prezzo IVA esclusa) |
 
-## Decisioni prese
+- Lo start kit attiva l'account. **Sconto del 40% e negozio online si attivano dall'ordine successivo.**
+- **Spedizione:** 6,90 € per ogni ordine, a carico di chi ordina, senza soglia di gratuità. Non genera punti né compensi e non entra nell'incasso aziendale.
+- Esempio acquisto personale: shampoo 32,90 € → pagato 19,74 € IVA inclusa → 16,18 € IVA esclusa → 12,94 punti.
+
+## 3. Attività e tetto
+
+- **Attiva:** PP ≥ 33 nel mese.
+- Chi **non è attiva** nel mese non matura qualifica, differenze, bonus Leader Fondatori, generazioni, pool né bonus auto. **La provvigione online e il margine sugli acquisti restano sempre.**
+- **Tetto:** gli acquisti personali contano per le **soglie di qualifica** fino a 250 punti al mese. Gli ordini online e lo start kit contano per intero. Il tetto riguarda solo le soglie: **i compensi si calcolano su tutti i punti.**
+- **Inattività prolungata:** dopo 6 mesi di fila con 0 PP l'incaricata torna cliente. I suoi diretti passano al suo sponsor. Operazione automatica il primo del mese, registrata nel registro modifiche. Il saldo provvigioni residuo resta richiedibile. Se riprende a comprare come incaricata riparte con lo stesso sponsor, salvo diversa richiesta approvata dalla sede.
+
+## 4. Qualifiche
+
+**Qualifica reale** in base ai PGQ del mese. Soglie con "maggiore o uguale".
+
+| Qualifica | PGQ del mese | Percentuale |
+| --- | --- | --- |
+| Nessuna | 0 – 79,99 | 0% |
+| New Star | 80 | 4% |
+| Partner | 480 | 8% |
+| Expert | 1.200 | 12% |
+| Director | 2.800 | 16% |
+| Leader | 5.600 | 20% |
+
+**Qualifica bloccata** (impostata dalla sede): percentuale (massimo 20%), data di inizio, data di fine (vuota = senza scadenza), motivo, utente che l'ha impostata; ogni modifica va nel registro modifiche.
+
+**Percentuale applicata (A)** = la maggiore tra la percentuale della qualifica reale e quella bloccata valida nel mese. La percentuale applicata esiste anche per chi è inattiva (serve per la differenza di chi sta sopra), ma chi è inattiva non incassa nulla su di essa.
+
+**Leader del mese** = incaricata **attiva** con **qualifica reale** Leader (PGQ ≥ 5.600). Una qualifica bloccata al 20% dà la percentuale del 20% ma **non** rende Leader: titoli manager, linee al 20% e generazioni richiedono i punti veri. (Nella pratica chi ha una Leader sotto di sé ha già almeno 5.600 PGQ.)
+
+## 5. Compensi mensili
+
+Ogni mese un'incaricata può avere queste voci: provvigione online, margine (solo informativo), qualifica, differenza, generazioni, bonus Leader Fondatore, pool, quota pool riservata, Master President, bonus auto.
+
+### 5a. Provvigione online
+50% dei punti ON del mese. Dovuta sempre, anche se l'incaricata è inattiva.
+
+### 5b. Qualifica sui punti personali
+(AP + ON) × A, solo se attiva. Calcolata su tutti i punti, senza tetto. I punti KIT sono esclusi (sul kit la nuova incaricata non guadagna).
+
+### 5c. Differenza imprenditoriale
+Per ogni ordine (start kit compreso) con punti P generato dall'incaricata X:
+1. si risale la catena degli sponsor partendo dallo sponsor di X;
+2. "percentuale già pagata" iniziale = A di X (anche se X è inattiva);
+3. per ogni upline U: se A di U è maggiore della percentuale già pagata, U riceve P × (A di U − percentuale già pagata), **solo se U è attiva**. In ogni caso la percentuale già pagata diventa A di U: se U è inattiva la sua quota resta all'azienda;
+4. ci si ferma quando la percentuale già pagata arriva al 20%.
+
+### 5d. Zona manager e generazioni
+- **Linee al 20%** di una Leader = numero di suoi **diretti** che sono Leader del mese (attive, con qualifica reale Leader). Una Leader inattiva non conta come linea. Parametro `bloccate_contano_come_linee`, iniziale falso.
+- Titolo manager, solo per le Leader del mese:
+
+| Linee al 20% | Titolo | Generazioni pagate | Quote pool | Bonus auto |
+| --- | --- | --- | --- | --- |
+| 1 | Leader in crescita | 1ª 3% | 0 | — |
+| 2 | Gold Leader | 1ª 4% | 1 | — |
+| 3 | Prestige Director | 1ª 4%, 2ª 3% | 2 | 300 €/mese |
+| 4 | President | 1ª 4%, 2ª 3%, 3ª 2% | 3 | 500 €/mese |
+| 5 o più | Diamond President | 1ª 4%, 2ª 3%, 3ª 2%, 4ª 2%, 5ª 1,5% | 5 | 800 €/mese |
+
+- **Team di una Leader L:** PP di L più i PP della sua downline, fermandosi alle Leader del mese successive (escluse, con le loro downline). Punti reali, senza tetto.
+- **Leader inattiva (compressione):** chi avrebbe la qualifica reale Leader ma è inattiva non è Leader del mese: non incassa, non conta come linea e **viene saltata**. Il suo team confluisce nel team della prima Leader del mese sopra di lei; se sopra non c'è nessuna Leader del mese, quei punti non generano generazioni (restano all'azienda).
+- **Generazioni:** per ogni Leader del mese L, si risale la catena: la 1ª, 2ª, 3ª… Leader del mese incontrata sopra L riceve sul team di L la percentuale della generazione corrispondente, se il suo titolo la prevede.
+- **Bonus auto:** importo fisso del titolo, nei mesi in cui il titolo è raggiunto. Voce separata, finanziata dal budget marketing.
+
+### 5e. Pool manager
+- Fondo = **4% dell'incasso aziendale** del mese.
+- **Quota riservata:** 1% dell'incasso a Margherita Suma, **solo se attiva** nel mese; se è inattiva quell'1% resta all'azienda. (Quota configurabile per utente dall'area sede.)
+- Il resto (**3% dell'incasso**) si divide in proporzione alle quote del titolo tra i manager del mese, **esclusi quelli esclusi dal pool** (Giovanna Di Lillo). Se nessuno ha quote, resta all'azienda.
+- Ogni manager incassa 3% × incasso × sue quote ÷ quote totali, calcolato in modo esatto e arrotondato al centesimo solo alla fine.
+
+### 5f. Master President
+**2% dell'incasso aziendale** del mese a Giovanna Di Lillo, ogni mese, anche se inattiva. Configurabile dall'area sede. Nei report è una voce distinta.
+
+### 5g. Programma Leader Fondatori
+- Flag per utente con data di ingresso, assegnato dalla sede. Massimo **10**, ingresso entro **12 mesi** dal lancio.
+- Per **12 mesi** dall'ingresso (mese di ingresso + 11 successivi): **qualifica bloccata al 16%** (dentro il piano: vale anche per la differenza di chi sta sopra) e **bonus del 3% sui PGR** del mese, solo se attiva.
+- Requisito: almeno **1.000 PGQ** sommando i PPQ suoi e della sua downline degli ordini pagati dal giorno di ingresso al 90° giorno compreso. Altrimenti blocco e bonus decadono dal mese successivo.
+- Il titolo "Leader Fondatore" resta a vita, senza effetti economici.
+
+## 6. Figure speciali
+
+| Persona | Regole |
+| --- | --- |
+| **Giovanna Di Lillo** (GL000001), fondatrice, "Master President" | Master President 2% dell'incasso aziendale, anche se inattiva. Qualifica bloccata al 20% senza scadenza. Titoli e generazioni come tutti, con i punti veri. **Esclusa dal pool e dal bonus auto.** |
+| **Margherita Suma**, Leader Fondatrice | Quota riservata del pool: 1% dell'incasso, solo se attiva. Programma Leader Fondatori (5g). Se diventa manager riceve **anche** le quote normali del pool e il bonus auto. |
+
+## 7. Algoritmo mensile
+
+Il calcolo gira sul server, in quest'ordine. Durante il mese si può rilanciare come anteprima.
+
+1. Prendi gli ordini del mese pagati e non annullati né resi. I resi di ordini di mesi già chiusi non entrano qui: si gestiscono con gli storni (sezione 9).
+2. Per ogni incaricata calcola AP, ON, KIT, PP, PPQ e se è attiva.
+3. Calcola PGQ e PGR dal basso verso l'alto dell'albero, in una sola passata.
+4. Assegna qualifica reale, percentuale applicata A (blocchi e Leader Fondatori compresi) e Leader del mese.
+5. Conta le linee al 20% e assegna i titoli manager.
+6. Calcola provvigione online e qualifica sui punti personali.
+7. Calcola le differenze, ordine per ordine, risalendo gli sponsor.
+8. Calcola i team (con la compressione delle Leader inattive) e le generazioni.
+9. Calcola l'incasso aziendale, il pool (quota riservata e quote) e il Master President.
+10. Aggiungi bonus auto e bonus Leader Fondatori.
+11. Salva ogni voce come riga del registro provvigioni: beneficiaria, tipo voce, mese, base, percentuale, importo, ordini da cui provengono i punti, versione dei parametri.
+12. Il mese si chiude sempre **l'ultimo giorno del mese** (23:59:59, ora italiana). Il calcolo definitivo gira subito dopo e congela il mese.
+
+## 8. Pagamenti
+
+- **Saldo richiedibile** = importi non ancora richiesti dei mesi precedenti + voci pagabili del mese chiuso (tutte tranne il margine) ± storni.
+- Il pulsante **"Richiedi pagamento"** è attivo **dal 1° al 4 del mese successivo**, se il saldo è almeno **50 €**.
+- Le richieste vanno alla contabilità e si pagano **il 20 del mese**; se il 20 è sabato, domenica o festivo nazionale, il **primo giorno lavorativo successivo**. Bonifico all'IBAN del profilo.
+- Sotto 50 €, o se non richiesto, il saldo si riporta al mese dopo, senza scadenza. Un saldo negativo (per storni) si riporta e si compensa con i mesi successivi.
+- **Ritenuta d'imposta:** 23% sul 78% dell'importo (17,94%), calcolata su **ogni** pagamento e per **tutte** le incaricate, arrotondata al centesimo. Bonifico del netto.
+- **IVA e INPS:** per ogni incaricata "partita IVA sì/no" e "contributi INPS a carico dell'azienda sì/no". Parametri globali: aliquota IVA, aliquota contributiva, quota a carico dell'azienda, base imponibile in % dei compensi, soglia di esenzione annua. Il costo IVA e INPS a carico dell'azienda va in un report mensile separato dai compensi. Valori in attesa del commercialista: nessuna regola fiscale fissa nel codice.
+- **Export per la contabilità:** compensi per incaricata e per voce (provvigione online, qualifica, differenze, generazioni, Leader Fondatori, pool, quota pool riservata, Master President, bonus auto), con dati fiscali.
+
+## 9. Resi, storni e riacquisti
+
+- **Reso nello stesso mese, prima della chiusura:** l'ordine si esclude dal calcolo.
+- **Reso dopo la chiusura:** le qualifiche del mese passato **non si ricalcolano**. Si stornano punti e compensi collegati all'ordine, per l'incaricata e per la sua upline, nel mese in cui avviene il reso. Metodo: per ogni beneficiaria e voce, storno = importo originale − importo ricalcolato senza quell'ordine, **tenendo ferme** le percentuali applicate, i titoli, le Leader del mese e lo stato di attività del mese originale. Così, se tutto viene reso, il totale torna esattamente a zero.
+- Pool, quota riservata e Master President **non si stornano** per i resi.
+- **Riacquisto merce delle incaricate:** al 90% del prezzo pagato, per merce integra e rivendibile, entro 12 mesi. Si stornano il 100% dei punti dell'acquisto originale e i compensi collegati, con lo stesso metodo.
+- Rimborsi Stripe → storni con lo stesso metodo.
+
+## 10. Regole e controlli
+
+- **Riordino responsabile:** a ogni acquisto personale l'incaricata conferma con una spunta di aver venduto o consumato almeno il 70% dell'acquisto precedente; si salva con data e ora.
+- **Clienti fittizi:** segnalare alla sede i clienti con stesso indirizzo di consegna, stesso metodo di pagamento, stessa email o stesso telefono dell'incaricata a cui sono legati.
+- **Vendite a clienti finali:** per ogni incaricata e per la rete, quota mensile di punti ON sul totale dei PP. Visibile nell'area sede.
+- **Marketplace vietati:** la sede può sospendere un'incaricata. Chi è sospesa è trattata come inattiva (riceve solo la provvigione online).
+
+## 11. Casi di test
+
+Importi in euro. Tutte attive salvo dove indicato. "Totale" esclude il margine sugli acquisti personali.
+
+| Caso | Dati | Voci attese | Totale |
+| --- | --- | --- | --- |
+| T1 Anna, New Star | 4 kit routine dal negozio online: 113,93 € → 91,14 punti ciascuno, 364,56 punti | PGQ 364,56 → New Star 4%. Online 50% = 182,28; qualifica 364,56 × 4% = 14,58 | 196,86 |
+| T2 Luca, Partner | 546,84 punti ON; 2 diretti con 150 punti ciascuno (New Star) | PGQ 846,84 → Partner 8%. Online 273,42; qualifica 43,75; differenza 300 × 4% = 12,00 | 329,17 |
+| T3 Sara, Director | 400 punti ON; 3 linee: Partner con PGQ 700, Expert con 1.300, Partner con 600 | PGQ 3.000 → Director 16%. Online 200,00; qualifica 64,00; differenze 56,00 + 52,00 + 48,00 | 420,00 |
+| T4 Leader Fondatore | 300 punti AP; 5 diretti New Star per 1.450 punti in tutto | PGQ 250 + 1.450 = 1.700 → Expert reale, bloccata al 16%. Qualifica 300 × 16% = 48,00; differenze 1.450 × 12% = 174,00; bonus fondatore 3% × PGR 1.750 = 52,50 | 274,50 |
+| T5 Paola, Prestige Director | 500 punti ON. 3 diretti Leader, ciascuno con team di 6.000 e sotto un'altra Leader con team di 5.600. Altre 2 linee **Expert** con 4.000 punti in tutto. Incasso aziendale 300.000 €, 12 quote pool totali tra i manager | Leader, 3 linee al 20% → Prestige Director. Online 250,00; qualifica 100,00; differenze 4.000 × 8% = 320,00; 1ª gen 18.000 × 4% = 720,00; 2ª gen 16.800 × 3% = 504,00; pool 9.000 ÷ 12 × 2 = 1.500,00; bonus auto 300,00 | 3.694,00 |
+| T6 Tetto acquisti | 400 punti AP, nessun ON, nessuna squadra | PPQ 250 → New Star 4%; qualifica su tutti i punti: 400 × 4% = 16,00 | 16,00 |
+| T7 Upline inattiva | X: 100 ON. Sponsor di X: U con 20 ON (inattiva) e un altro diretto Y con 400 ON → U PGQ 520, Partner 8%. Sponsor di U: V con 700 ON → PGQ 1.220, Expert 12% | X: New Star 4%. U inattiva: solo online 10,00. V: online 350,00; qualifica 84,00; differenze su X 100 × 4% = 4,00, su Y 400 × 4% = 16,00, su U 20 × 4% = 0,80. La quota di U (8% − 4%) resta all'azienda | V: 454,80 |
+| T8 Start kit | Mara nuova con solo lo start kit. Sponsor di Mara: Bea, Partner 8% | Mara: PP 33 → attiva; PGQ 33 → nessuna qualifica; guadagna 0. Bea: differenza 33 × 8% = 2,64. Ordine successivo di Mara: shampoo a 19,74 € IVA inclusa (−40%) → 16,18 € → 12,94 punti | Mara 0,00; Bea 2,64 dal kit |
+| T9 Pagamento minimo | Compensi del mese 42 € | Pulsante non attivo, i 42 € si sommano al mese dopo | 0,00 |
+| T10 Reso dopo la chiusura | Come T1 a settembre; uno dei 4 kit routine reso a ottobre | Ricalcolo senza l'ordine a percentuali ferme: 273,42 punti → online 136,71 (−45,57), qualifica 10,94 (−3,64). Settembre invariato | −49,21 a ottobre |
+| T11 Leader inattiva saltata | Paola: 600 ON, Leader. Diretti di Paola: Lina (5.600 ON, Leader) e Carla (20 ON, inattiva, PGQ 11.020). Sotto Carla: Sonia (5.000 ON, Director) e Rita (6.000 ON, Leader) | Carla non è Leader del mese: Paola ha 1 linea (Lina) → Leader in crescita, 1ª gen 3%. Online 300,00; qualifica 120,00; differenze 0 (sopra Carla al 20% non si paga). Generazioni: Lina 5.600 e Rita 6.000 (Carla saltata) → 11.600 × 3% = 348,00. Carla: solo online 10,00 | Paola: 768,00 |
+| T12 Pool con le figure speciali | Incasso 300.000 €. Manager: Giovanna Prestige Director (2 quote), Margherita Gold Leader (1 quota), M2 President (3 quote). Mese A: Margherita attiva. Mese B: Margherita inattiva | A: quota riservata Margherita 3.000; 3% = 9.000 su 4 quote (Giovanna esclusa) → 2.250 a quota: Margherita 2.250, M2 6.750 + auto 500. Giovanna: Master President 6.000, pool 0, auto 0. B: l'1% resta all'azienda; M2 unico manager con quote → 9.000 + auto 500; Giovanna 6.000 | A: Margherita 5.250,00; M2 7.250,00; Giovanna 6.000,00 |
+| T13 Ritenuta | Pagamento di 100,00 € | Ritenuta 17,94; bonifico 82,06, per tutte le incaricate | — |
+| T14 Data di pagamento | Saldo 80 € a fine novembre 2026, richiesto il 2 dicembre | Il 20 dicembre 2026 è domenica → pagamento lunedì 21 dicembre | 80,00 lordi |
+| T15 Soglia esatta | PGQ esattamente 480 | Partner 8% | — |
+
+## 12. Decisioni prese
 
 | # | Tema | Decisione |
 | --- | --- | --- |
-| 1 | Base del bonus qualifica e differenza | Acquisti personali fino a 300 punti al mese, anche verso lo sponsor; ordini online tutti |
-| 2 | Differenza di un incaricato inattivo o sospeso | Va allo sponsor |
-| 3 | Punti dei rami guidati da un Leader | Contano nei punti di gruppo di chi sta sopra |
-| 4 | Base del pool | Somma dei PPQ di tutti gli incaricati (acquisti fino a 300 punti + ordini online) |
-| 5 | Linea al 20% | Basta un Leader vero a qualsiasi profondità della linea; ogni linea conta una volta |
-| 6 | Mese di competenza | Mese in cui l'ordine è pagato |
-| 7 | Pagamento provvigioni | Pulsante attivo dal 10 al 13 di ogni mese, soglia 50 €, pagamento il 20 con bonifico all'IBAN del profilo |
-| 8 | Prodotti scontati e codici sconto | Punti sul prezzo realmente pagato; sconti sull'ordine ripartiti in proporzione sulle righe |
-| 9 | Spedizioni e start kit | Non danno punti |
-| 10 | Riacquisto al 90% | Si tolgono il 100% dei punti dell'acquisto originale |
-| 11 | Soglia spedizione gratuita | 75 € IVA inclusa |
-| 12 | Leader Fondatore sotto 1.000 punti in 90 giorni | Perde garanzia del 20% e bonus avvio dal mese successivo |
-| 13 | Resi dopo la chiusura | Solo righe di rettifica; i punti del mese del reso non cambiano |
-| 14 | Calcolo delle rettifiche | Ricalcolo del mese senza l'ordine, qualifiche comprese; differenza come rettifica; pool escluso |
-| 15 | Leader Fondatore | Qualifica extra piano: il piano si calcola con la sua P reale (anche per lo sponsor); in più, se attivo, integrazione fino al 20% e bonus avvio. Entra nella zona manager solo con i punti reali |
-| 16 | Sospesi | Come gli inattivi, ma ricevono la provvigione online |
-| 17 | Chiusura del mese | Sempre l'ultimo giorno del mese, calcolo definitivo automatico |
-| 18 | Incaricato diventato cliente | Saldo residuo richiedibile; se riparte, stesso sponsor salvo diversa richiesta |
-| 19 | Ritenuta | 23% sul 78%; senza partita IVA la versa l'azienda, con partita IVA l'incaricato |
-| 20 | Negozio online | Pagina personale dentro l'app |
-| 21 | Pagamento ordini | Solo carta, PayPal, Klarna tramite Stripe; nessun bonifico. Il mese di competenza è dato dalla conferma di Stripe |
-| 22 | Qualifica bloccata | Fino a Leader 20%, dentro il piano, fa da minimo, vale anche da inattivo, finché l'amministrazione non la toglie; la sospensione prevale; non dà accesso alla zona manager |
-| 23 | Giovanna Di Lillo (GL000001) | Quota 2% sui PPQ dell'azienda anche se inattiva; qualifica bloccata a Leader 20%; titoli e generazioni fino a Diamond President; esclusa da pool e bonus auto; etichetta Master President |
-| 24 | Margherita Suma | Leader Fondatrice; quota 1% sui PPQ dell'azienda solo se attiva; per il resto piano normale, pool e bonus auto compresi |
-| 25 | Quote fondatrici e resi | Come il pool, non si ricalcolano |
+| 1 | Entrata in vigore | Dal primo ordine; nessuno storico da convertire |
+| 2 | Start kit | 33 punti fissi: contano per attività e soglie della nuova incaricata, che non guadagna su di essi; l'upline guadagna con le regole normali |
+| 3 | Linee al 20% | Solo i diretti che sono Leader del mese |
+| 4 | Qualifica bloccata al 20% | Dà la percentuale ma non rende Leader: titoli e generazioni con i punti veri |
+| 5 | Leader inattiva | Saltata: il suo team confluisce nella prima Leader del mese sopra di lei; se non c'è, resta all'azienda |
+| 6 | Differenza su un'upline inattiva | La percentuale già pagata avanza comunque, la quota resta all'azienda |
+| 7 | Pagamenti | Richiesta dal 1° al 4 del mese successivo, minimo 50 €, pagamento il 20 o il primo giorno lavorativo successivo |
+| 8 | Resi dopo la chiusura | Storno a percentuali ferme, senza ricalcolare le qualifiche; pool e quote fisse non si stornano |
+| 9 | Margherita Suma | 1% dell'incasso solo se attiva; Leader Fondatrice; anche quote normali del pool se manager |
+| 10 | Giovanna Di Lillo | Master President 2% sempre; bloccata al 20% senza scadenza; esclusa da pool e bonus auto |
+| 11 | Ritenuta | 23% sul 78% su tutti i pagamenti, per tutte; IVA e INPS come parametri dove previsto |
+| 12 | Ruoli sede | Amministrazione, contabilità e un terzo ruolo "ordini" |
+| 13 | Caso T5 | Due linee Expert con 4.000 punti, totale 3.694,00 € |
+| 14 | Leader inattiva e linee | Una Leader inattiva non conta come linea al 20% della sua sponsor nel mese |
+| 15 | Requisito Leader Fondatori | I 1.000 punti in 90 giorni si contano come punti per qualifica (con il tetto di 250 sugli acquisti) |
 
+## 13. Verifiche esterne prima del lancio
 
-## Verifiche esterne prima del lancio
-
-- Commercialista: trattamento IVA sugli acquisti degli incaricati, ritenute sulle provvigioni, contributi INPS per gli incaricati occasionali oltre la soglia annua, trattamento fiscale delle quote fondatrici (2% Giovanna Di Lillo, socia fondatrice; 1% Margherita Suma).
+- Commercialista: base dello sconto (IVA inclusa o esclusa), IVA sugli acquisti delle incaricate, ritenuta, contributi INPS, trattamento fiscale di Master President e quota riservata.
 - Legale: conformità del piano alla Legge 173/2005.
