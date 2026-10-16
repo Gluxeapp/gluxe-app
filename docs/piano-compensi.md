@@ -90,7 +90,7 @@ Per ogni ordine (start kit compreso) con punti P generato dall'incaricata X:
 4. ci si ferma quando la percentuale già pagata arriva al 20%.
 
 ### 5d. Zona manager e generazioni
-- **Linee al 20%** di una Leader = numero di suoi **diretti** che sono Leader del mese (attive, con qualifica reale Leader). Parametro `bloccate_contano_come_linee`, iniziale falso.
+- **Linee al 20%** di una Leader = numero di suoi **diretti** che sono Leader del mese (attive, con qualifica reale Leader). Una Leader inattiva non conta come linea. Parametro `bloccate_contano_come_linee`, iniziale falso.
 - Titolo manager, solo per le Leader del mese:
 
 | Linee al 20% | Titolo | Generazioni pagate | Quote pool | Bonus auto |
@@ -209,13 +209,10 @@ Importi in euro. Tutte attive salvo dove indicato. "Totale" esclude il margine s
 | 11 | Ritenuta | 23% sul 78% su tutti i pagamenti, per tutte; IVA e INPS come parametri dove previsto |
 | 12 | Ruoli sede | Amministrazione, contabilità e un terzo ruolo "ordini" |
 | 13 | Caso T5 | Due linee Expert con 4.000 punti, totale 3.694,00 € |
+| 14 | Leader inattiva e linee | Una Leader inattiva non conta come linea al 20% della sua sponsor nel mese |
+| 15 | Requisito Leader Fondatori | I 1.000 punti in 90 giorni si contano come punti per qualifica (con il tetto di 250 sugli acquisti) |
 
-## 13. Da confermare
-
-- **Leader inattiva e linee al 20%:** per coerenza con la decisione 5, una Leader inattiva non conta come linea al 20% della sua sponsor nel mese. Confermare.
-- **Requisito Leader Fondatori (1.000 punti in 90 giorni):** calcolato sui punti per qualifica (PGQ, con il tetto di 250 sugli acquisti). Confermare, oppure sui punti reali.
-
-## 14. Verifiche esterne prima del lancio
+## 13. Verifiche esterne prima del lancio
 
 - Commercialista: base dello sconto (IVA inclusa o esclusa), IVA sugli acquisti delle incaricate, ritenuta, contributi INPS, trattamento fiscale di Master President e quota riservata.
 - Legale: conformità del piano alla Legge 173/2005.
