@@ -11,7 +11,10 @@
     "typecheck": "tsc --noEmit",
     "db:genera": "drizzle-kit generate",
     "db:aggiorna": "node --env-file=.env.local scripts/aggiorna-database.mjs",
-    "crea-staff": "node --env-file=.env.local scripts/crea-staff.mjs"
+    "crea-staff": "node --env-file=.env.local scripts/crea-staff.mjs",
+    "db:aggiorna:produzione": "node --env-file=.env.local scripts/aggiorna-database.mjs --produzione",
+    "db:annulla": "node --env-file=.env.local scripts/annulla-migrazione.mjs",
+    "db:seme-catalogo": "node --env-file=.env.local scripts/seme-catalogo.ts"
   },
   "dependencies": {
     "@node-rs/argon2": "^2.2.2",

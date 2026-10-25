@@ -91,6 +91,20 @@ Il progetto vive in `C:\Progetti\gluxe-app`, **fuori da OneDrive** (la sincroniz
 - Anteprime e computer di sviluppo devono usare un **database di prova** separato (progetto Supabase "gluxe-test"), mai quello di produzione.
 - Le modifiche al database (migrazioni) devono essere **reversibili**: per ognuna va previsto come tornare indietro.
 - Il database di produzione si modifica solo dopo l'ok del fondatore.
+- In `.env.local`: `DATABASE_URL` = database di prova, `DATABASE_URL_PRODUZIONE` = database vero. Gli script (`db:aggiorna`, `db:annulla`, `db:seme-catalogo`, `crea-staff`) usano la prova; con `--produzione` (o `db:aggiorna:produzione`) quello vero.
+- Su Vercel: `DATABASE_URL` di Production = database vero, di Preview = database di prova. L'anteprima di un branch ha l'indirizzo fisso `gluxe-app-git-<branch>-g-luxe.vercel.app`.
+- Lo strumento Vercel si usa con `npx vercel` (installato nel progetto, account già collegato). Nel terminale PowerShell dell'utente usare `npm.cmd` al posto di `npm` (gli script `.ps1` sono bloccati da Windows).
+- Mai mostrare in chat password, chiavi o indirizzi dei database: per passarli all'utente si copiano negli appunti.
+
+## Lavori in corso (aggiornare a ogni passo)
+
+- **Branch `fase-2-catalogo`**: Fase 2 completa e provata, anteprima online, **in attesa dell'ok del fondatore** per unirla a `main`.
+- Per pubblicarla: unire a `main`, poi `npm run db:aggiorna:produzione` e `npm run db:seme-catalogo -- --produzione` (crea parametri rev. 5 e prodotti).
+- Domande aperte al fondatore:
+  - promozioni: i punti degli acquisti in promo contano come acquisti personali (tetto 250) e la provvigione del 50% si paga anche da inattiva (scelta mia, da confermare).
+- Database di prova: account staff del fondatore (prestigehcaire@gmail.com) e incaricata finta GL000001 per le prove.
+- Produzione: account amministratore del fondatore e Giovanna Di Lillo (GL000001). Next.js 16.4.3 (aggiornamento di sicurezza già online).
+- Ancora da fare in futuro: dominio aziendale su Resend (email alle incaricate), pagina per creare account staff dall'area sede, pulsante "mostra link password" (proposto, non ancora approvato).
 
 ## Piano di sviluppo
 
@@ -98,7 +112,7 @@ Il progetto vive in `C:\Progetti\gluxe-app`, **fuori da OneDrive** (la sincroniz
 | --- | --- | --- |
 | 0 | Fondamenta: progetto, database, hosting di prova, PWA, grafica base | completata |
 | 1 | Registrazione con codice sponsor, richieste di contatto, accesso incaricati (codice + password) e admin (email + password + codice), recupero password, anagrafica incaricati, codice automatico, audit log | completata (le email alle incaricate partiranno quando sarà verificato il dominio aziendale su Resend) |
-| 2 | Catalogo: prodotti, listino, punti con coefficiente, sconto 40%, start kit, promozioni | da fare |
+| 2 | Catalogo: prodotti, listino, punti con coefficiente, sconto 40%, start kit, promozioni | completata (online senza foto prodotti) |
 | 3 | Ordini con pagamento Stripe (carta, PayPal, Klarna): start kit in registrazione, spedizione 6,90 €, stati, storico, conferma riordino 70%, ruolo staff "ordini" | da fare |
 | 4 | Motore provvigioni (rev. 5): prima i test di `docs/piano-compensi.md`, poi il codice; parametri versionati; qualifiche bloccate, Leader Fondatori, figure speciali; anteprima | da fare |
 | 5 | Carriera e rete: qualifica, avanzamento, albero grafico della rete | da fare |

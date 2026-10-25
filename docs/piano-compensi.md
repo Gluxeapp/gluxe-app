@@ -40,6 +40,7 @@ Codici sconto sull'intero ordine: lo sconto si ripartisce in proporzione sulle r
 | --- | --- | --- | --- |
 | **Start kit** (ingresso) | 59,90 € IVA inclusa. Contiene shampoo, spray 12in1, licenza account incaricata, borsa campionario e materiale formativo | **33 punti fissi** (non con il coefficiente) | La nuova incaricata **non guadagna nulla** sui 33 punti, ma valgono per la sua attività e per le sue soglie di qualifica. **L'upline guadagna** su questi punti con le regole normali (differenza, generazioni) |
 | **Acquisto personale** | Listino − **40%** (sconto calcolato sul prezzo IVA inclusa; parametro `sconto_su_prezzo_ivato`, iniziale vero, da confermare con il commercialista) | Coefficiente × prezzo pagato IVA esclusa | Nessuna provvigione per l'incaricata: lo sconto è il suo guadagno (margine, mostrato solo come informazione) |
+| **Acquisto personale di un prodotto in promozione** | Prezzo in promozione, **senza** lo sconto del 40% (lo sconto vale solo per i prodotti a listino) | Coefficiente × prezzo pagato IVA esclusa; contano come acquisti personali (tetto di 250 per le soglie) | **Provvigione = 50% dei punti** dell'acquisto, come una vendita dal negozio online; dovuta sempre, anche se l'incaricata è inattiva |
 | **Ordine cliente dal negozio online** | Listino pieno, pagato dal cliente legato all'incaricata del link | Coefficiente × prezzo pagato IVA esclusa, attribuiti all'incaricata | **Provvigione online = 50% dei punti** dell'ordine (= 40% del prezzo IVA esclusa) |
 
 - Lo start kit attiva l'account. **Sconto del 40% e negozio online si attivano dall'ordine successivo.**
@@ -74,7 +75,7 @@ Codici sconto sull'intero ordine: lo sconto si ripartisce in proporzione sulle r
 
 ## 5. Compensi mensili
 
-Ogni mese un'incaricata può avere queste voci: provvigione online, margine (solo informativo), qualifica, differenza, generazioni, bonus Leader Fondatore, pool, quota pool riservata, Master President, bonus auto.
+Ogni mese un'incaricata può avere queste voci: provvigione online, provvigione su acquisti in promozione, margine (solo informativo), qualifica, differenza, generazioni, bonus Leader Fondatore, pool, quota pool riservata, Master President, bonus auto.
 
 ### 5a. Provvigione online
 50% dei punti ON del mese. Dovuta sempre, anche se l'incaricata è inattiva.
@@ -191,6 +192,7 @@ Importi in euro. Tutte attive salvo dove indicato. "Totale" esclude il margine s
 | T13 Ritenuta | Pagamento di 100,00 € | Ritenuta 17,94; bonifico 82,06, per tutte le incaricate | — |
 | T14 Data di pagamento | Saldo 80 € a fine novembre 2026, richiesto il 2 dicembre | Il 20 dicembre 2026 è domenica → pagamento lunedì 21 dicembre | 80,00 lordi |
 | T15 Soglia esatta | PGQ esattamente 480 | Partner 8% | — |
+| T16 Acquisto in promozione | Shampoo in promozione a 27,90 €, comprato dall'incaricata per sé | Paga 27,90 € (niente sconto 40%) → 22,87 € IVA esclusa → 18,30 punti, contati come acquisti personali; provvigione 50% = 9,15 € | 9,15 |
 
 ## 12. Decisioni prese
 
@@ -211,6 +213,7 @@ Importi in euro. Tutte attive salvo dove indicato. "Totale" esclude il margine s
 | 13 | Caso T5 | Due linee Expert con 4.000 punti, totale 3.694,00 € |
 | 14 | Leader inattiva e linee | Una Leader inattiva non conta come linea al 20% della sua sponsor nel mese |
 | 15 | Requisito Leader Fondatori | I 1.000 punti in 90 giorni si contano come punti per qualifica (con il tetto di 250 sugli acquisti) |
+| 16 | Promozioni | Niente sconto 40% sui prodotti in promozione; l'incaricata che li compra riceve il 50% dei punti come provvigione |
 
 ## 13. Verifiche esterne prima del lancio
 

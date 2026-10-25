@@ -12,7 +12,7 @@ export default function HomeArea() {
 }
 
 const sezioni = [
-  { href: "/area/prodotti", titolo: "Prodotti", testo: "Listino e promozioni", fase: 2 },
+  { href: "/area/prodotti", titolo: "Prodotti", testo: "Listino e promozioni", fase: 0 },
   { href: "/area/ordini", titolo: "Ordini", testo: "Nuovo ordine e stato dei tuoi ordini", fase: 3 },
   { href: "/area/carriera", titolo: "Carriera", testo: "Qualifica, avanzamento e la tua rete", fase: 5 },
   { href: "/area/provvigioni", titolo: "Provvigioni", testo: "Maturate, disponibili e pagate", fase: 6 },
@@ -38,9 +38,11 @@ async function Contenuto() {
             <Scheda>
               <p className="font-titoli text-xl text-oro-chiaro">{s.titolo}</p>
               <p className="mt-1 text-sm text-testo-tenue">{s.testo}</p>
-              <p className="mt-3 inline-block rounded-full border border-oro/40 px-3 py-0.5 text-xs text-testo-tenue">
-                In arrivo nella Fase {s.fase}
-              </p>
+              {s.fase > 0 && (
+                <p className="mt-3 inline-block rounded-full border border-oro/40 px-3 py-0.5 text-xs text-testo-tenue">
+                  In arrivo nella Fase {s.fase}
+                </p>
+              )}
             </Scheda>
           </Link>
         ))}
