@@ -4,6 +4,9 @@ import { esci } from "@/app/azioni/accesso";
 const voci = [
   { href: "/staff", etichetta: "Riepilogo" },
   { href: "/staff/incaricati", etichetta: "Incaricati" },
+  { href: "/staff/catalogo", etichetta: "Catalogo" },
+  { href: "/staff/catalogo/promozioni", etichetta: "Promozioni" },
+  { href: "/staff/parametri", etichetta: "Parametri del piano" },
   { href: "/staff/richieste", etichetta: "Richieste sponsor" },
   { href: "/staff/registro", etichetta: "Registro modifiche" },
 ];

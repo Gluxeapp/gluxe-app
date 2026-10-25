@@ -20,12 +20,12 @@ export async function inviaEmail({ a, oggetto, testo }: Messaggio): Promise<bool
   const chiave = process.env.RESEND_API_KEY;
   let errore: string | null = null;
 
+  // Sul computer di sviluppo il messaggio si vede sempre nel terminale (database di prova, indirizzi finti).
+  if (process.env.NODE_ENV === "development") {
+    console.info(`\n[email di prova]\nA: ${a}\nOggetto: ${oggetto}\n\n${testo}\n`);
+  }
   if (!chiave) {
-    if (process.env.NODE_ENV === "development") {
-      console.info(`\n[email di prova, non inviata]\nA: ${a}\nOggetto: ${oggetto}\n\n${testo}\n`);
-    } else {
-      errore = "RESEND_API_KEY non configurata";
-    }
+    if (process.env.NODE_ENV !== "development") errore = "RESEND_API_KEY non configurata";
   } else {
     const risposta = await fetch("https://api.resend.com/emails", {
       method: "POST",

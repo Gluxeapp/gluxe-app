@@ -144,6 +144,13 @@ export const NOMI_AZIONI: Record<string, string> = {
   "password.reimpostata": "Password reimpostata",
   "staff.accesso": "Accesso staff",
   "richiesta.gestita": "Richiesta sponsor gestita",
+  "staff.creato": "Account staff creato",
+  "prodotto.creato": "Prodotto creato",
+  "prodotto.modificato": "Prodotto modificato",
+  "prodotto.attivato": "Prodotto riattivato",
+  "prodotto.disattivato": "Prodotto disattivato",
+  "promozione.creata": "Promozione creata",
+  "promozione.disattivata": "Promozione disattivata",
 };
 
 export function dataOra(d: Date): string {

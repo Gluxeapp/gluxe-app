@@ -7,6 +7,7 @@
  */
 import { sql } from "drizzle-orm";
 import {
+  bigint,
   bigserial,
   boolean,
   date,
@@ -171,3 +172,68 @@ export const emailInUscita = app.table("email_in_uscita", {
   errore: text("errore"),
   creatoIl: creatoIl(),
 });
+
+// ── Fase 2: parametri del piano e catalogo ───────────────────────────────────
+
+/** Versioni dei parametri del piano: ogni modifica è una nuova riga con la sua data di efficacia. */
+export const parametriVersioni = app.table(
+  "parametri_versioni",
+  {
+    id: bigserial("id", { mode: "bigint" }).primaryKey(),
+    validoDal: date("valido_dal").notNull(),
+    valori: jsonb("valori").notNull(),
+    note: text("note"),
+    creatoDa: uuid("creato_da").references(() => utenti.id),
+    creatoIl: creatoIl(),
+  },
+  (t) => [index("parametri_versioni_dal").on(t.validoDal)],
+);
+
+export const tipoProdotto = app.enum("tipo_prodotto", ["prodotto", "start_kit"]);
+
+/** Foto dei prodotti, salvate nel database (pochi prodotti, immagini piccole): niente servizi esterni. */
+export const immagini = app.table("immagini", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  tipo: text("tipo").notNull(),
+  dati: text("dati").notNull(),
+  creatoIl: creatoIl(),
+});
+
+export const prodotti = app.table(
+  "prodotti",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    codice: text("codice").notNull().unique(),
+    nome: text("nome").notNull(),
+    linea: text("linea"),
+    formato: text("formato"),
+    descrizione: text("descrizione"),
+    tipo: tipoProdotto("tipo").notNull().default("prodotto"),
+    /** Prezzo al pubblico IVA inclusa, in centesimi. */
+    prezzoListino: bigint("prezzo_listino", { mode: "bigint" }).notNull(),
+    immagineId: uuid("immagine_id").references(() => immagini.id),
+    attivo: boolean("attivo").notNull().default(true),
+    ordine: integer("ordine").notNull().default(0),
+    creatoIl: creatoIl(),
+  },
+  (t) => [index("prodotti_ordine").on(t.attivo, t.ordine)],
+);
+
+/** Promozioni: prezzo al pubblico scontato per un periodo. */
+export const promozioni = app.table(
+  "promozioni",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    prodottoId: uuid("prodotto_id")
+      .notNull()
+      .references(() => prodotti.id),
+    titolo: text("titolo").notNull(),
+    /** Prezzo al pubblico IVA inclusa durante la promozione, in centesimi. */
+    prezzoPromo: bigint("prezzo_promo", { mode: "bigint" }).notNull(),
+    dal: date("dal").notNull(),
+    al: date("al").notNull(),
+    attiva: boolean("attiva").notNull().default(true),
+    creatoIl: creatoIl(),
+  },
+  (t) => [index("promozioni_periodo").on(t.dal, t.al)],
+);
