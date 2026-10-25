@@ -6,6 +6,7 @@ type Prezzi = {
   incaricata: { ivaInclusa: bigint; punti: bigint };
   margine: bigint;
   provvigioneOnline: bigint;
+  provvigioneAcquisto: bigint;
 };
 
 type Props = {
@@ -54,6 +55,12 @@ export function SchedaProdotto({ nome, linea, formato, descrizione, immagineId, 
           </dd>
           <dt className="text-testo-tenue">Il tuo prezzo</dt>
           <dd className="text-right font-semibold text-oro-chiaro">{formattaEuro(prezzi.incaricata.ivaInclusa)}</dd>
+          {prezzi.provvigioneAcquisto > 0n && (
+            <>
+              <dt className="text-testo-tenue">Provvigione sul tuo acquisto</dt>
+              <dd className="text-right text-oro-chiaro">+{formattaEuro(prezzi.provvigioneAcquisto)}</dd>
+            </>
+          )}
           <dt className="text-testo-tenue">Punti (tuo acquisto)</dt>
           <dd className="text-right">{formatta(prezzi.incaricata.punti)}</dd>
           <dt className="text-testo-tenue">Dal tuo negozio</dt>

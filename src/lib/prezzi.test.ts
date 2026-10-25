@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { PARAMETRI_INIZIALI as P, parametriDaJson, parametriInJson } from "./parametri";
-import { prezziProdotto, prezziStartKit } from "./prezzi";
+import { prezziProdotto, prezziPromozione, prezziStartKit } from "./prezzi";
 
 describe("prezzi e punti (piano rev. 5)", () => {
   it("kit routine 139,00 €: 113,93 € IVA esclusa, 91,14 punti, provvigione online 45,57 € (caso T1)", () => {
@@ -31,6 +31,16 @@ describe("prezzi e punti (piano rev. 5)", () => {
     const k = prezziStartKit(5990n, P);
     expect(k.ivaEsclusa).toBe(4910n);
     expect(k.punti).toBe(3300n);
+  });
+
+  it("prodotto in promozione a 27,90 €: l'incaricata paga 27,90 €, 18,30 punti, provvigione 9,15 € (caso T16)", () => {
+    const p = prezziPromozione(2790n, P);
+    expect(p.incaricata.ivaInclusa).toBe(2790n);
+    expect(p.incaricata.ivaEsclusa).toBe(2287n);
+    expect(p.incaricata.punti).toBe(1830n);
+    expect(p.provvigioneAcquisto).toBe(915n);
+    expect(p.provvigioneOnline).toBe(915n);
+    expect(p.margine).toBe(0n);
   });
 
   it("i parametri si salvano e si rileggono uguali", () => {

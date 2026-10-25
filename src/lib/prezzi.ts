@@ -39,6 +39,25 @@ export function prezziProdotto(listinoIvato: Centesimi, p: Parametri) {
     margine: listinoIvato - incaricataIvaInclusa,
     /** Provvigione su un pezzo venduto dal negozio online: 50% dei punti. */
     provvigioneOnline: percentuale(pubblico.punti, p.provvigioneOnline),
+    /** Provvigione sull'acquisto personale: solo per i prodotti in promozione. */
+    provvigioneAcquisto: 0n as Centesimi,
+  };
+}
+
+/**
+ * Prodotto in promozione: niente sconto per l'incaricata (paga il prezzo in promozione), ma
+ * riceve come provvigione la stessa percentuale dei punti di una vendita dal negozio (decisione 16).
+ */
+export function prezziPromozione(prezzoPromoIvato: Centesimi, p: Parametri) {
+  const ivaEsclusa = scorporaIva(prezzoPromoIvato, p.aliquotaIva);
+  const prezzo: Prezzo = { ivaInclusa: prezzoPromoIvato, ivaEsclusa, punti: puntiDi(ivaEsclusa, p) };
+  const provvigione = percentuale(prezzo.punti, p.provvigioneOnline);
+  return {
+    pubblico: prezzo,
+    incaricata: prezzo,
+    margine: 0n as Centesimi,
+    provvigioneOnline: provvigione,
+    provvigioneAcquisto: provvigione,
   };
 }
 

@@ -4,7 +4,7 @@ import { db } from "@/db";
 import { parametriVersioni, prodotti, promozioni } from "@/db/schema";
 import { richiediIncaricato, richiediStaff } from "./accesso";
 import { parametriDaJson, type Parametri } from "./parametri";
-import { prezziProdotto, prezziStartKit } from "./prezzi";
+import { prezziProdotto, prezziPromozione, prezziStartKit } from "./prezzi";
 
 /** Data di oggi in Italia, calcolata dal database (vale per promozioni e parametri). */
 const OGGI = sql`(now() at time zone 'Europe/Rome')::date`;
@@ -58,7 +58,7 @@ export async function catalogoIncaricata() {
     return {
       prodotto,
       listino: prezziProdotto(prodotto.prezzoListino, p),
-      promozione: promozione ? { ...promozione, prezzi: prezziProdotto(promozione.prezzoPromo, p) } : undefined,
+      promozione: promozione ? { ...promozione, prezzi: prezziPromozione(promozione.prezzoPromo, p) } : undefined,
     };
   });
 }
