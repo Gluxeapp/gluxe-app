@@ -1,13 +1,13 @@
-// Crea un account di amministrazione o contabilità e invia il link per scegliere la password.
-// Uso: npm run crea-staff -- email@azienda.it "Nome Cognome" amministrazione|contabilita
+// Crea un account staff (amministrazione, contabilità o ordini) e invia il link per scegliere la password.
+// Uso: npm run crea-staff -- email@azienda.it "Nome Cognome" amministrazione|contabilita|ordini
 import { createHash, randomBytes } from "node:crypto";
 import postgres from "postgres";
 
 // Senza opzioni usa il database di PROVA; con --produzione quello vero.
 const produzione = process.argv.includes("--produzione");
 const [email, nome, ruolo = "amministrazione"] = process.argv.slice(2).filter((a) => a !== "--produzione");
-if (!email || !nome || !["amministrazione", "contabilita"].includes(ruolo)) {
-  console.error('Uso: npm run crea-staff -- email@azienda.it "Nome Cognome" amministrazione|contabilita');
+if (!email || !nome || !["amministrazione", "contabilita", "ordini"].includes(ruolo)) {
+  console.error('Uso: npm run crea-staff -- email@azienda.it "Nome Cognome" amministrazione|contabilita|ordini');
   process.exit(1);
 }
 

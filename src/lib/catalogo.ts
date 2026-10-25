@@ -2,7 +2,7 @@ import "server-only";
 import { and, asc, desc, eq, lte, gte, ne, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { parametriVersioni, prodotti, promozioni } from "@/db/schema";
-import { richiediIncaricato, richiediStaff } from "./accesso";
+import { richiediIncaricataOperativa, richiediStaff } from "./accesso";
 import { parametriDaJson, type Parametri } from "./parametri";
 import { prezziProdotto, prezziPromozione, prezziStartKit } from "./prezzi";
 
@@ -30,7 +30,7 @@ export async function storicoParametri() {
 }
 
 /** Promozione valida oggi per ogni prodotto (se ce n'è più di una vince il prezzo più basso). */
-async function promozioniDiOggi() {
+export async function promozioniDiOggi() {
   const righe = await db()
     .select()
     .from(promozioni)
@@ -43,7 +43,7 @@ async function promozioniDiOggi() {
 
 /** Catalogo per le incaricate: prodotti attivi (start kit escluso) con prezzi, punti e promozioni di oggi. */
 export async function catalogoIncaricata() {
-  await richiediIncaricato();
+  await richiediIncaricataOperativa();
   const [p, righe, promo] = await Promise.all([
     parametriCorrenti(),
     db()

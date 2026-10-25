@@ -108,7 +108,7 @@ export async function accediStaff(_: EsitoModulo, formData: FormData): Promise<E
   await inviaEmail({
     a: utente.email,
     oggetto: "G LUXE: il tuo codice di accesso",
-    testo: `Il tuo codice di accesso all'area amministrazione G LUXE è: ${codice}\n\nVale 10 minuti. Se non hai provato ad accedere, cambia subito la password.`,
+    testo: `Il tuo codice di accesso all'area riservata G LUXE è: ${codice}\n\nVale 10 minuti. Se non hai provato ad accedere, cambia subito la password.`,
   });
   await creaSessione(utente.id, { verificata: false, durataOre: DURATA_STAFF_ORE });
   redirect("/staff/verifica");

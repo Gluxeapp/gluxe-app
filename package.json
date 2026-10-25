@@ -14,7 +14,9 @@
     "crea-staff": "node --env-file=.env.local scripts/crea-staff.mjs",
     "db:aggiorna:produzione": "node --env-file=.env.local scripts/aggiorna-database.mjs --produzione",
     "db:annulla": "node --env-file=.env.local scripts/annulla-migrazione.mjs",
-    "db:seme-catalogo": "node --env-file=.env.local scripts/seme-catalogo.ts"
+    "db:seme-catalogo": "node --env-file=.env.local scripts/seme-catalogo.ts",
+    "stripe:inoltra": "node --env-file=.env.local scripts/inoltra-stripe.mjs",
+    "stripe:metodi": "node --env-file=.env.local scripts/stripe-metodi-pagamento.mjs"
   },
   "dependencies": {
     "@node-rs/argon2": "^2.2.2",
@@ -24,6 +26,7 @@
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "server-only": "^0.0.1",
+    "stripe": "23.0.0",
     "zod": "^4.6.6"
   },
   "devDependencies": {
