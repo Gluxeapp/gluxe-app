@@ -42,7 +42,8 @@ try {
   for (const p of prodotti) {
     const [esiste] = await sql`select id from app.prodotti where codice = ${p.codice}`;
     if (esiste) continue;
-    const [img] = p.foto
+    // Le foto di esempio sono di un altro marchio: sul sito vero i prodotti partono senza foto.
+    const [img] = p.foto && !produzione
       ? await sql`insert into app.immagini (tipo, dati)
           values ('image/png', ${readFileSync(`assets/esempi-prodotti/${p.foto}`).toString("base64")}) returning id`
       : [];

@@ -101,8 +101,6 @@ Il progetto vive in `C:\Progetti\gluxe-app`, **fuori da OneDrive** (la sincroniz
 - **Branch `fase-2-catalogo`**: Fase 2 completa e provata, anteprima online, **in attesa dell'ok del fondatore** per unirla a `main`.
 - Per pubblicarla: unire a `main`, poi `npm run db:aggiorna:produzione` e `npm run db:seme-catalogo -- --produzione` (crea parametri rev. 5 e prodotti).
 - Domande aperte al fondatore:
-  - prezzo dello Shampoo Detox (32,90 €) ancora da confermare. Confermati: Mask 39,90 €, Final Spray 34,90 €, Kit Routine Botox 106,90 € (inserito dal fondatore, codice HB-SH-10, senza foto);
-  - foto: in produzione partire **senza foto** (quelle di esempio sono di un altro marchio, EVRL) finché non arrivano quelle G LUXE (consigliato);
   - promozioni: i punti degli acquisti in promo contano come acquisti personali (tetto 250) e la provvigione del 50% si paga anche da inattiva (scelta mia, da confermare).
 - Database di prova: account staff del fondatore (prestigehcaire@gmail.com) e incaricata finta GL000001 per le prove.
 - Produzione: account amministratore del fondatore e Giovanna Di Lillo (GL000001). Next.js 16.4.3 (aggiornamento di sicurezza già online).
@@ -114,7 +112,7 @@ Il progetto vive in `C:\Progetti\gluxe-app`, **fuori da OneDrive** (la sincroniz
 | --- | --- | --- |
 | 0 | Fondamenta: progetto, database, hosting di prova, PWA, grafica base | completata |
 | 1 | Registrazione con codice sponsor, richieste di contatto, accesso incaricati (codice + password) e admin (email + password + codice), recupero password, anagrafica incaricati, codice automatico, audit log | completata (le email alle incaricate partiranno quando sarà verificato il dominio aziendale su Resend) |
-| 2 | Catalogo: prodotti, listino, punti con coefficiente, sconto 40%, start kit, promozioni | pronta sul branch `fase-2-catalogo`, in attesa dell'ok |
+| 2 | Catalogo: prodotti, listino, punti con coefficiente, sconto 40%, start kit, promozioni | completata (online senza foto prodotti) |
 | 3 | Ordini con pagamento Stripe (carta, PayPal, Klarna): start kit in registrazione, spedizione 6,90 €, stati, storico, conferma riordino 70%, ruolo staff "ordini" | da fare |
 | 4 | Motore provvigioni (rev. 5): prima i test di `docs/piano-compensi.md`, poi il codice; parametri versionati; qualifiche bloccate, Leader Fondatori, figure speciali; anteprima | da fare |
 | 5 | Carriera e rete: qualifica, avanzamento, albero grafico della rete | da fare |
