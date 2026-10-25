@@ -13,10 +13,19 @@ const sql = postgres((produzione ? process.env.DATABASE_URL_PRODUZIONE : process
   onnotice: () => {},
 });
 
-const prodotti = [
+type Prodotto = { codice: string; nome: string; linea: string; descrizione?: string; prezzo: number; foto?: string; ordine: number };
+const prodotti: Prodotto[] = [
+  {
+    codice: "HB-SH-10",
+    nome: "Kit Routine Botox",
+    linea: "Hair Botox",
+    descrizione: "Shampoo + Maschera + Final Spray + pochette Gluxe",
+    prezzo: 10690,
+    ordine: 0,
+  },
   { codice: "HB-SH", nome: "Shampoo Hair Botox", linea: "Hair Botox", prezzo: 3290, foto: "shampoo-hair-botox.png", ordine: 10 },
-  { codice: "HB-MA", nome: "Mask Hair Botox", linea: "Hair Botox", prezzo: 3290, foto: "mask-hair-botox.png", ordine: 20 },
-  { codice: "HB-FS", nome: "Final Spray Hair Botox", linea: "Hair Botox", prezzo: 3990, foto: "final-spray-hair-botox.png", ordine: 30 },
+  { codice: "HB-MA", nome: "Mask Hair Botox", linea: "Hair Botox", prezzo: 3990, foto: "mask-hair-botox.png", ordine: 20 },
+  { codice: "HB-FS", nome: "Final Spray Hair Botox", linea: "Hair Botox", prezzo: 3490, foto: "final-spray-hair-botox.png", ordine: 30 },
   { codice: "DX-SH", nome: "Shampoo Detox", linea: "Detox", prezzo: 3290, foto: "shampoo-detox.png", ordine: 40 },
 ];
 
@@ -33,10 +42,12 @@ try {
   for (const p of prodotti) {
     const [esiste] = await sql`select id from app.prodotti where codice = ${p.codice}`;
     if (esiste) continue;
-    const dati = readFileSync(`assets/esempi-prodotti/${p.foto}`).toString("base64");
-    const [img] = await sql`insert into app.immagini (tipo, dati) values ('image/png', ${dati}) returning id`;
+    const [img] = p.foto
+      ? await sql`insert into app.immagini (tipo, dati)
+          values ('image/png', ${readFileSync(`assets/esempi-prodotti/${p.foto}`).toString("base64")}) returning id`
+      : [];
     await sql`insert into app.prodotti (codice, nome, linea, descrizione, prezzo_listino, immagine_id, ordine)
-      values (${p.codice}, ${p.nome}, ${p.linea}, 'Descrizione in arrivo.', ${p.prezzo}, ${img.id}, ${p.ordine})`;
+      values (${p.codice}, ${p.nome}, ${p.linea}, ${p.descrizione ?? "Descrizione in arrivo."}, ${p.prezzo}, ${img?.id ?? null}, ${p.ordine})`;
     console.log(`Prodotto creato: ${p.nome}`);
   }
 

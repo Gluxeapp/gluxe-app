@@ -101,7 +101,7 @@ Il progetto vive in `C:\Progetti\gluxe-app`, **fuori da OneDrive** (la sincroniz
 - **Branch `fase-2-catalogo`**: Fase 2 completa e provata, anteprima online, **in attesa dell'ok del fondatore** per unirla a `main`.
 - Per pubblicarla: unire a `main`, poi `npm run db:aggiorna:produzione` e `npm run db:seme-catalogo -- --produzione` (crea parametri rev. 5 e prodotti).
 - Domande aperte al fondatore:
-  - prezzi provvisori: Final Spray Hair Botox 39,90 €, Shampoo Detox 32,90 €;
+  - prezzo dello Shampoo Detox (32,90 €) ancora da confermare. Confermati: Mask 39,90 €, Final Spray 34,90 €, Kit Routine Botox 106,90 € (inserito dal fondatore, codice HB-SH-10, senza foto);
   - foto: in produzione partire **senza foto** (quelle di esempio sono di un altro marchio, EVRL) finché non arrivano quelle G LUXE (consigliato);
   - promozioni: i punti degli acquisti in promo contano come acquisti personali (tetto 250) e la provvigione del 50% si paga anche da inattiva (scelta mia, da confermare).
 - Database di prova: account staff del fondatore (prestigehcaire@gmail.com) e incaricata finta GL000001 per le prove.
