@@ -3,13 +3,16 @@
 import { createHash, randomBytes } from "node:crypto";
 import postgres from "postgres";
 
-const [email, nome, ruolo = "amministrazione"] = process.argv.slice(2);
+// Senza opzioni usa il database di PROVA; con --produzione quello vero.
+const produzione = process.argv.includes("--produzione");
+const [email, nome, ruolo = "amministrazione"] = process.argv.slice(2).filter((a) => a !== "--produzione");
 if (!email || !nome || !["amministrazione", "contabilita"].includes(ruolo)) {
   console.error('Uso: npm run crea-staff -- email@azienda.it "Nome Cognome" amministrazione|contabilita');
   process.exit(1);
 }
 
-const sql = postgres(process.env.DATABASE_URL, { prepare: false, max: 1, onnotice: () => {} });
+console.log(`Database: ${produzione ? "PRODUZIONE (vero)" : "prova"}`);
+const sql = postgres(produzione ? process.env.DATABASE_URL_PRODUZIONE : process.env.DATABASE_URL, { prepare: false, max: 1, onnotice: () => {} });
 try {
   const [utente] = await sql`
     insert into app.utenti (ruolo, email, nome) values (${ruolo}, ${email.trim().toLowerCase()}, ${nome})
@@ -23,8 +26,8 @@ try {
     insert into app.registro_modifiche (utente_id, azione, entita, entita_id, dopo)
     values (${utente.id}, 'staff.creato', 'utente', ${utente.id}, ${sql.json({ email, nome, ruolo })})`;
 
-  // Il database è lo stesso per il computer e per il sito online: il link porta al sito online.
-  const base = (process.env.APP_URL ?? "https://gluxe-app.vercel.app").replace(/\/$/, "");
+  // Account sul database vero → link al sito online; sul database di prova → link al computer.
+  const base = (process.env.APP_URL ?? (produzione ? "https://gluxe-app.vercel.app" : "http://localhost:3000")).replace(/\/$/, "");
   const link = `${base}/reimposta-password?token=${token}`;
   if (process.env.RESEND_API_KEY) {
     const r = await fetch("https://api.resend.com/emails", {

@@ -4,9 +4,12 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import { migrate } from "drizzle-orm/postgres-js/migrator";
 import postgres from "postgres";
 
-const url = process.env.DATABASE_URL;
+// Senza opzioni usa il database di PROVA; con --produzione quello vero.
+const produzione = process.argv.includes("--produzione");
+const url = produzione ? process.env.DATABASE_URL_PRODUZIONE : process.env.DATABASE_URL;
+console.log(`Database: ${produzione ? "PRODUZIONE (vero)" : "prova"}`);
 if (!url) {
-  console.error("Manca DATABASE_URL: controlla il file .env.local");
+  console.error(`Manca ${produzione ? "DATABASE_URL_PRODUZIONE" : "DATABASE_URL"}: controlla il file .env.local`);
   process.exit(1);
 }
 
