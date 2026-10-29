@@ -24,7 +24,7 @@ import {
 
 export const app = pgSchema("app");
 
-export const ruolo = app.enum("ruolo", ["incaricato", "amministrazione", "contabilita"]);
+export const ruolo = app.enum("ruolo", ["incaricato", "amministrazione", "contabilita", "ordini"]);
 export const statoIncaricato = app.enum("stato_incaricato", ["attivo", "sospeso", "cessato", "cliente"]);
 export const scopoCodice = app.enum("scopo_codice", ["accesso_staff", "recupero_password"]);
 export const statoRichiesta = app.enum("stato_richiesta", ["nuova", "gestita"]);
@@ -236,4 +236,141 @@ export const promozioni = app.table(
     creatoIl: creatoIl(),
   },
   (t) => [index("promozioni_periodo").on(t.dal, t.al)],
+);
+
+// ── Fase 3: ordini e pagamenti Stripe ────────────────────────────────────────
+
+export const tipoOrdine = app.enum("tipo_ordine", ["start_kit", "personale", "online"]);
+export const statoOrdine = app.enum("stato_ordine", [
+  "inserito",
+  "pagato",
+  "in_preparazione",
+  "spedito",
+  "consegnato",
+  "annullato",
+  "reso",
+]);
+/** Come è stato calcolato il prezzo di una riga: serve al motore provvigioni (Fase 4). */
+export const tipoPrezzoRiga = app.enum("tipo_prezzo_riga", ["listino_scontato", "promozione", "start_kit", "listino_pieno"]);
+
+/** Numeri d'ordine progressivi e leggibili (n. 1, 2, 3…), mai riutilizzati. */
+export const sequenzaNumeroOrdine = app.sequence("sequenza_numero_ordine", { startWith: 1 });
+
+/**
+ * Ordini. Prezzi, punti e indirizzo sono "fotografati" alla creazione (CLAUDE.md, regola 10):
+ * se poi cambiano listino o parametri, l'ordine resta com'era.
+ * Lo stato "pagato" lo imposta solo il webhook di Stripe; pagato_il decide il mese di competenza.
+ */
+export const ordini = app.table(
+  "ordini",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    numero: bigint("numero", { mode: "bigint" })
+      .notNull()
+      .unique()
+      .default(sql`nextval('app.sequenza_numero_ordine')`),
+    incaricatoId: uuid("incaricato_id")
+      .notNull()
+      .references(() => incaricati.id),
+    tipo: tipoOrdine("tipo").notNull(),
+    stato: statoOrdine("stato").notNull().default("inserito"),
+    parametriVersioneId: bigint("parametri_versione_id", { mode: "bigint" })
+      .notNull()
+      .references(() => parametriVersioni.id),
+    // Totali in centesimi: somma delle righe già arrotondate.
+    merceIvaInclusa: bigint("merce_iva_inclusa", { mode: "bigint" }).notNull(),
+    merceIvaEsclusa: bigint("merce_iva_esclusa", { mode: "bigint" }).notNull(),
+    punti: bigint("punti", { mode: "bigint" }).notNull(),
+    provvigioneAcquisto: bigint("provvigione_acquisto", { mode: "bigint" }).notNull(),
+    speseSpedizione: bigint("spese_spedizione", { mode: "bigint" }).notNull(),
+    totale: bigint("totale", { mode: "bigint" }).notNull(),
+    // Indirizzo di spedizione
+    destinatario: text("destinatario").notNull(),
+    indirizzo: text("indirizzo").notNull(),
+    cap: text("cap").notNull(),
+    citta: text("citta").notNull(),
+    provincia: text("provincia").notNull(),
+    telefono: text("telefono").notNull(),
+    /** Spunta "ho venduto o consumato almeno il 70% dell'acquisto precedente", con data e ora. */
+    riordinoConfermatoIl: timestamp("riordino_confermato_il", { withTimezone: true }),
+    stripeSessioneId: text("stripe_sessione_id").unique(),
+    stripePagamentoId: text("stripe_pagamento_id"),
+    pagatoIl: timestamp("pagato_il", { withTimezone: true }),
+    corriere: text("corriere"),
+    tracciamento: text("tracciamento"),
+    creatoIl: creatoIl(),
+  },
+  (t) => [
+    index("ordini_incaricato").on(t.incaricatoId, t.creatoIl),
+    index("ordini_stato").on(t.stato, t.creatoIl),
+    index("ordini_pagato_il").on(t.pagatoIl),
+    index("ordini_stripe_pagamento").on(t.stripePagamentoId),
+  ],
+);
+
+export const righeOrdine = app.table(
+  "righe_ordine",
+  {
+    id: bigserial("id", { mode: "bigint" }).primaryKey(),
+    ordineId: uuid("ordine_id")
+      .notNull()
+      .references(() => ordini.id),
+    prodottoId: uuid("prodotto_id")
+      .notNull()
+      .references(() => prodotti.id),
+    codice: text("codice").notNull(),
+    nome: text("nome").notNull(),
+    tipoPrezzo: tipoPrezzoRiga("tipo_prezzo").notNull(),
+    promozioneId: uuid("promozione_id").references(() => promozioni.id),
+    quantita: integer("quantita").notNull(),
+    // Valori di un'unità…
+    prezzoUnitarioIvato: bigint("prezzo_unitario_ivato", { mode: "bigint" }).notNull(),
+    prezzoUnitarioIvaEsclusa: bigint("prezzo_unitario_iva_esclusa", { mode: "bigint" }).notNull(),
+    puntiUnitari: bigint("punti_unitari", { mode: "bigint" }).notNull(),
+    provvigioneUnitaria: bigint("provvigione_unitaria", { mode: "bigint" }).notNull(),
+    // …e della riga (unità × quantità)
+    totaleIvato: bigint("totale_ivato", { mode: "bigint" }).notNull(),
+    totaleIvaEsclusa: bigint("totale_iva_esclusa", { mode: "bigint" }).notNull(),
+    totalePunti: bigint("totale_punti", { mode: "bigint" }).notNull(),
+    totaleProvvigione: bigint("totale_provvigione", { mode: "bigint" }).notNull(),
+  },
+  (t) => [index("righe_ordine_ordine").on(t.ordineId)],
+);
+
+/** Storico degli stati di ogni ordine: chi (staff, oppure nessuno = Stripe/sistema), quando, perché. */
+export const storicoStatiOrdine = app.table(
+  "storico_stati_ordine",
+  {
+    id: bigserial("id", { mode: "bigint" }).primaryKey(),
+    ordineId: uuid("ordine_id")
+      .notNull()
+      .references(() => ordini.id),
+    stato: statoOrdine("stato").notNull(),
+    utenteId: uuid("utente_id").references(() => utenti.id),
+    nota: text("nota"),
+    creatoIl: creatoIl(),
+  },
+  (t) => [index("storico_stati_ordine_ordine").on(t.ordineId)],
+);
+
+/** Eventi ricevuti da Stripe: lo stesso evento arrivato due volte si elabora una volta sola. */
+export const eventiStripe = app.table("eventi_stripe", {
+  id: text("id").primaryKey(),
+  tipo: text("tipo").notNull(),
+  ricevutoIl: timestamp("ricevuto_il", { withTimezone: true }).notNull().defaultNow(),
+});
+
+/** Rimborsi fatti su Stripe: diventeranno rettifiche delle provvigioni (Fase 6). */
+export const rimborsi = app.table(
+  "rimborsi",
+  {
+    id: text("id").primaryKey(),
+    ordineId: uuid("ordine_id")
+      .notNull()
+      .references(() => ordini.id),
+    importo: bigint("importo", { mode: "bigint" }).notNull(),
+    rimborsatoIl: timestamp("rimborsato_il", { withTimezone: true }).notNull(),
+    creatoIl: creatoIl(),
+  },
+  (t) => [index("rimborsi_ordine").on(t.ordineId)],
 );

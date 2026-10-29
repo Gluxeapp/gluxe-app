@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { esci } from "@/app/azioni/accesso";
-import { NavigazioneArea } from "./navigazione";
+import { Suspense } from "react";
+import { NavigazioneArea, NavigazioneCorrente } from "./navigazione";
 
 export default function LayoutArea({ children }: LayoutProps<"/area">) {
   return (
@@ -17,7 +18,9 @@ export default function LayoutArea({ children }: LayoutProps<"/area">) {
         </div>
       </header>
       <main className="flex-1 px-5 py-6 pb-28">{children}</main>
-      <NavigazioneArea />
+      <Suspense fallback={<NavigazioneArea percorso="" />}>
+        <NavigazioneCorrente />
+      </Suspense>
     </div>
   );
 }

@@ -78,8 +78,8 @@ export function ModuloRegistrazione() {
       </Sezione>
 
       <Avviso>
-        Per completare la registrazione è previsto l&apos;acquisto dello <strong>start kit (59,90 €)</strong>. Il pagamento
-        online sarà disponibile a breve: per ora la registrazione si completa senza pagamento.
+        Per completare la registrazione è previsto l&apos;acquisto dello <strong>start kit (59,90 €)</strong>. Dopo aver
+        inviato i dati lo paghi online (carta, PayPal o Klarna): con il pagamento il tuo account si attiva.
       </Avviso>
 
       <div>

@@ -66,9 +66,10 @@ export async function registraIncaricato(_: EsitoModulo, formData: FormData): Pr
     a: letto.data.email,
     oggetto: `Benvenuta in G LUXE: il tuo codice incaricato è ${nuovo.codice}`,
     testo:
-      `Ciao ${letto.data.nome},\n\nla tua registrazione come incaricata G LUXE è completata.\n\n` +
+      `Ciao ${letto.data.nome},\n\ni tuoi dati di incaricata G LUXE sono registrati.\n\n` +
       `Il tuo codice incaricato è: ${nuovo.codice}\n` +
-      `Usalo con la tua password per accedere all'app: ${indirizzoApp()}\n\n` +
+      `Usalo con la tua password per accedere all'app: ${indirizzoApp()}\n` +
+      `Ultimo passo: paga lo start kit dall'app per attivare il tuo account.\n\n` +
       `Il tuo sponsor è ${sponsor.etichetta}\n\nNata per brillare.\nG LUXE`,
   });
 

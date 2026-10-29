@@ -11,8 +11,12 @@ const voci = [
   { href: "/area/provvigioni", etichetta: "Provvigioni" },
 ];
 
-export function NavigazioneArea() {
-  const percorso = usePathname();
+/** Menu con la voce della pagina aperta evidenziata (l'indirizzo si legge nel browser). */
+export function NavigazioneCorrente() {
+  return <NavigazioneArea percorso={usePathname()} />;
+}
+
+export function NavigazioneArea({ percorso }: { percorso: string }) {
   return (
     <nav
       aria-label="Sezioni"

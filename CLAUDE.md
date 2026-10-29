@@ -14,7 +14,7 @@ App per gli incaricati alle vendite di G LUXE (haircare, vendita diretta multili
 
 - **Next.js** (App Router) in **TypeScript** con `strict: true`. Un solo progetto per interfaccia e logica server.
 - **PWA** installabile da smartphone (manifest + service worker). Mobile first.
-- **PostgreSQL** su **Supabase**, regione UE (Irlanda, eu-west-1). Accesso al database solo dal server.
+- **PostgreSQL** su **Supabase**, regione UE (Irlanda, eu-west-1). Accesso al database solo dal server, con Drizzle ORM e node-postgres.
 - **Vercel**, regione UE (Dublino, dub1, vicino al database), per l'hosting dell'app.
 - **Stripe** per tutti i pagamenti degli ordini (acquisti personali e negozio online): carta, PayPal, Klarna. Lo stato "pagato" arriva solo dal webhook di Stripe, mai impostato a mano.
 - **Postmark** o **Resend** per le email (recupero password, notifiche).
@@ -68,10 +68,16 @@ App per gli incaricati alle vendite di G LUXE (haircare, vendita diretta multili
 ## Decisioni di prodotto
 
 - **Codice incaricato**: generato in automatico, formato `GL` + 6 cifre progressive (es. `GL000123`). Non si riutilizza mai.
-- **Registrazione incaricato**: self-service. Dati: nome, cognome, codice fiscale, data di nascita, indirizzo, telefono, email, IBAN, partita IVA (sì/no + numero), password, **codice sponsor** obbligatorio (l'app mostra nome e iniziale del cognome dello sponsor per conferma). Nessuna approvazione: l'incaricato è attivo subito. **Start kit (59,90 €, 33 punti fissi) obbligatorio** in registrazione: attiva l'account; sconto 40% e negozio online dall'ordine successivo; finché non c'è il pagamento (Fase 3) la registrazione funziona senza; da allora l'attivazione avviene alla conferma di Stripe.
+- **Registrazione incaricato**: self-service. Dati: nome, cognome, codice fiscale, data di nascita, indirizzo, telefono, email, IBAN, partita IVA (sì/no + numero), password, **codice sponsor** obbligatorio (l'app mostra nome e iniziale del cognome dello sponsor per conferma). Nessuna approvazione: l'incaricato è attivo subito. **Start kit (59,90 €, 33 punti fissi) obbligatorio** in registrazione: attiva l'account alla conferma di Stripe; sconto 40% e negozio online dall'ordine successivo.
 - **Senza codice sponsor**: avviso "Se non hai un codice sponsor chiedilo all'azienda" con un modulo di sola richiesta di contatto (nome, cognome, telefono, email, città). La richiesta arriva all'amministrazione come notifica (area admin + email); l'amministrazione contatta la persona e le comunica un codice sponsor.
 - **Pagine incaricato**: Prodotti a listino, Promozioni, Ordini (nuovo ordine + elenco con stato), Carriera (qualifica, requisiti per la successiva, avanzamento in %, rete con **rappresentazione grafica ad albero**), Provvigioni (maturate, disponibili, richieste, pagate, dettaglio voce per voce, pulsante "Richiedi pagamento").
 - **Stati ordine**: inserito, pagato, in preparazione, spedito, consegnato, annullato, reso.
+  - "Pagato" lo imposta solo il webhook di Stripe. Lo staff (amministrazione e ordini) segna a mano in preparazione, spedito (corriere e numero di tracciamento obbligatori, email all'incaricata) e consegnato.
+  - Un ordine non pagato entro 24 ore si annulla; l'incaricata può annullare i suoi ordini non pagati.
+  - Rimborso totale su Stripe: l'ordine diventa "reso" se già spedito, altrimenti "annullato". I rimborsi si registrano per le rettifiche della Fase 6.
+- **Start kit non pagato**: i dati e il codice GL restano; l'incaricata accede ma vede solo "Paga lo start kit" finché Stripe non conferma. Vale anche per chi è inserito dall'amministrazione; le incaricate esistenti prima della Fase 3 sono già segnate come pagate.
+- **Spedizione degli ordini personali**: proposto l'indirizzo del profilo, modificabile per il singolo ordine.
+- **Riordino responsabile (70%)**: spunta obbligatoria dal secondo acquisto personale pagato (lo start kit non conta), salvata con data e ora.
 - **Negozio personale online**: pagina pubblica di ogni incaricato dentro l'app (es. `/negozio/GL000123`), curata nella grafica. Gli ordini sono attribuiti all'incaricato con certezza e generano punti ON.
 - **Pagamento ordini**: solo carta, PayPal e Klarna tramite Stripe. **Il bonifico non è ammesso per gli ordini.** Mese di competenza = momento in cui Stripe conferma il pagamento. Rimborsi Stripe → rettifiche.
 - **Prezzi e punti**: listino IVA inclusa; punti = 0,80 × prezzo pagato IVA esclusa; acquisti personali con sconto 40%; provvigione negozio online = 50% dei punti; spedizione 6,90 € per ogni ordine, senza punti. Tutti parametri (vedi `docs/piano-compensi.md`).
@@ -92,17 +98,21 @@ Il progetto vive in `C:\Progetti\gluxe-app`, **fuori da OneDrive** (la sincroniz
 - Le modifiche al database (migrazioni) devono essere **reversibili**: per ognuna va previsto come tornare indietro.
 - Il database di produzione si modifica solo dopo l'ok del fondatore.
 - In `.env.local`: `DATABASE_URL` = database di prova, `DATABASE_URL_PRODUZIONE` = database vero. Gli script (`db:aggiorna`, `db:annulla`, `db:seme-catalogo`, `crea-staff`) usano la prova; con `--produzione` (o `db:aggiorna:produzione`) quello vero.
+- Collegamento al database dall'app: **node-postgres (`pg`)**, pooler di Supabase in modalità sessione (porta 5432). Non usare postgres.js dentro Next.js: manda le interrogazioni in due tempi e, con più pagine aperte insieme, alcune connessioni restavano a metà e le pagine si bloccavano su "Caricamento…" (scoperto e risolto il 29/10/2026). Gli script in `scripts/` usano ancora postgres.js (fuori da Next.js va bene).
 - Su Vercel: `DATABASE_URL` di Production = database vero, di Preview = database di prova. L'anteprima di un branch ha l'indirizzo fisso `gluxe-app-git-<branch>-g-luxe.vercel.app`.
 - Lo strumento Vercel si usa con `npx vercel` (installato nel progetto, account già collegato). Nel terminale PowerShell dell'utente usare `npm.cmd` al posto di `npm` (gli script `.ps1` sono bloccati da Windows).
 - Mai mostrare in chat password, chiavi o indirizzi dei database: per passarli all'utente si copiano negli appunti.
 
 ## Lavori in corso (aggiornare a ogni passo)
 
-- **Branch `fase-2-catalogo`**: Fase 2 completa e provata, anteprima online, **in attesa dell'ok del fondatore** per unirla a `main`.
-- Per pubblicarla: unire a `main`, poi `npm run db:aggiorna:produzione` e `npm run db:seme-catalogo -- --produzione` (crea parametri rev. 5 e prodotti).
+- **Fase 2 online** (catalogo sul sito vero, prodotti senza foto finché non arrivano quelle G LUXE).
+- **Branch `fase-3-ordini`**: Fase 3 provata sul computer con il database di prova (start kit, ordine personale con promo, pagamento con carta di prova, scadenza della pagina di pagamento, idempotenza del webhook, staff ordini, spedizione, rimborso → reso, riordino 70%, annullamento).
+  - Anteprima online pronta (ok del fondatore del 29/10/2026): chiavi Stripe di prova su Vercel (Preview), "Protection Bypass for Automation" attivo (segreto solo in `.env.local`, `VERCEL_BYPASS_ANTEPRIME`), webhook Stripe di prova verso `gluxe-app-git-fase-3-ordini-g-luxe.vercel.app/api/stripe/webhook` con il bypass nell'indirizzo; il suo segreto è `STRIPE_WEBHOOK_SECRET` di Preview. Per un nuovo branch serve un nuovo webhook verso la sua anteprima.
+  - Per il sito vero: account Stripe completato (dati aziendali, IBAN), PayPal attivato su Stripe, chiavi vere su Vercel (Production), `npm run stripe:metodi` con la chiave vera, webhook Stripe verso `https://gluxe-app.vercel.app/api/stripe/webhook`, `npm run db:aggiorna:produzione`.
+  - Sul computer: `npm run stripe:inoltra` (in un secondo terminale) fa arrivare gli eventi di Stripe al server di sviluppo. Credenziali finte per le prove in `.env.local` (`PROVA_…`).
 - Domande aperte al fondatore:
   - promozioni: i punti degli acquisti in promo contano come acquisti personali (tetto 250) e la provvigione del 50% si paga anche da inattiva (scelta mia, da confermare).
-- Database di prova: account staff del fondatore (prestigehcaire@gmail.com) e incaricata finta GL000001 per le prove.
+- Database di prova: account staff del fondatore (prestigehcaire@gmail.com), staff "ordini" finto (ordini-prova@gluxe.test), incaricate finte GL000001 e GL000002 (prova.incaricata@gluxe.test) per le prove.
 - Produzione: account amministratore del fondatore e Giovanna Di Lillo (GL000001). Next.js 16.4.3 (aggiornamento di sicurezza già online).
 - Ancora da fare in futuro: dominio aziendale su Resend (email alle incaricate), pagina per creare account staff dall'area sede, pulsante "mostra link password" (proposto, non ancora approvato).
 
@@ -113,7 +123,7 @@ Il progetto vive in `C:\Progetti\gluxe-app`, **fuori da OneDrive** (la sincroniz
 | 0 | Fondamenta: progetto, database, hosting di prova, PWA, grafica base | completata |
 | 1 | Registrazione con codice sponsor, richieste di contatto, accesso incaricati (codice + password) e admin (email + password + codice), recupero password, anagrafica incaricati, codice automatico, audit log | completata (le email alle incaricate partiranno quando sarà verificato il dominio aziendale su Resend) |
 | 2 | Catalogo: prodotti, listino, punti con coefficiente, sconto 40%, start kit, promozioni | completata (online senza foto prodotti) |
-| 3 | Ordini con pagamento Stripe (carta, PayPal, Klarna): start kit in registrazione, spedizione 6,90 €, stati, storico, conferma riordino 70%, ruolo staff "ordini" | da fare |
+| 3 | Ordini con pagamento Stripe (carta, PayPal, Klarna): start kit in registrazione, spedizione 6,90 €, stati, storico, conferma riordino 70%, ruolo staff "ordini" | provata sul computer, branch `fase-3-ordini`; manca l'anteprima online |
 | 4 | Motore provvigioni (rev. 5): prima i test di `docs/piano-compensi.md`, poi il codice; parametri versionati; qualifiche bloccate, Leader Fondatori, figure speciali; anteprima | da fare |
 | 5 | Carriera e rete: qualifica, avanzamento, albero grafico della rete | da fare |
 | 6 | Chiusura mese, registro provvigioni, storni, richieste di pagamento (1–4), area contabilità, ritenute, report IVA/INPS, export | da fare |

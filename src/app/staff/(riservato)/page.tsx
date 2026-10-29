@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { Caricamento, Scheda, Titolo } from "@/components/ui";
 import { richiediStaff } from "@/lib/accesso";
 import { riepilogo } from "@/lib/dati-staff";
+import { contaOrdiniPerStato } from "@/lib/ordini";
 
 export default function RiepilogoStaff() {
   return (
@@ -12,22 +13,41 @@ export default function RiepilogoStaff() {
   );
 }
 
+const AREE = { amministrazione: "Area amministrazione", contabilita: "Area contabilità", ordini: "Area ordini" };
+
 async function Contenuto() {
   const staff = await richiediStaff();
-  const numeri = await riepilogo();
+  const vedeOrdini = staff.ruolo === "amministrazione" || staff.ruolo === "ordini";
+  const [numeri, ordini] = await Promise.all([
+    staff.ruolo === "ordini" ? undefined : riepilogo(),
+    vedeOrdini ? contaOrdiniPerStato() : undefined,
+  ]);
+
   const riquadri = [
-    { etichetta: "Incaricati attivi", valore: numeri.incaricatiAttivi, href: "/staff/incaricati" },
-    { etichetta: "Nuovi negli ultimi 30 giorni", valore: numeri.nuoviUltimi30Giorni, href: "/staff/incaricati" },
-    { etichetta: "Richieste sponsor da gestire", valore: numeri.richiesteNuove, href: "/staff/richieste" },
+    ...(ordini
+      ? [
+          { etichetta: "Ordini da preparare", valore: ordini.pagato ?? 0, href: "/staff/ordini?stato=pagato" },
+          { etichetta: "In preparazione", valore: ordini.in_preparazione ?? 0, href: "/staff/ordini?stato=in_preparazione" },
+          { etichetta: "Spediti, da consegnare", valore: ordini.spedito ?? 0, href: "/staff/ordini?stato=spedito" },
+        ]
+      : []),
+    ...(numeri
+      ? [
+          { etichetta: "Incaricati attivi", valore: numeri.incaricatiAttivi, href: "/staff/incaricati" },
+          { etichetta: "Nuovi negli ultimi 30 giorni", valore: numeri.nuoviUltimi30Giorni, href: "/staff/incaricati" },
+          { etichetta: "Richieste sponsor da gestire", valore: numeri.richiesteNuove, href: "/staff/richieste" },
+        ]
+      : []),
   ];
+  const conCollegamento = (href: string) =>
+    staff.ruolo === "amministrazione" || (staff.ruolo === "ordini" && href.startsWith("/staff/ordini"));
+
   return (
     <>
-      <Titolo sottotitolo={staff.ruolo === "contabilita" ? "Area contabilità" : "Area amministrazione"}>
-        Ciao {staff.nome}
-      </Titolo>
+      <Titolo sottotitolo={AREE[staff.ruolo]}>Ciao {staff.nome}</Titolo>
       <div className="grid gap-4 sm:grid-cols-3">
         {riquadri.map((r) =>
-          staff.ruolo === "amministrazione" ? (
+          conCollegamento(r.href) ? (
             <Link key={r.etichetta} href={r.href}>
               <Riquadro {...r} />
             </Link>
