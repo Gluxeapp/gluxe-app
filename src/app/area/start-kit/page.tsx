@@ -9,6 +9,7 @@ import { calcolaOrdine } from "@/lib/calcolo-ordine";
 import { parametriCorrenti } from "@/lib/catalogo";
 import { formattaEuro } from "@/lib/denaro";
 import { indirizzoDelProfilo } from "@/lib/ordini";
+import { pagamentiAttivi } from "@/lib/stripe";
 import { ModuloStartKit } from "./modulo-start-kit";
 
 export default function StartKit() {
@@ -55,7 +56,11 @@ async function Contenuto() {
           online. Paghi con carta, PayPal o Klarna sulla pagina sicura di Stripe.
         </p>
       </Scheda>
-      <ModuloStartKit indirizzo={indirizzo} />
+      {pagamentiAttivi() ? (
+        <ModuloStartKit indirizzo={indirizzo} />
+      ) : (
+        <Avviso>Il pagamento online sarà attivo a breve. Ti avviseremo quando potrai procedere.</Avviso>
+      )}
     </div>
   );
 }

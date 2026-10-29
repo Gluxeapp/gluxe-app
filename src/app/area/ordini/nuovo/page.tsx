@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { Suspense } from "react";
-import { Caricamento, Titolo } from "@/components/ui";
+import { Avviso, Caricamento, Titolo } from "@/components/ui";
 import { richiediIncaricataOperativa } from "@/lib/accesso";
 import { catalogoIncaricata } from "@/lib/catalogo";
 import { formattaEuro, formatta } from "@/lib/denaro";
 import { indirizzoDelProfilo, serveConfermaRiordino } from "@/lib/ordini";
+import { pagamentiAttivi } from "@/lib/stripe";
 import { ModuloNuovoOrdine } from "./modulo-nuovo-ordine";
 
 export default function NuovoOrdine() {
@@ -25,6 +26,9 @@ export default function NuovoOrdine() {
 
 async function Contenuto() {
   const { incaricato } = await richiediIncaricataOperativa();
+  if (!pagamentiAttivi()) {
+    return <Avviso>Il pagamento online sarà attivo a breve. Ti avviseremo quando potrai ordinare.</Avviso>;
+  }
   const [catalogo, indirizzo, conferma] = await Promise.all([
     catalogoIncaricata(),
     indirizzoDelProfilo(incaricato.id),

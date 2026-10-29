@@ -30,3 +30,8 @@ export function configurazionePagamenti(): string {
   if (!id) throw new Error("Pagamenti non configurati: manca STRIPE_CONFIGURAZIONE_PAGAMENTI");
   return id;
 }
+
+/** Vero quando i pagamenti sono configurati. Finché mancano le chiavi, l'app avvisa invece di mostrare un errore. */
+export function pagamentiAttivi(): boolean {
+  return Boolean(process.env.STRIPE_SECRET_KEY && process.env.STRIPE_CONFIGURAZIONE_PAGAMENTI);
+}
