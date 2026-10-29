@@ -1,0 +1,2008 @@
+{
+  "id": "8567eccd-3550-4c5d-a277-00ba381b8b25",
+  "prevId": "dd8b2a3d-f65e-46cf-8570-bf6213a898fb",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "app.codici_verifica": {
+      "name": "codici_verifica",
+      "schema": "app",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "utente_id": {
+          "name": "utente_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "scopo": {
+          "name": "scopo",
+          "type": "scopo_codice",
+          "typeSchema": "app",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "impronta": {
+          "name": "impronta",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tentativi": {
+          "name": "tentativi",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "scade_il": {
+          "name": "scade_il",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "usato_il": {
+          "name": "usato_il",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "creato_il": {
+          "name": "creato_il",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "codici_verifica_utente": {
+          "name": "codici_verifica_utente",
+          "columns": [
+            {
+              "expression": "utente_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "scopo",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        }
+      },
+      "foreignKeys": {
+        "codici_verifica_utente_id_utenti_id_fk": {
+          "name": "codici_verifica_utente_id_utenti_id_fk",
+          "tableFrom": "codici_verifica",
+          "columnsFrom": [
+            "utente_id"
+          ],
+          "tableTo": "utenti",
+          "schemaTo": "app",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "app.email_in_uscita": {
+      "name": "email_in_uscita",
+      "schema": "app",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "destinatario": {
+          "name": "destinatario",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "oggetto": {
+          "name": "oggetto",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "inviata_il": {
+          "name": "inviata_il",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "errore": {
+          "name": "errore",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "creato_il": {
+          "name": "creato_il",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "app.eventi_stripe": {
+      "name": "eventi_stripe",
+      "schema": "app",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "tipo": {
+          "name": "tipo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ricevuto_il": {
+          "name": "ricevuto_il",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "app.immagini": {
+      "name": "immagini",
+      "schema": "app",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "tipo": {
+          "name": "tipo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "dati": {
+          "name": "dati",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "creato_il": {
+          "name": "creato_il",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "app.incaricati": {
+      "name": "incaricati",
+      "schema": "app",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "utente_id": {
+          "name": "utente_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "codice": {
+          "name": "codice",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nome": {
+          "name": "nome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cognome": {
+          "name": "cognome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "codice_fiscale": {
+          "name": "codice_fiscale",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "data_nascita": {
+          "name": "data_nascita",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "indirizzo": {
+          "name": "indirizzo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cap": {
+          "name": "cap",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "citta": {
+          "name": "citta",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "provincia": {
+          "name": "provincia",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "telefono": {
+          "name": "telefono",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "iban": {
+          "name": "iban",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "partita_iva": {
+          "name": "partita_iva",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "sponsor_id": {
+          "name": "sponsor_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "stato": {
+          "name": "stato",
+          "type": "stato_incaricato",
+          "typeSchema": "app",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'attivo'"
+        },
+        "start_kit_pagato": {
+          "name": "start_kit_pagato",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "privacy_accettata_il": {
+          "name": "privacy_accettata_il",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "creato_il": {
+          "name": "creato_il",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "incaricati_sponsor": {
+          "name": "incaricati_sponsor",
+          "columns": [
+            {
+              "expression": "sponsor_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        },
+        "incaricati_cognome": {
+          "name": "incaricati_cognome",
+          "columns": [
+            {
+              "expression": "cognome",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        }
+      },
+      "foreignKeys": {
+        "incaricati_utente_id_utenti_id_fk": {
+          "name": "incaricati_utente_id_utenti_id_fk",
+          "tableFrom": "incaricati",
+          "columnsFrom": [
+            "utente_id"
+          ],
+          "tableTo": "utenti",
+          "schemaTo": "app",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "incaricati_sponsor_id_incaricati_id_fk": {
+          "name": "incaricati_sponsor_id_incaricati_id_fk",
+          "tableFrom": "incaricati",
+          "columnsFrom": [
+            "sponsor_id"
+          ],
+          "tableTo": "incaricati",
+          "schemaTo": "app",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "incaricati_utente_id_unique": {
+          "name": "incaricati_utente_id_unique",
+          "columns": [
+            "utente_id"
+          ],
+          "nullsNotDistinct": false
+        },
+        "incaricati_codice_unique": {
+          "name": "incaricati_codice_unique",
+          "columns": [
+            "codice"
+          ],
+          "nullsNotDistinct": false
+        },
+        "incaricati_codice_fiscale_unique": {
+          "name": "incaricati_codice_fiscale_unique",
+          "columns": [
+            "codice_fiscale"
+          ],
+          "nullsNotDistinct": false
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "app.ordini": {
+      "name": "ordini",
+      "schema": "app",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "numero": {
+          "name": "numero",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "nextval('app.sequenza_numero_ordine')"
+        },
+        "incaricato_id": {
+          "name": "incaricato_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tipo": {
+          "name": "tipo",
+          "type": "tipo_ordine",
+          "typeSchema": "app",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "stato": {
+          "name": "stato",
+          "type": "stato_ordine",
+          "typeSchema": "app",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'inserito'"
+        },
+        "parametri_versione_id": {
+          "name": "parametri_versione_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "merce_iva_inclusa": {
+          "name": "merce_iva_inclusa",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "merce_iva_esclusa": {
+          "name": "merce_iva_esclusa",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "punti": {
+          "name": "punti",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "provvigione_acquisto": {
+          "name": "provvigione_acquisto",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "spese_spedizione": {
+          "name": "spese_spedizione",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "totale": {
+          "name": "totale",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "destinatario": {
+          "name": "destinatario",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "indirizzo": {
+          "name": "indirizzo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cap": {
+          "name": "cap",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "citta": {
+          "name": "citta",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "provincia": {
+          "name": "provincia",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "telefono": {
+          "name": "telefono",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "riordino_confermato_il": {
+          "name": "riordino_confermato_il",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "stripe_sessione_id": {
+          "name": "stripe_sessione_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "stripe_pagamento_id": {
+          "name": "stripe_pagamento_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pagato_il": {
+          "name": "pagato_il",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "corriere": {
+          "name": "corriere",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tracciamento": {
+          "name": "tracciamento",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "creato_il": {
+          "name": "creato_il",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "ordini_incaricato": {
+          "name": "ordini_incaricato",
+          "columns": [
+            {
+              "expression": "incaricato_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "creato_il",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        },
+        "ordini_stato": {
+          "name": "ordini_stato",
+          "columns": [
+            {
+              "expression": "stato",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "creato_il",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        },
+        "ordini_pagato_il": {
+          "name": "ordini_pagato_il",
+          "columns": [
+            {
+              "expression": "pagato_il",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        },
+        "ordini_stripe_pagamento": {
+          "name": "ordini_stripe_pagamento",
+          "columns": [
+            {
+              "expression": "stripe_pagamento_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        }
+      },
+      "foreignKeys": {
+        "ordini_incaricato_id_incaricati_id_fk": {
+          "name": "ordini_incaricato_id_incaricati_id_fk",
+          "tableFrom": "ordini",
+          "columnsFrom": [
+            "incaricato_id"
+          ],
+          "tableTo": "incaricati",
+          "schemaTo": "app",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "ordini_parametri_versione_id_parametri_versioni_id_fk": {
+          "name": "ordini_parametri_versione_id_parametri_versioni_id_fk",
+          "tableFrom": "ordini",
+          "columnsFrom": [
+            "parametri_versione_id"
+          ],
+          "tableTo": "parametri_versioni",
+          "schemaTo": "app",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "ordini_numero_unique": {
+          "name": "ordini_numero_unique",
+          "columns": [
+            "numero"
+          ],
+          "nullsNotDistinct": false
+        },
+        "ordini_stripe_sessione_id_unique": {
+          "name": "ordini_stripe_sessione_id_unique",
+          "columns": [
+            "stripe_sessione_id"
+          ],
+          "nullsNotDistinct": false
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "app.parametri_versioni": {
+      "name": "parametri_versioni",
+      "schema": "app",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "valido_dal": {
+          "name": "valido_dal",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "valori": {
+          "name": "valori",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "note": {
+          "name": "note",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "creato_da": {
+          "name": "creato_da",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "creato_il": {
+          "name": "creato_il",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "parametri_versioni_dal": {
+          "name": "parametri_versioni_dal",
+          "columns": [
+            {
+              "expression": "valido_dal",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        }
+      },
+      "foreignKeys": {
+        "parametri_versioni_creato_da_utenti_id_fk": {
+          "name": "parametri_versioni_creato_da_utenti_id_fk",
+          "tableFrom": "parametri_versioni",
+          "columnsFrom": [
+            "creato_da"
+          ],
+          "tableTo": "utenti",
+          "schemaTo": "app",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "app.prodotti": {
+      "name": "prodotti",
+      "schema": "app",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "codice": {
+          "name": "codice",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nome": {
+          "name": "nome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "linea": {
+          "name": "linea",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "formato": {
+          "name": "formato",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "descrizione": {
+          "name": "descrizione",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tipo": {
+          "name": "tipo",
+          "type": "tipo_prodotto",
+          "typeSchema": "app",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'prodotto'"
+        },
+        "prezzo_listino": {
+          "name": "prezzo_listino",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "immagine_id": {
+          "name": "immagine_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "attivo": {
+          "name": "attivo",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "ordine": {
+          "name": "ordine",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "creato_il": {
+          "name": "creato_il",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "prodotti_ordine": {
+          "name": "prodotti_ordine",
+          "columns": [
+            {
+              "expression": "attivo",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "ordine",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        }
+      },
+      "foreignKeys": {
+        "prodotti_immagine_id_immagini_id_fk": {
+          "name": "prodotti_immagine_id_immagini_id_fk",
+          "tableFrom": "prodotti",
+          "columnsFrom": [
+            "immagine_id"
+          ],
+          "tableTo": "immagini",
+          "schemaTo": "app",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "prodotti_codice_unique": {
+          "name": "prodotti_codice_unique",
+          "columns": [
+            "codice"
+          ],
+          "nullsNotDistinct": false
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "app.promozioni": {
+      "name": "promozioni",
+      "schema": "app",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "prodotto_id": {
+          "name": "prodotto_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "titolo": {
+          "name": "titolo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "prezzo_promo": {
+          "name": "prezzo_promo",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "dal": {
+          "name": "dal",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "al": {
+          "name": "al",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "attiva": {
+          "name": "attiva",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "creato_il": {
+          "name": "creato_il",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "promozioni_periodo": {
+          "name": "promozioni_periodo",
+          "columns": [
+            {
+              "expression": "dal",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "al",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        }
+      },
+      "foreignKeys": {
+        "promozioni_prodotto_id_prodotti_id_fk": {
+          "name": "promozioni_prodotto_id_prodotti_id_fk",
+          "tableFrom": "promozioni",
+          "columnsFrom": [
+            "prodotto_id"
+          ],
+          "tableTo": "prodotti",
+          "schemaTo": "app",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "app.registro_modifiche": {
+      "name": "registro_modifiche",
+      "schema": "app",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "utente_id": {
+          "name": "utente_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "azione": {
+          "name": "azione",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "entita": {
+          "name": "entita",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "entita_id": {
+          "name": "entita_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "prima": {
+          "name": "prima",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "dopo": {
+          "name": "dopo",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "creato_il": {
+          "name": "creato_il",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "registro_modifiche_entita": {
+          "name": "registro_modifiche_entita",
+          "columns": [
+            {
+              "expression": "entita",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "entita_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        },
+        "registro_modifiche_data": {
+          "name": "registro_modifiche_data",
+          "columns": [
+            {
+              "expression": "creato_il",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        }
+      },
+      "foreignKeys": {
+        "registro_modifiche_utente_id_utenti_id_fk": {
+          "name": "registro_modifiche_utente_id_utenti_id_fk",
+          "tableFrom": "registro_modifiche",
+          "columnsFrom": [
+            "utente_id"
+          ],
+          "tableTo": "utenti",
+          "schemaTo": "app",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "app.richieste_contatto": {
+      "name": "richieste_contatto",
+      "schema": "app",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "nome": {
+          "name": "nome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cognome": {
+          "name": "cognome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "telefono": {
+          "name": "telefono",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "citta": {
+          "name": "citta",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "stato": {
+          "name": "stato",
+          "type": "stato_richiesta",
+          "typeSchema": "app",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'nuova'"
+        },
+        "note": {
+          "name": "note",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "gestita_da": {
+          "name": "gestita_da",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "gestita_il": {
+          "name": "gestita_il",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "creato_il": {
+          "name": "creato_il",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "richieste_contatto_gestita_da_utenti_id_fk": {
+          "name": "richieste_contatto_gestita_da_utenti_id_fk",
+          "tableFrom": "richieste_contatto",
+          "columnsFrom": [
+            "gestita_da"
+          ],
+          "tableTo": "utenti",
+          "schemaTo": "app",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "app.righe_ordine": {
+      "name": "righe_ordine",
+      "schema": "app",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "ordine_id": {
+          "name": "ordine_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "prodotto_id": {
+          "name": "prodotto_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "codice": {
+          "name": "codice",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nome": {
+          "name": "nome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tipo_prezzo": {
+          "name": "tipo_prezzo",
+          "type": "tipo_prezzo_riga",
+          "typeSchema": "app",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "promozione_id": {
+          "name": "promozione_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "quantita": {
+          "name": "quantita",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "prezzo_unitario_ivato": {
+          "name": "prezzo_unitario_ivato",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "prezzo_unitario_iva_esclusa": {
+          "name": "prezzo_unitario_iva_esclusa",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "punti_unitari": {
+          "name": "punti_unitari",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "provvigione_unitaria": {
+          "name": "provvigione_unitaria",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "totale_ivato": {
+          "name": "totale_ivato",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "totale_iva_esclusa": {
+          "name": "totale_iva_esclusa",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "totale_punti": {
+          "name": "totale_punti",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "totale_provvigione": {
+          "name": "totale_provvigione",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "righe_ordine_ordine": {
+          "name": "righe_ordine_ordine",
+          "columns": [
+            {
+              "expression": "ordine_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        }
+      },
+      "foreignKeys": {
+        "righe_ordine_ordine_id_ordini_id_fk": {
+          "name": "righe_ordine_ordine_id_ordini_id_fk",
+          "tableFrom": "righe_ordine",
+          "columnsFrom": [
+            "ordine_id"
+          ],
+          "tableTo": "ordini",
+          "schemaTo": "app",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "righe_ordine_prodotto_id_prodotti_id_fk": {
+          "name": "righe_ordine_prodotto_id_prodotti_id_fk",
+          "tableFrom": "righe_ordine",
+          "columnsFrom": [
+            "prodotto_id"
+          ],
+          "tableTo": "prodotti",
+          "schemaTo": "app",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "righe_ordine_promozione_id_promozioni_id_fk": {
+          "name": "righe_ordine_promozione_id_promozioni_id_fk",
+          "tableFrom": "righe_ordine",
+          "columnsFrom": [
+            "promozione_id"
+          ],
+          "tableTo": "promozioni",
+          "schemaTo": "app",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "app.rimborsi": {
+      "name": "rimborsi",
+      "schema": "app",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "ordine_id": {
+          "name": "ordine_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "importo": {
+          "name": "importo",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "rimborsato_il": {
+          "name": "rimborsato_il",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "creato_il": {
+          "name": "creato_il",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "rimborsi_ordine": {
+          "name": "rimborsi_ordine",
+          "columns": [
+            {
+              "expression": "ordine_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        }
+      },
+      "foreignKeys": {
+        "rimborsi_ordine_id_ordini_id_fk": {
+          "name": "rimborsi_ordine_id_ordini_id_fk",
+          "tableFrom": "rimborsi",
+          "columnsFrom": [
+            "ordine_id"
+          ],
+          "tableTo": "ordini",
+          "schemaTo": "app",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "app.sessioni": {
+      "name": "sessioni",
+      "schema": "app",
+      "columns": {
+        "impronta": {
+          "name": "impronta",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "utente_id": {
+          "name": "utente_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "verificata": {
+          "name": "verificata",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "scade_il": {
+          "name": "scade_il",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "creato_il": {
+          "name": "creato_il",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "sessioni_utente": {
+          "name": "sessioni_utente",
+          "columns": [
+            {
+              "expression": "utente_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        }
+      },
+      "foreignKeys": {
+        "sessioni_utente_id_utenti_id_fk": {
+          "name": "sessioni_utente_id_utenti_id_fk",
+          "tableFrom": "sessioni",
+          "columnsFrom": [
+            "utente_id"
+          ],
+          "tableTo": "utenti",
+          "schemaTo": "app",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "app.storico_sponsor": {
+      "name": "storico_sponsor",
+      "schema": "app",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "incaricato_id": {
+          "name": "incaricato_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sponsor_id": {
+          "name": "sponsor_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "dal": {
+          "name": "dal",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "motivo": {
+          "name": "motivo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "modificato_da": {
+          "name": "modificato_da",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "storico_sponsor_incaricato": {
+          "name": "storico_sponsor_incaricato",
+          "columns": [
+            {
+              "expression": "incaricato_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        }
+      },
+      "foreignKeys": {
+        "storico_sponsor_incaricato_id_incaricati_id_fk": {
+          "name": "storico_sponsor_incaricato_id_incaricati_id_fk",
+          "tableFrom": "storico_sponsor",
+          "columnsFrom": [
+            "incaricato_id"
+          ],
+          "tableTo": "incaricati",
+          "schemaTo": "app",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "storico_sponsor_sponsor_id_incaricati_id_fk": {
+          "name": "storico_sponsor_sponsor_id_incaricati_id_fk",
+          "tableFrom": "storico_sponsor",
+          "columnsFrom": [
+            "sponsor_id"
+          ],
+          "tableTo": "incaricati",
+          "schemaTo": "app",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "storico_sponsor_modificato_da_utenti_id_fk": {
+          "name": "storico_sponsor_modificato_da_utenti_id_fk",
+          "tableFrom": "storico_sponsor",
+          "columnsFrom": [
+            "modificato_da"
+          ],
+          "tableTo": "utenti",
+          "schemaTo": "app",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "app.storico_stati_ordine": {
+      "name": "storico_stati_ordine",
+      "schema": "app",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "ordine_id": {
+          "name": "ordine_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "stato": {
+          "name": "stato",
+          "type": "stato_ordine",
+          "typeSchema": "app",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "utente_id": {
+          "name": "utente_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nota": {
+          "name": "nota",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "creato_il": {
+          "name": "creato_il",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "storico_stati_ordine_ordine": {
+          "name": "storico_stati_ordine_ordine",
+          "columns": [
+            {
+              "expression": "ordine_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        }
+      },
+      "foreignKeys": {
+        "storico_stati_ordine_ordine_id_ordini_id_fk": {
+          "name": "storico_stati_ordine_ordine_id_ordini_id_fk",
+          "tableFrom": "storico_stati_ordine",
+          "columnsFrom": [
+            "ordine_id"
+          ],
+          "tableTo": "ordini",
+          "schemaTo": "app",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "storico_stati_ordine_utente_id_utenti_id_fk": {
+          "name": "storico_stati_ordine_utente_id_utenti_id_fk",
+          "tableFrom": "storico_stati_ordine",
+          "columnsFrom": [
+            "utente_id"
+          ],
+          "tableTo": "utenti",
+          "schemaTo": "app",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "app.utenti": {
+      "name": "utenti",
+      "schema": "app",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "ruolo": {
+          "name": "ruolo",
+          "type": "ruolo",
+          "typeSchema": "app",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nome": {
+          "name": "nome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "password_hash": {
+          "name": "password_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "attivo": {
+          "name": "attivo",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "tentativi_falliti": {
+          "name": "tentativi_falliti",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "bloccato_fino": {
+          "name": "bloccato_fino",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ultimo_accesso": {
+          "name": "ultimo_accesso",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "creato_il": {
+          "name": "creato_il",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "utenti_email_staff": {
+          "name": "utenti_email_staff",
+          "columns": [
+            {
+              "expression": "lower(\"email\")",
+              "isExpression": true,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "with": {},
+          "method": "btree",
+          "where": "\"app\".\"utenti\".\"ruolo\" <> 'incaricato'",
+          "concurrently": false
+        },
+        "utenti_email_incaricati": {
+          "name": "utenti_email_incaricati",
+          "columns": [
+            {
+              "expression": "lower(\"email\")",
+              "isExpression": true,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "with": {},
+          "method": "btree",
+          "where": "\"app\".\"utenti\".\"ruolo\" = 'incaricato'",
+          "concurrently": false
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "app.ruolo": {
+      "name": "ruolo",
+      "schema": "app",
+      "values": [
+        "incaricato",
+        "amministrazione",
+        "contabilita",
+        "ordini"
+      ]
+    },
+    "app.scopo_codice": {
+      "name": "scopo_codice",
+      "schema": "app",
+      "values": [
+        "accesso_staff",
+        "recupero_password"
+      ]
+    },
+    "app.stato_incaricato": {
+      "name": "stato_incaricato",
+      "schema": "app",
+      "values": [
+        "attivo",
+        "sospeso",
+        "cessato",
+        "cliente"
+      ]
+    },
+    "app.stato_ordine": {
+      "name": "stato_ordine",
+      "schema": "app",
+      "values": [
+        "inserito",
+        "pagato",
+        "in_preparazione",
+        "spedito",
+        "consegnato",
+        "annullato",
+        "reso"
+      ]
+    },
+    "app.stato_richiesta": {
+      "name": "stato_richiesta",
+      "schema": "app",
+      "values": [
+        "nuova",
+        "gestita"
+      ]
+    },
+    "app.tipo_ordine": {
+      "name": "tipo_ordine",
+      "schema": "app",
+      "values": [
+        "start_kit",
+        "personale",
+        "online"
+      ]
+    },
+    "app.tipo_prezzo_riga": {
+      "name": "tipo_prezzo_riga",
+      "schema": "app",
+      "values": [
+        "listino_scontato",
+        "promozione",
+        "start_kit",
+        "listino_pieno"
+      ]
+    },
+    "app.tipo_prodotto": {
+      "name": "tipo_prodotto",
+      "schema": "app",
+      "values": [
+        "prodotto",
+        "start_kit"
+      ]
+    }
+  },
+  "schemas": {
+    "app": "app"
+  },
+  "views": {},
+  "sequences": {
+    "app.sequenza_codice_incaricato": {
+      "name": "sequenza_codice_incaricato",
+      "increment": "1",
+      "minValue": "1",
+      "maxValue": "9223372036854775807",
+      "startWith": "1",
+      "cache": "1",
+      "cycle": false,
+      "schema": "app"
+    },
+    "app.sequenza_numero_ordine": {
+      "name": "sequenza_numero_ordine",
+      "increment": "1",
+      "minValue": "1",
+      "maxValue": "9223372036854775807",
+      "startWith": "1",
+      "cache": "1",
+      "cycle": false,
+      "schema": "app"
+    }
+  },
+  "roles": {},
+  "policies": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

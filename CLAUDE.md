@@ -8,7 +8,7 @@ App per gli incaricati alle vendite di G LUXE (haircare, vendita diretta multili
 - Tutta l'interfaccia dell'app è in italiano.
 - Lavora per fasi (vedi sotto). Ogni fase deve finire con qualcosa che il fondatore può provare, e con le istruzioni per provarlo.
 - Se una regola del piano compensi è ambigua o in conflitto con un'altra, **fermati e chiedi** prima di scrivere codice. Non inventare regole.
-- Fonte ufficiale delle regole di calcolo: [docs/piano-compensi.md](docs/piano-compensi.md). Se il codice e il documento non coincidono, vale il documento; ogni modifica alle regole va prima approvata e scritta lì.
+- Fonte ufficiale delle regole di calcolo: [docs/piano-compensi.md](docs/piano-compensi.md). Le garanzie contro doppi conteggi ed errori con ordini contemporanei sono in [docs/garanzie-calcolo.md](docs/garanzie-calcolo.md): ogni modifica che tocca soldi o punti le rispetta e supera `npm run prova:garanzie`. Se il codice e il documento non coincidono, vale il documento; ogni modifica alle regole va prima approvata e scritta lì.
 
 ## Stack
 
