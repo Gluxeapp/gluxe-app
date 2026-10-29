@@ -16,7 +16,8 @@
     "db:annulla": "node --env-file=.env.local scripts/annulla-migrazione.mjs",
     "db:seme-catalogo": "node --env-file=.env.local scripts/seme-catalogo.ts",
     "stripe:inoltra": "node --env-file=.env.local scripts/inoltra-stripe.mjs",
-    "stripe:metodi": "node --env-file=.env.local scripts/stripe-metodi-pagamento.mjs"
+    "stripe:metodi": "node --env-file=.env.local scripts/stripe-metodi-pagamento.mjs",
+    "prova:garanzie": "node --env-file=.env.local scripts/prova-garanzie.mjs"
   },
   "dependencies": {
     "@node-rs/argon2": "^2.2.2",
