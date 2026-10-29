@@ -102,7 +102,9 @@ export async function creaIncaricato(
         .values({ ruolo: "incaricato", email: dati.email, nome: `${dati.nome} ${dati.cognome}`, passwordHash })
         .returning({ id: utenti.id });
 
-      const [{ numero }] = await tx.execute<{ numero: string }>(
+      const {
+        rows: [{ numero }],
+      } = await tx.execute<{ numero: string }>(
         sql`select nextval('app.sequenza_codice_incaricato')::text as numero`,
       );
       const codice = `GL${numero.padStart(6, "0")}`;
