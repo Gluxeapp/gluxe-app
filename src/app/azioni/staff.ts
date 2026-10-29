@@ -130,7 +130,7 @@ export async function cambiaSponsor(_: EsitoModulo, formData: FormData): Promise
       )
       select id from rete where id = ${sponsor.id}
     `);
-    if (rete.length > 0) return "ciclo" as const;
+    if (rete.rows.length > 0) return "ciclo" as const;
 
     const [prima] = await tx
       .select({ sponsorId: incaricati.sponsorId })
