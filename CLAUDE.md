@@ -106,9 +106,9 @@ Il progetto vive in `C:\Progetti\gluxe-app`, **fuori da OneDrive** (la sincroniz
 ## Lavori in corso (aggiornare a ogni passo)
 
 - **Fase 2 online** (catalogo sul sito vero, prodotti senza foto finché non arrivano quelle G LUXE).
-- **Branch `fase-3-ordini`**: Fase 3 provata sul computer con il database di prova (start kit, ordine personale con promo, pagamento con carta di prova, scadenza della pagina di pagamento, idempotenza del webhook, staff ordini, spedizione, rimborso → reso, riordino 70%, annullamento).
+- **Fase 3 online dal 29/10/2026** (migrazione 0002 applicata al database vero). Sul sito vero mancano le chiavi Stripe: start kit e nuovi ordini mostrano "Il pagamento online sarà attivo a breve" (`pagamentiAttivi()` in `src/lib/stripe.ts`). Provata su computer e anteprima (start kit, ordini con promo, carta di prova, scadenza pagamento, idempotenza webhook, staff ordini, spedizione, rimborso → reso, riordino 70%, annullamento).
   - Anteprima online pronta (ok del fondatore del 29/10/2026): chiavi Stripe di prova su Vercel (Preview), "Protection Bypass for Automation" attivo (segreto solo in `.env.local`, `VERCEL_BYPASS_ANTEPRIME`), webhook Stripe di prova verso `gluxe-app-git-fase-3-ordini-g-luxe.vercel.app/api/stripe/webhook` con il bypass nell'indirizzo; il suo segreto è `STRIPE_WEBHOOK_SECRET` di Preview. Per un nuovo branch serve un nuovo webhook verso la sua anteprima.
-  - Per il sito vero: account Stripe completato (dati aziendali, IBAN), PayPal attivato su Stripe, chiavi vere su Vercel (Production), `npm run stripe:metodi` con la chiave vera, webhook Stripe verso `https://gluxe-app.vercel.app/api/stripe/webhook`, `npm run db:aggiorna:produzione`.
+  - Per accendere i pagamenti sul sito vero: account Stripe completato (dati aziendali, IBAN), PayPal attivato su Stripe, chiavi vere su Vercel (Production), `npm run stripe:metodi` con la chiave vera, webhook Stripe verso `https://gluxe-app.vercel.app/api/stripe/webhook`. Il database vero è già aggiornato.
   - Sul computer: `npm run stripe:inoltra` (in un secondo terminale) fa arrivare gli eventi di Stripe al server di sviluppo. Credenziali finte per le prove in `.env.local` (`PROVA_…`).
 - Domande aperte al fondatore:
   - promozioni: i punti degli acquisti in promo contano come acquisti personali (tetto 250) e la provvigione del 50% si paga anche da inattiva (scelta mia, da confermare).
@@ -123,7 +123,7 @@ Il progetto vive in `C:\Progetti\gluxe-app`, **fuori da OneDrive** (la sincroniz
 | 0 | Fondamenta: progetto, database, hosting di prova, PWA, grafica base | completata |
 | 1 | Registrazione con codice sponsor, richieste di contatto, accesso incaricati (codice + password) e admin (email + password + codice), recupero password, anagrafica incaricati, codice automatico, audit log | completata (le email alle incaricate partiranno quando sarà verificato il dominio aziendale su Resend) |
 | 2 | Catalogo: prodotti, listino, punti con coefficiente, sconto 40%, start kit, promozioni | completata (online senza foto prodotti) |
-| 3 | Ordini con pagamento Stripe (carta, PayPal, Klarna): start kit in registrazione, spedizione 6,90 €, stati, storico, conferma riordino 70%, ruolo staff "ordini" | provata sul computer, branch `fase-3-ordini`; manca l'anteprima online |
+| 3 | Ordini con pagamento Stripe (carta, PayPal, Klarna): start kit in registrazione, spedizione 6,90 €, stati, storico, conferma riordino 70%, ruolo staff "ordini" | completata (online dal 29/10/2026; pagamenti da accendere quando l'account Stripe è completo) |
 | 4 | Motore provvigioni (rev. 5): prima i test di `docs/piano-compensi.md`, poi il codice; parametri versionati; qualifiche bloccate, Leader Fondatori, figure speciali; anteprima | da fare |
 | 5 | Carriera e rete: qualifica, avanzamento, albero grafico della rete | da fare |
 | 6 | Chiusura mese, registro provvigioni, storni, richieste di pagamento (1–4), area contabilità, ritenute, report IVA/INPS, export | da fare |
