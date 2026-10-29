@@ -1,6 +1,6 @@
 # G LUXE · Piano Compensi (specifiche del motore di calcolo)
 
-Versione: 16 ottobre 2026 · **rev. 5 "Piano Compensi G LUXE"**. Sostituisce tutte le versioni precedenti (la rev. 4 resta solo nello storico di Git e non è mai stata applicata a ordini reali).
+Versione: 29 ottobre 2026 · **rev. 5 "Piano Compensi G LUXE"**, con le decisioni 16–18 sulle promozioni e sulla chiusura del mese. Sostituisce tutte le versioni precedenti (la rev. 4 resta solo nello storico di Git e non è mai stata applicata a ordini reali).
 
 Questo documento traduce il piano compensi in regole univoche per il motore di calcolo dell'app G LUXE. Ogni regola deve dare un solo risultato possibile. È la fonte ufficiale: se il codice non coincide con il documento, vale il documento.
 
@@ -19,11 +19,12 @@ Per lo sviluppo: scrivere prima i test della sezione "Casi di test", poi il codi
 | Prezzo IVA esclusa | Prezzo IVA inclusa ÷ (1 + IVA), arrotondato al centesimo, **per unità** | 139,00 → 113,93 € |
 | Prezzo pagato | Quanto viene pagato all'azienda per una riga d'ordine, IVA esclusa, spedizione esclusa | — |
 | Punti di una riga | Coefficiente × prezzo pagato IVA esclusa **di un'unità**, arrotondato a 2 decimali, × quantità | Coefficiente 0,80. Kit routine: 0,80 × 113,93 = 91,14 punti |
-| Punti AP | Punti degli acquisti personali dell'incaricata nel mese | — |
-| Punti ON | Punti degli ordini dei suoi clienti sul negozio online nel mese | — |
+| Punti AP | Punti degli acquisti personali **a listino** (con lo sconto del 40%) dell'incaricata nel mese | — |
+| Punti PR | Punti degli acquisti personali **in promozione** dell'incaricata nel mese | — |
+| Punti ON | Punti degli ordini dei suoi clienti sul negozio online nel mese (anche di prodotti in promozione) | — |
 | Punti KIT | 33 punti fissi dello start kit, solo nel mese in cui è pagato | 33 |
-| Punti personali (PP) | AP + ON + KIT | — |
-| Punti personali per qualifica (PPQ) | ON + MIN(AP; 250) + KIT | Tetto 250 |
+| Punti personali (PP) | AP + PR + ON + KIT | — |
+| Punti personali per qualifica (PPQ) | ON + MIN(AP; 250) + PR + KIT | Tetto 250 solo sugli AP |
 | Punti di gruppo per qualifica (PGQ) | PPQ propri + PPQ di tutta la downline, a ogni profondità, attive o no | — |
 | Punti di gruppo reali (PGR) | PP propri + PP di tutta la downline, senza tetto | — |
 | Attiva | PP ≥ 33 nel mese | 33 |
@@ -40,8 +41,8 @@ Codici sconto sull'intero ordine: lo sconto si ripartisce in proporzione sulle r
 | --- | --- | --- | --- |
 | **Start kit** (ingresso) | 59,90 € IVA inclusa. Contiene shampoo, spray 12in1, licenza account incaricata, borsa campionario e materiale formativo | **33 punti fissi** (non con il coefficiente) | La nuova incaricata **non guadagna nulla** sui 33 punti, ma valgono per la sua attività e per le sue soglie di qualifica. **L'upline guadagna** su questi punti con le regole normali (differenza, generazioni) |
 | **Acquisto personale** | Listino − **40%** (sconto calcolato sul prezzo IVA inclusa; parametro `sconto_su_prezzo_ivato`, iniziale vero, da confermare con il commercialista) | Coefficiente × prezzo pagato IVA esclusa | Nessuna provvigione per l'incaricata: lo sconto è il suo guadagno (margine, mostrato solo come informazione) |
-| **Acquisto personale di un prodotto in promozione** | Prezzo in promozione, **senza** lo sconto del 40% (lo sconto vale solo per i prodotti a listino) | Coefficiente × prezzo pagato IVA esclusa; contano come acquisti personali (tetto di 250 per le soglie) | **Provvigione = 50% dei punti** dell'acquisto, come una vendita dal negozio online; dovuta sempre, anche se l'incaricata è inattiva |
-| **Ordine cliente dal negozio online** | Listino pieno, pagato dal cliente legato all'incaricata del link | Coefficiente × prezzo pagato IVA esclusa, attribuiti all'incaricata | **Provvigione online = 50% dei punti** dell'ordine (= 40% del prezzo IVA esclusa) |
+| **Acquisto personale di un prodotto in promozione** | Prezzo in promozione, **senza** lo sconto del 40% (lo sconto vale solo per i prodotti a listino) | Coefficiente × prezzo pagato IVA esclusa = punti PR: contano per l'attività e per le soglie di qualifica **per intero, senza tetto** | **Solo se attiva:** provvigione promozione = **50% dei punti PR** + qualifica sui punti PR (sezione 5b). L'upline guadagna con le regole normali (differenza, generazioni) |
+| **Ordine cliente dal negozio online** | Listino pieno (o prezzo in promozione, se il prodotto è in promozione), pagato dal cliente legato all'incaricata del link | Coefficiente × prezzo pagato IVA esclusa, attribuiti all'incaricata | **Provvigione online = 50% dei punti** dell'ordine (= 40% del prezzo IVA esclusa), dovuta sempre; qualifica e differenze con le regole normali |
 
 - Lo start kit attiva l'account. **Sconto del 40% e negozio online si attivano dall'ordine successivo.**
 - **Spedizione:** 6,90 € per ogni ordine, a carico di chi ordina, senza soglia di gratuità. Non genera punti né compensi e non entra nell'incasso aziendale.
@@ -50,8 +51,8 @@ Codici sconto sull'intero ordine: lo sconto si ripartisce in proporzione sulle r
 ## 3. Attività e tetto
 
 - **Attiva:** PP ≥ 33 nel mese.
-- Chi **non è attiva** nel mese non matura qualifica, differenze, bonus Leader Fondatori, generazioni, pool né bonus auto. **La provvigione online e il margine sugli acquisti restano sempre.**
-- **Tetto:** gli acquisti personali contano per le **soglie di qualifica** fino a 250 punti al mese. Gli ordini online e lo start kit contano per intero. Il tetto riguarda solo le soglie: **i compensi si calcolano su tutti i punti.**
+- Chi **non è attiva** nel mese non matura provvigione sulle promozioni, qualifica, differenze, bonus Leader Fondatori, generazioni, pool né bonus auto. **La provvigione online e il margine sugli acquisti restano sempre.**
+- **Tetto:** gli acquisti personali a listino (AP) contano per le **soglie di qualifica** fino a 250 punti al mese. Ordini online, acquisti in promozione e start kit contano per intero. Il tetto riguarda solo le soglie: **i compensi si calcolano su tutti i punti.**
 - **Inattività prolungata:** dopo 6 mesi di fila con 0 PP l'incaricata torna cliente. I suoi diretti passano al suo sponsor. Operazione automatica il primo del mese, registrata nel registro modifiche. Il saldo provvigioni residuo resta richiedibile. Se riprende a comprare come incaricata riparte con lo stesso sponsor, salvo diversa richiesta approvata dalla sede.
 
 ## 4. Qualifiche
@@ -80,8 +81,11 @@ Ogni mese un'incaricata può avere queste voci: provvigione online, provvigione 
 ### 5a. Provvigione online
 50% dei punti ON del mese. Dovuta sempre, anche se l'incaricata è inattiva.
 
+### 5a-bis. Provvigione sugli acquisti in promozione
+50% dei punti PR del mese, **solo se attiva**.
+
 ### 5b. Qualifica sui punti personali
-(AP + ON) × A, solo se attiva. Calcolata su tutti i punti, senza tetto. I punti KIT sono esclusi (sul kit la nuova incaricata non guadagna).
+(AP + PR + ON) × A, solo se attiva. Calcolata su tutti i punti, senza tetto. I punti KIT sono esclusi (sul kit la nuova incaricata non guadagna).
 
 ### 5c. Differenza imprenditoriale
 Per ogni ordine (start kit compreso) con punti P generato dall'incaricata X:
@@ -134,17 +138,18 @@ Per ogni ordine (start kit compreso) con punti P generato dall'incaricata X:
 Il calcolo gira sul server, in quest'ordine. Durante il mese si può rilanciare come anteprima.
 
 1. Prendi gli ordini del mese pagati e non annullati né resi. I resi di ordini di mesi già chiusi non entrano qui: si gestiscono con gli storni (sezione 9).
-2. Per ogni incaricata calcola AP, ON, KIT, PP, PPQ e se è attiva.
+2. Per ogni incaricata calcola AP, PR, ON, KIT, PP, PPQ e se è attiva.
 3. Calcola PGQ e PGR dal basso verso l'alto dell'albero, in una sola passata.
 4. Assegna qualifica reale, percentuale applicata A (blocchi e Leader Fondatori compresi) e Leader del mese.
 5. Conta le linee al 20% e assegna i titoli manager.
-6. Calcola provvigione online e qualifica sui punti personali.
+6. Calcola provvigione online, provvigione sulle promozioni e qualifica sui punti personali.
 7. Calcola le differenze, ordine per ordine, risalendo gli sponsor.
 8. Calcola i team (con la compressione delle Leader inattive) e le generazioni.
 9. Calcola l'incasso aziendale, il pool (quota riservata e quote) e il Master President.
 10. Aggiungi bonus auto e bonus Leader Fondatori.
 11. Salva ogni voce come riga del registro provvigioni: beneficiaria, tipo voce, mese, base, percentuale, importo, ordini da cui provengono i punti, versione dei parametri.
-12. Il mese si chiude sempre **l'ultimo giorno del mese** (23:59:59, ora italiana). Il calcolo definitivo gira subito dopo e congela il mese.
+12. Il mese comprende gli ordini pagati fino all'**ultimo giorno del mese** (23:59:59, ora italiana). **Chiusura:** il giorno 1 alle 3:00 l'app prepara il calcolo del mese finito con i controlli di quadratura e avvisa l'amministrazione via email; l'amministrazione controlla l'anteprima e conferma con "Chiudi il mese". Solo con la conferma il mese si congela e le incaricate possono chiedere il pagamento. Finché non è confermato, il calcolo si può rifare.
+13. Un pagamento confermato da Stripe dopo la chiusura del mese a cui apparterrebbe conta nel **primo mese ancora aperto**.
 
 ## 8. Pagamenti
 
@@ -192,7 +197,9 @@ Importi in euro. Tutte attive salvo dove indicato. "Totale" esclude il margine s
 | T13 Ritenuta | Pagamento di 100,00 € | Ritenuta 17,94; bonifico 82,06, per tutte le incaricate | — |
 | T14 Data di pagamento | Saldo 80 € a fine novembre 2026, richiesto il 2 dicembre | Il 20 dicembre 2026 è domenica → pagamento lunedì 21 dicembre | 80,00 lordi |
 | T15 Soglia esatta | PGQ esattamente 480 | Partner 8% | — |
-| T16 Acquisto in promozione | Shampoo in promozione a 27,90 €, comprato dall'incaricata per sé | Paga 27,90 € (niente sconto 40%) → 22,87 € IVA esclusa → 18,30 punti, contati come acquisti personali; provvigione 50% = 9,15 € | 9,15 |
+| T16 Acquisto in promozione | Anna compra per sé uno shampoo in promozione a 27,90 € e ha 70 punti ON. Sponsor di Anna: Bea, Expert 12% | Anna paga 27,90 € (niente sconto 40%) → 22,87 € IVA esclusa → 18,30 punti PR. PP 88,30 → attiva; PPQ 70 + 18,30 = 88,30 → New Star 4%. Anna: online 35,00; promozione 50% × 18,30 = 9,15; qualifica 88,30 × 4% = 3,53. Bea, differenze ordine per ordine: 70 × 8% = 5,60 e 18,30 × 8% = 1,46 | Anna 47,68; Bea 7,06 da Anna |
+| T17 Promozione da inattiva | Anna nel mese compra solo lo shampoo in promozione (18,30 punti PR). Sponsor Bea, Expert 12%, attiva | Anna: PP 18,30 < 33 → inattiva, nessuna qualifica (A = 0%): nessuna provvigione. Bea: differenza 18,30 × (12% − 0%) = 2,20 | Anna 0,00; Bea 2,20 |
+| T18 Promozioni senza tetto | 300 punti AP a listino e 250 punti PR, nessun ON, nessuna squadra | PPQ = MIN(300; 250) + 250 = 500 → Partner 8% (con il tetto anche sulle promozioni sarebbe New Star). Promozione 50% × 250 = 125,00; qualifica (300 + 250) × 8% = 44,00 | 169,00 |
 
 ## 12. Decisioni prese
 
@@ -212,8 +219,10 @@ Importi in euro. Tutte attive salvo dove indicato. "Totale" esclude il margine s
 | 12 | Ruoli sede | Amministrazione, contabilità e un terzo ruolo "ordini" |
 | 13 | Caso T5 | Due linee Expert con 4.000 punti, totale 3.694,00 € |
 | 14 | Leader inattiva e linee | Una Leader inattiva non conta come linea al 20% della sua sponsor nel mese |
-| 15 | Requisito Leader Fondatori | I 1.000 punti in 90 giorni si contano come punti per qualifica (con il tetto di 250 sugli acquisti) |
-| 16 | Promozioni | Niente sconto 40% sui prodotti in promozione; l'incaricata che li compra riceve il 50% dei punti come provvigione |
+| 15 | Requisito Leader Fondatori | I 1.000 punti in 90 giorni si contano come punti per qualifica (con il tetto di 250 sugli acquisti a listino) |
+| 16 | Promozioni | Niente sconto 40% sui prodotti in promozione. Acquisto per sé: 50% dei punti come provvigione più la qualifica, **solo se attiva**; punti validi per attività e soglie senza tetto; l'upline guadagna la differenza normale. Promozione comprata da una cliente nel negozio: ordine online come gli altri (decisioni del 29/10/2026) |
+| 17 | Chiusura del mese | Preparazione automatica il giorno 1 alle 3:00 con email all'amministrazione; il mese si congela solo con la conferma "Chiudi il mese" |
+| 18 | Pagamento confermato dopo la chiusura | Conta nel primo mese ancora aperto |
 
 ## 13. Verifiche esterne prima del lancio
 

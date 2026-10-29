@@ -8,7 +8,7 @@ import { Schede } from "../schede";
 export default function Promozioni() {
   return (
     <>
-      <Titolo sottotitolo="Prodotti scontati in questo periodo. Sulle promozioni non c'è lo sconto del 40%: ricevi invece una provvigione anche quando li compri tu.">Prodotti</Titolo>
+      <Titolo sottotitolo="Prodotti scontati in questo periodo. Sulle promozioni non c'è lo sconto del 40%: se nel mese sei attiva ricevi invece una provvigione anche quando li compri tu.">Prodotti</Titolo>
       <Suspense fallback={<Caricamento />}>
         <Elenco />
       </Suspense>

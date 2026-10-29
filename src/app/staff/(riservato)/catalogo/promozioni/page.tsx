@@ -9,7 +9,7 @@ import { ModuloPromozione } from "./modulo-promozione";
 export default function Promozioni() {
   return (
     <>
-      <Titolo sottotitolo="Prezzo al pubblico scontato per un periodo. Sulle promozioni le incaricate non hanno lo sconto del 40%: pagano il prezzo in promozione e ricevono il 50% dei punti come provvigione.">
+      <Titolo sottotitolo="Prezzo al pubblico scontato per un periodo. Sulle promozioni le incaricate non hanno lo sconto del 40%: pagano il prezzo in promozione e, se attive nel mese, ricevono il 50% dei punti come provvigione più la loro percentuale di qualifica.">
         Promozioni
       </Titolo>
       <Suspense fallback={<Caricamento />}>

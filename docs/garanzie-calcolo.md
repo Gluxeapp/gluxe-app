@@ -41,7 +41,4 @@ Verifica automatica: `npm run prova:garanzie` (app avviata, database di prova). 
 ## Decisioni
 
 - **Pagamento confermato da Stripe dopo la chiusura del suo mese** (caso raro: Stripe ritenta l'avviso per qualche giorno se il sito non risponde): conta nel **primo mese ancora aperto**, come le rettifiche (fondatore, 29/10/2026).
-
-## Domande aperte (da decidere prima della Fase 6)
-
-- **Quando si chiude il mese:** in automatico il giorno 1 alle 3:00, oppure a mano dall'amministrazione dopo l'anteprima.
+- **Chiusura del mese:** il giorno 1 alle 3:00 l'app prepara il calcolo e i controlli e avvisa l'amministrazione; il mese si congela solo con la conferma "Chiudi il mese" (fondatore, 29/10/2026).
