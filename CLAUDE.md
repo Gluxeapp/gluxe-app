@@ -106,7 +106,7 @@ Il progetto vive in `C:\Progetti\gluxe-app`, **fuori da OneDrive** (la sincroniz
 
 - **Fase 2 online** (catalogo sul sito vero, prodotti senza foto finché non arrivano quelle G LUXE).
 - **Branch `fase-3-ordini`**: Fase 3 provata sul computer con il database di prova (start kit, ordine personale con promo, pagamento con carta di prova, scadenza della pagina di pagamento, idempotenza del webhook, staff ordini, spedizione, rimborso → reso, riordino 70%, annullamento).
-  - Per l'anteprima online servono: chiavi Stripe di prova su Vercel (Preview), un webhook Stripe verso l'anteprima e, poiché le anteprime sono protette da Vercel, il "Protection Bypass for Automation" (chiedere l'ok al fondatore prima di attivarlo).
+  - Anteprima online pronta (ok del fondatore del 29/10/2026): chiavi Stripe di prova su Vercel (Preview), "Protection Bypass for Automation" attivo (segreto solo in `.env.local`, `VERCEL_BYPASS_ANTEPRIME`), webhook Stripe di prova verso `gluxe-app-git-fase-3-ordini-g-luxe.vercel.app/api/stripe/webhook` con il bypass nell'indirizzo; il suo segreto è `STRIPE_WEBHOOK_SECRET` di Preview. Per un nuovo branch serve un nuovo webhook verso la sua anteprima.
   - Per il sito vero: account Stripe completato (dati aziendali, IBAN), PayPal attivato su Stripe, chiavi vere su Vercel (Production), `npm run stripe:metodi` con la chiave vera, webhook Stripe verso `https://gluxe-app.vercel.app/api/stripe/webhook`, `npm run db:aggiorna:produzione`.
   - Sul computer: `npm run stripe:inoltra` (in un secondo terminale) fa arrivare gli eventi di Stripe al server di sviluppo. Credenziali finte per le prove in `.env.local` (`PROVA_…`).
 - Domande aperte al fondatore:
