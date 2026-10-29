@@ -38,7 +38,10 @@ Verifica automatica: `npm run prova:garanzie` (app avviata, database di prova). 
 5. **Saldo = somma dei movimenti**, mai un numero salvato a parte.
 6. **Richiesta di pagamento:** una per incaricata per periodo (chiave univoca); al momento della richiesta il saldo si ricalcola con l'incaricata bloccata, così due richieste contemporanee non possono superare il saldo.
 
+## Decisioni
+
+- **Pagamento confermato da Stripe dopo la chiusura del suo mese** (caso raro: Stripe ritenta l'avviso per qualche giorno se il sito non risponde): conta nel **primo mese ancora aperto**, come le rettifiche (fondatore, 29/10/2026).
+
 ## Domande aperte (da decidere prima della Fase 6)
 
-- **Pagamento confermato da Stripe dopo la chiusura del mese a cui apparterrebbe** (caso raro: Stripe ritenta l'avviso per qualche giorno se il sito non risponde). Proposta: conta nel primo mese ancora aperto, come le rettifiche.
 - **Quando si chiude il mese:** in automatico il giorno 1 alle 3:00, oppure a mano dall'amministrazione dopo l'anteprima.
