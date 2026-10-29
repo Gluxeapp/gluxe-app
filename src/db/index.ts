@@ -1,21 +1,23 @@
 import "server-only";
-import { drizzle } from "drizzle-orm/postgres-js";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
 import * as schema from "./schema";
-import postgres from "postgres";
 
 /**
  * Collegamento al database PostgreSQL (Supabase). Usabile solo dal server:
  * `server-only` blocca la compilazione se un componente del browser prova a importarlo.
+ *
+ * Si usa node-postgres (pg): manda ogni interrogazione in un unico messaggio. La libreria usata
+ * prima (postgres.js) la mandava in due tempi e, dentro Next.js con più pagine aperte insieme,
+ * il secondo tempo a volte non partiva: la connessione restava a metà e la pagina si bloccava su
+ * "Caricamento…" (29/10/2026). Gli script in scripts/ usano ancora postgres.js, fuori da Next.js.
  */
 let istanza: ReturnType<typeof crea> | undefined;
 
 function crea(url: string) {
-  // Si usa il pooler di Supabase in modalità "sessione" (porta 5432). In modalità "transazione"
-  // (porta 6543) con più pagine aperte insieme alcune connessioni restavano a metà di un messaggio
-  // e le pagine si bloccavano su "Caricamento…" (provato il 29/10/2026).
-  // In modalità sessione ogni connessione occupa un posto sul database: poche per istanza, chiuse
-  // dopo 20 secondi di inattività.
-  const client = postgres(url, { prepare: false, max: 5, idle_timeout: 20, onnotice: () => {} });
+  // Pooler di Supabase in modalità sessione (porta 5432): ogni connessione occupa un posto sul
+  // database, quindi poche per istanza e chiuse dopo 20 secondi di inattività.
+  const client = new Pool({ connectionString: url, max: 5, idleTimeoutMillis: 20_000, connectionTimeoutMillis: 10_000 });
   return { client, db: drizzle(client, { schema }) };
 }
 

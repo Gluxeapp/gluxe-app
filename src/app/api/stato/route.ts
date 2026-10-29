@@ -11,7 +11,7 @@ export async function GET() {
   }
 
   try {
-    await collegamento.client`select 1`;
+    await collegamento.client.query("select 1");
     return Response.json({ app: "ok", database: "collegato" });
   } catch {
     return Response.json({ app: "ok", database: "errore di collegamento" }, { status: 503 });
