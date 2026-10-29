@@ -98,6 +98,7 @@ Il progetto vive in `C:\Progetti\gluxe-app`, **fuori da OneDrive** (la sincroniz
 - Le modifiche al database (migrazioni) devono essere **reversibili**: per ognuna va previsto come tornare indietro.
 - Il database di produzione si modifica solo dopo l'ok del fondatore.
 - In `.env.local`: `DATABASE_URL` = database di prova, `DATABASE_URL_PRODUZIONE` = database vero. Gli script (`db:aggiorna`, `db:annulla`, `db:seme-catalogo`, `crea-staff`) usano la prova; con `--produzione` (o `db:aggiorna:produzione`) quello vero.
+- Collegamento al database: **pooler di Supabase in modalità sessione, porta 5432**. Mai la modalità transazione (porta 6543): con più pagine aperte insieme le connessioni restano a metà e le pagine si bloccano su "Caricamento…" (scoperto il 29/10/2026).
 - Su Vercel: `DATABASE_URL` di Production = database vero, di Preview = database di prova. L'anteprima di un branch ha l'indirizzo fisso `gluxe-app-git-<branch>-g-luxe.vercel.app`.
 - Lo strumento Vercel si usa con `npx vercel` (installato nel progetto, account già collegato). Nel terminale PowerShell dell'utente usare `npm.cmd` al posto di `npm` (gli script `.ps1` sono bloccati da Windows).
 - Mai mostrare in chat password, chiavi o indirizzi dei database: per passarli all'utente si copiano negli appunti.

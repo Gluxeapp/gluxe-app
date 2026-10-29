@@ -10,8 +10,12 @@ import postgres from "postgres";
 let istanza: ReturnType<typeof crea> | undefined;
 
 function crea(url: string) {
-  // prepare: false è richiesto dal "transaction pooler" di Supabase (porta 6543).
-  const client = postgres(url, { prepare: false, max: 5, onnotice: () => {} });
+  // Si usa il pooler di Supabase in modalità "sessione" (porta 5432). In modalità "transazione"
+  // (porta 6543) con più pagine aperte insieme alcune connessioni restavano a metà di un messaggio
+  // e le pagine si bloccavano su "Caricamento…" (provato il 29/10/2026).
+  // In modalità sessione ogni connessione occupa un posto sul database: poche per istanza, chiuse
+  // dopo 20 secondi di inattività.
+  const client = postgres(url, { prepare: false, max: 5, idle_timeout: 20, onnotice: () => {} });
   return { client, db: drizzle(client, { schema }) };
 }
 
