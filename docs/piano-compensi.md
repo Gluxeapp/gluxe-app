@@ -154,7 +154,7 @@ Il calcolo gira sul server, in quest'ordine. Durante il mese si può rilanciare 
 ## 8. Pagamenti
 
 - **Saldo richiedibile** = importi non ancora richiesti dei mesi precedenti + voci pagabili del mese chiuso (tutte tranne il margine) ± storni.
-- Il pulsante **"Richiedi pagamento"** è attivo **dal 1° al 4 del mese successivo**, se il saldo è almeno **50 €**.
+- Il pulsante **"Richiedi pagamento"** è attivo **dal 3 al 6 del mese successivo** (il mese si chiude il 1°), se il saldo è almeno **50 €**.
 - Le richieste vanno alla contabilità e si pagano **il 20 del mese**; se il 20 è sabato, domenica o festivo nazionale, il **primo giorno lavorativo successivo**. Bonifico all'IBAN del profilo.
 - Sotto 50 €, o se non richiesto, il saldo si riporta al mese dopo, senza scadenza. Un saldo negativo (per storni) si riporta e si compensa con i mesi successivi.
 - **Ritenuta d'imposta:** 23% sul 78% dell'importo (17,94%), calcolata su **ogni** pagamento e per **tutte** le incaricate, arrotondata al centesimo. Bonifico del netto.
@@ -195,7 +195,7 @@ Importi in euro. Tutte attive salvo dove indicato. "Totale" esclude il margine s
 | T11 Leader inattiva saltata | Paola: 600 ON, Leader. Diretti di Paola: Lina (5.600 ON, Leader) e Carla (20 ON, inattiva, PGQ 11.020). Sotto Carla: Sonia (5.000 ON, Director) e Rita (6.000 ON, Leader) | Carla non è Leader del mese: Paola ha 1 linea (Lina) → Leader in crescita, 1ª gen 3%. Online 300,00; qualifica 120,00; differenze 0 (sopra Carla al 20% non si paga). Generazioni: Lina 5.600 e Rita 6.000 (Carla saltata) → 11.600 × 3% = 348,00. Carla: solo online 10,00 | Paola: 768,00 |
 | T12 Pool con le figure speciali | Incasso 300.000 €. Manager: Giovanna Prestige Director (2 quote), Margherita Gold Leader (1 quota), M2 President (3 quote). Mese A: Margherita attiva. Mese B: Margherita inattiva | A: quota riservata Margherita 3.000; 3% = 9.000 su 4 quote (Giovanna esclusa) → 2.250 a quota: Margherita 2.250, M2 6.750 + auto 500. Giovanna: Master President 6.000, pool 0, auto 0. B: l'1% resta all'azienda; M2 unico manager con quote → 9.000 + auto 500; Giovanna 6.000 | A: Margherita 5.250,00; M2 7.250,00; Giovanna 6.000,00 |
 | T13 Ritenuta | Pagamento di 100,00 € | Ritenuta 17,94; bonifico 82,06, per tutte le incaricate | — |
-| T14 Data di pagamento | Saldo 80 € a fine novembre 2026, richiesto il 2 dicembre | Il 20 dicembre 2026 è domenica → pagamento lunedì 21 dicembre | 80,00 lordi |
+| T14 Data di pagamento | Saldo 80 € a fine novembre 2026, richiesto il 4 dicembre | Il 20 dicembre 2026 è domenica → pagamento lunedì 21 dicembre | 80,00 lordi |
 | T15 Soglia esatta | PGQ esattamente 480 | Partner 8% | — |
 | T16 Acquisto in promozione | Anna compra per sé uno shampoo in promozione a 27,90 € e ha 70 punti ON. Sponsor di Anna: Bea, Expert 12% | Anna paga 27,90 € (niente sconto 40%) → 22,87 € IVA esclusa → 18,30 punti PR. PP 88,30 → attiva; PPQ 70 + 18,30 = 88,30 → New Star 4%. Anna: online 35,00; promozione 50% × 18,30 = 9,15; qualifica 88,30 × 4% = 3,53. Bea, differenze ordine per ordine: 70 × 8% = 5,60 e 18,30 × 8% = 1,46 | Anna 47,68; Bea 7,06 da Anna |
 | T17 Promozione da inattiva | Anna nel mese compra solo lo shampoo in promozione (18,30 punti PR). Sponsor Bea, Expert 12%, attiva | Anna: PP 18,30 < 33 → inattiva, nessuna qualifica (A = 0%): nessuna provvigione. Bea: differenza 18,30 × (12% − 0%) = 2,20 | Anna 0,00; Bea 2,20 |
@@ -211,7 +211,7 @@ Importi in euro. Tutte attive salvo dove indicato. "Totale" esclude il margine s
 | 4 | Qualifica bloccata al 20% | Dà la percentuale ma non rende Leader: titoli e generazioni con i punti veri |
 | 5 | Leader inattiva | Saltata: il suo team confluisce nella prima Leader del mese sopra di lei; se non c'è, resta all'azienda |
 | 6 | Differenza su un'upline inattiva | La percentuale già pagata avanza comunque, la quota resta all'azienda |
-| 7 | Pagamenti | Richiesta dal 1° al 4 del mese successivo, minimo 50 €, pagamento il 20 o il primo giorno lavorativo successivo |
+| 7 | Pagamenti | Richiesta dal 3 al 6 del mese successivo (spostata dal 1–4 il 30/10/2026, dopo la chiusura del mese il 1°), minimo 50 €, pagamento il 20 o il primo giorno lavorativo successivo |
 | 8 | Resi dopo la chiusura | Storno a percentuali ferme, senza ricalcolare le qualifiche; pool e quote fisse non si stornano |
 | 9 | Margherita Suma | 1% dell'incasso solo se attiva; Leader Fondatrice; anche quote normali del pool se manager |
 | 10 | Giovanna Di Lillo | Master President 2% sempre; bloccata al 20% senza scadenza; esclusa da pool e bonus auto |

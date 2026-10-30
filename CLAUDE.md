@@ -81,7 +81,7 @@ App per gli incaricati alle vendite di G LUXE (haircare, vendita diretta multili
 - **Negozio personale online**: pagina pubblica di ogni incaricato dentro l'app (es. `/negozio/GL000123`), curata nella grafica. Gli ordini sono attribuiti all'incaricato con certezza e generano punti ON.
 - **Pagamento ordini**: solo carta, PayPal e Klarna tramite Stripe. **Il bonifico non è ammesso per gli ordini.** Mese di competenza = momento in cui Stripe conferma il pagamento. Rimborsi Stripe → rettifiche.
 - **Prezzi e punti**: listino IVA inclusa; punti = 0,80 × prezzo pagato IVA esclusa; acquisti personali con sconto 40%; provvigione negozio online = 50% dei punti; spedizione 6,90 € per ogni ordine, senza punti. Tutti parametri (vedi `docs/piano-compensi.md`).
-- **Pagamento provvigioni**: pulsante "Richiedi pagamento" dal 1° al 4 del mese successivo, minimo 50 €; pagamento il 20 (o primo giorno lavorativo successivo) con bonifico all'IBAN del profilo.
+- **Pagamento provvigioni**: pulsante "Richiedi pagamento" dal 3 al 6 del mese successivo (il mese si chiude il 1°), minimo 50 €; pagamento il 20 (o primo giorno lavorativo successivo) con bonifico all'IBAN del profilo.
 - **Leader Fondatori**: per 12 mesi qualifica bloccata al 16% (dentro il piano) + bonus 3% sui punti di gruppo reali, se attive.
 - **Figure speciali**: Giovanna Di Lillo (GL000001, fondatrice) Master President 2% dell'incasso aziendale anche se inattiva, bloccata al 20%, esclusa da pool e bonus auto; Margherita Suma (Leader Fondatrice) quota riservata del pool 1% dell'incasso solo se attiva. Dettagli nella sezione 6 di `docs/piano-compensi.md`.
 - **Fisco**: ritenuta d'imposta 23% sul 78% su tutti i pagamenti, per tutte le incaricate. IVA (partita IVA sì/no) e INPS (a carico azienda sì/no) come parametri, in attesa del commercialista.
@@ -111,7 +111,7 @@ Il progetto vive in `C:\Progetti\gluxe-app`, **fuori da OneDrive** (la sincroniz
   - Per accendere i pagamenti sul sito vero: account Stripe completato (dati aziendali, IBAN), PayPal attivato su Stripe, chiavi vere su Vercel (Production), `npm run stripe:metodi` con la chiave vera, webhook Stripe verso `https://gluxe-app.vercel.app/api/stripe/webhook`. Il database vero è già aggiornato.
   - Sul computer: `npm run stripe:inoltra` (in un secondo terminale) fa arrivare gli eventi di Stripe al server di sviluppo. Credenziali finte per le prove in `.env.local` (`PROVA_…`).
 - **Branch `fase-4-provvigioni`**: decisioni 16–18 del piano scritte (promozioni solo se attiva, senza tetto, con qualifica; chiusura del mese semi-automatica; pagamento tardivo nel primo mese aperto). Prossimo: test T1–T18 del motore, poi il codice.
-- Domanda aperta al fondatore: se la chiusura del mese viene confermata dopo il 1°, la finestra per chiedere il pagamento dura comunque 4 giorni dalla chiusura? (proposta, non ancora confermata).
+- Finestra richieste di pagamento: dal 3 al 6 (decisione del 30/10/2026). Nei database (prova e vero) la versione dei parametri ha ancora 1–4: creare una nuova versione con 3–6 quando si pubblica la Fase 4.
 - Database di prova: account staff del fondatore (prestigehcaire@gmail.com), staff "ordini" finto (ordini-prova@gluxe.test), incaricate finte GL000001 e GL000002 (prova.incaricata@gluxe.test) per le prove.
 - Produzione: account amministratore del fondatore e Giovanna Di Lillo (GL000001). Next.js 16.4.3 (aggiornamento di sicurezza già online).
 - Ancora da fare in futuro: dominio aziendale su Resend (email alle incaricate), pagina per creare account staff dall'area sede, pulsante "mostra link password" (proposto, non ancora approvato).
@@ -126,7 +126,7 @@ Il progetto vive in `C:\Progetti\gluxe-app`, **fuori da OneDrive** (la sincroniz
 | 3 | Ordini con pagamento Stripe (carta, PayPal, Klarna): start kit in registrazione, spedizione 6,90 €, stati, storico, conferma riordino 70%, ruolo staff "ordini" | completata (online dal 29/10/2026; pagamenti da accendere quando l'account Stripe è completo) |
 | 4 | Motore provvigioni (rev. 5): prima i test di `docs/piano-compensi.md`, poi il codice; parametri versionati; qualifiche bloccate, Leader Fondatori, figure speciali; anteprima | da fare |
 | 5 | Carriera e rete: qualifica, avanzamento, albero grafico della rete | da fare |
-| 6 | Chiusura mese, registro provvigioni, storni, richieste di pagamento (1–4), area contabilità, ritenute, report IVA/INPS, export | da fare |
+| 6 | Chiusura mese, registro provvigioni, storni, richieste di pagamento (3–6), area contabilità, ritenute, report IVA/INPS, export | da fare |
 | 7 | Negozio personale online, clienti legati, controllo clienti fittizi, indicatore vendite a clienti finali | da fare |
 | 8 | API e webhook per siti esterni | da fare |
 | 9 | Collaudo con dati simulati, sicurezza, GDPR, backup, pilota con 5–10 incaricati | da fare |
