@@ -32,6 +32,13 @@ export function ModuloPromozione({ prodotti }: { prodotti: { id: string; nome: s
       </div>
       <Campo etichetta="Titolo" name="titolo" esito={esito} placeholder="Promo autunno" required />
       <Campo etichetta="Prezzo al pubblico in promozione" name="prezzoPromo" esito={esito} inputMode="decimal" placeholder="27,90" required />
+      <Campo
+        etichetta="Punti per pezzo (facoltativo)"
+        name="puntiManuali"
+        esito={esito}
+        inputMode="decimal"
+        aiuto="Vuoto = automatici: 0,80 × prezzo in promozione IVA esclusa. Valgono per acquisto personale e vendita online."
+      />
       <div className="grid grid-cols-2 gap-3">
         <Campo etichetta="Dal" name="dal" type="date" esito={esito} required />
         <Campo etichetta="Al" name="al" type="date" esito={esito} required />

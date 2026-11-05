@@ -57,15 +57,20 @@ export async function catalogoIncaricata() {
     const promozione = promo.get(prodotto.id);
     return {
       prodotto,
-      listino: prezziProdotto(prodotto.prezzoListino, p),
-      promozione: promozione ? { ...promozione, prezzi: prezziPromozione(promozione.prezzoPromo, p) } : undefined,
+      listino: prezziProdotto(prodotto.prezzoListino, p, puntiManualiDi(prodotto)),
+      promozione: promozione ? { ...promozione, prezzi: prezziPromozione(promozione.prezzoPromo, p, promozione.puntiManuali) } : undefined,
     };
   });
 }
 
-/** Catalogo completo per l'amministrazione, start kit e prodotti disattivati compresi. */
+/** Punti scritti a mano dalla sede per un prodotto (decisione 27). */
+export function puntiManualiDi(prodotto: { puntiPersonaleManuali: bigint | null; puntiOnlineManuali: bigint | null }) {
+  return { personale: prodotto.puntiPersonaleManuali, online: prodotto.puntiOnlineManuali };
+}
+
+/** Catalogo completo per lo staff, start kit e prodotti disattivati compresi. Tutto lo staff lo vede (e può cambiare i punti). */
 export async function catalogoStaff() {
-  await richiediStaff(["amministrazione"]);
+  await richiediStaff();
   const [p, righe, promo] = await Promise.all([
     parametriCorrenti(),
     db().select().from(prodotti).orderBy(asc(prodotti.ordine), asc(prodotti.nome)),
@@ -73,14 +78,15 @@ export async function catalogoStaff() {
   ]);
   return righe.map((prodotto) => ({
     prodotto,
-    prezzi: prodotto.tipo === "start_kit" ? undefined : prezziProdotto(prodotto.prezzoListino, p),
+    prezzi: prodotto.tipo === "start_kit" ? undefined : prezziProdotto(prodotto.prezzoListino, p, puntiManualiDi(prodotto)),
+    automatici: prodotto.tipo === "start_kit" ? undefined : prezziProdotto(prodotto.prezzoListino, p),
     kit: prodotto.tipo === "start_kit" ? prezziStartKit(prodotto.prezzoListino, p) : undefined,
     promozione: promo.get(prodotto.id),
   }));
 }
 
 export async function elencoPromozioni() {
-  await richiediStaff(["amministrazione"]);
+  await richiediStaff();
   return db()
     .select({
       promozione: promozioni,

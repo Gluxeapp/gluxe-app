@@ -18,7 +18,7 @@ Per lo sviluppo: scrivere prima i test della sezione "Casi di test", poi il codi
 | Aliquota IVA | Parametro | 22% |
 | Prezzo IVA esclusa | Prezzo IVA inclusa ÷ (1 + IVA), arrotondato al centesimo, **per unità** | 139,00 → 113,93 € |
 | Prezzo pagato | Quanto viene pagato all'azienda per una riga d'ordine, IVA esclusa, spedizione esclusa | — |
-| Punti di una riga | Coefficiente × prezzo pagato IVA esclusa **di un'unità**, arrotondato a 2 decimali, × quantità | Coefficiente 0,80. 113,93 € → 91,14 punti |
+| Punti di una riga | Coefficiente × prezzo pagato IVA esclusa **di un'unità**, arrotondato a 2 decimali, × quantità; oppure i **punti per pezzo scritti a mano** dalla sede per quel prodotto o promozione (decisione 27) | Coefficiente 0,80. 113,93 € → 91,14 punti |
 | Punti AP | Punti degli acquisti personali **a listino** (con lo sconto del 40%) dell'incaricata nel mese | — |
 | Punti PR | Punti degli acquisti personali **in promozione** intestati all'incaricata nel mese | — |
 | Punti ON | Punti degli ordini dei suoi clienti sul negozio online nel mese, anche di prodotti in promozione | — |
@@ -244,6 +244,7 @@ Controlli aggiuntivi automatici: lo stesso mese calcolato con gli ordini e le in
 | 23 | Leader inattiva | Saltata (compressione): il suo team confluisce nella prima Leader del mese sopra di lei |
 | 24 | Catalogo | Shampoo Botox 33,90 €, Shampoo Detox 32,90 €, Maschera Botox 39,90 €, Spray Botox 10in1 34,90 €; Kit Routine Botox resta a 106,90 € |
 | 25 | Soluzioni tecniche | Calcoli sul server dell'app (non Edge Functions), importi e punti come interi in centesimi (esatti come `numeric`), Row Level Security su tutte le tabelle come seconda barriera. Nella Fase 9: cifratura di IBAN e codice fiscale, consensi separati (trattamento e marketing, con data e testo dell'informativa), esportazione e cancellazione o anonimizzazione dei dati |
+| 27 | Punti scritti a mano | Lo staff (amministrazione, contabilità, ordini) può scrivere a mano i punti per pezzo di ogni prodotto, separati per acquisto personale e vendita online, e di ogni promozione (un valore unico per acquisto personale e online). Campo vuoto = calcolo automatico. Provvigione online e sulle promozioni = 50% dei punti, anche se scritti a mano. Start kit escluso (33 punti, parametro). Ogni modifica va nel registro modifiche; gli ordini già fatti non cambiano (fondatore, 5/11/2026) |
 | 26 | Controlli e conteggi | Limite dei compensi del mese al 70% dei punti aziendali (bonus auto escluso). I 33 punti di uno start kit contano per l'attività della sponsor ma nei punti di gruppo una volta sola. Una linea forte conta anche se la diretta è inattiva, purché il suo gruppo arrivi a 8.000 punti. Il 4 ottobre non si considera festivo per il giorno di pagamento (fondatore, 5/11/2026) |
 
 Le decisioni 2–5, 10, 13, 14 e 16 della rev. 5 sono superate dalle decisioni 19–23.

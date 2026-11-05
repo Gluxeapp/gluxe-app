@@ -94,6 +94,7 @@ try {
   }, vietato);
   await deveFallire("modificare una versione dei parametri del piano", (tx) => tx`update app.parametri_versioni set note = 'x' where id = ${parametri.id}`);
   await deveFallire("cancellare una versione dei parametri del piano", (tx) => tx`delete from app.parametri_versioni where id = ${parametri.id}`);
+  await deveFallire("punti negativi scritti a mano su un prodotto", (tx) => tx`update app.prodotti set punti_online_manuali = -1 where id = ${prodotto.id}`);
   await deveFallire("qualifica bloccata oltre il 20%", (tx) => tx`insert into app.qualifiche_bloccate (incaricato_id, percentuale, dal, motivo) values (${a.id}, 2500, current_date, 'x')`);
 
   // 2) Conferme di pagamento contemporanee: 10 copie di due eventi diversi per lo stesso ordine.

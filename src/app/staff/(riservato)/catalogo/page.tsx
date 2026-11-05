@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
 import { Caricamento, Titolo } from "@/components/ui";
+import { richiediStaff } from "@/lib/accesso";
 import { catalogoStaff } from "@/lib/catalogo";
 import { formatta, formattaEuro } from "@/lib/denaro";
 
@@ -9,12 +10,12 @@ export default function Catalogo() {
   return (
     <>
       <div className="flex flex-wrap items-start justify-between gap-4">
-        <Titolo sottotitolo="Prezzo incaricata, punti e provvigione sono calcolati dall'app con i parametri del piano.">
+        <Titolo sottotitolo="Prezzo incaricata, punti e provvigione sono calcolati dall'app con i parametri del piano. I punti si possono scrivere a mano nella scheda del prodotto (segnati con «a mano»).">
           Catalogo
         </Titolo>
-        <Link href="/staff/catalogo/nuovo" className="rounded-lg bg-oro px-4 py-2 font-semibold text-nero">
-          Nuovo prodotto
-        </Link>
+        <Suspense>
+          <NuovoProdotto />
+        </Suspense>
       </div>
       <Suspense fallback={<Caricamento />}>
         <Elenco />
@@ -22,6 +23,18 @@ export default function Catalogo() {
     </>
   );
 }
+
+async function NuovoProdotto() {
+  const { ruolo } = await richiediStaff();
+  if (ruolo !== "amministrazione") return null;
+  return (
+    <Link href="/staff/catalogo/nuovo" className="rounded-lg bg-oro px-4 py-2 font-semibold text-nero">
+      Nuovo prodotto
+    </Link>
+  );
+}
+
+const aMano = (manuale: bigint | null) => (manuale === null ? "" : " (a mano)");
 
 async function Elenco() {
   const catalogo = await catalogoStaff();
@@ -64,7 +77,9 @@ async function Elenco() {
                 <>
                   <td className="px-3 py-2 text-right">{formattaEuro(prezzi.incaricata.ivaInclusa)}</td>
                   <td className="px-3 py-2 text-right">
-                    {formatta(prezzi.pubblico.punti)} / {formatta(prezzi.incaricata.punti)}
+                    {formatta(prezzi.pubblico.punti)}
+                    {aMano(p.puntiOnlineManuali)} / {formatta(prezzi.incaricata.punti)}
+                    {aMano(p.puntiPersonaleManuali)}
                   </td>
                   <td className="px-3 py-2 text-right">{formattaEuro(prezzi.provvigioneOnline)}</td>
                 </>

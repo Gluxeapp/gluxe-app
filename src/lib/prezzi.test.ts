@@ -43,6 +43,34 @@ describe("prezzi e punti (piano rev. 5)", () => {
     expect(p.margine).toBe(0n);
   });
 
+  it("punti scritti a mano dalla sede: acquisto personale e vendita online separati (decisione 27)", () => {
+    const p = prezziProdotto(3390n, P, { personale: 1500n, online: 2500n });
+    expect(p.incaricata.punti).toBe(1500n);
+    expect(p.pubblico.punti).toBe(2500n);
+    // La provvigione online resta il 50% dei punti, anche se scritti a mano.
+    expect(p.provvigioneOnline).toBe(1250n);
+    // I prezzi non cambiano.
+    expect(p.incaricata.ivaInclusa).toBe(2034n);
+    expect(p.pubblico.ivaEsclusa).toBe(2779n);
+  });
+
+  it("punti a mano vuoti: resta il calcolo automatico (Shampoo Botox 33,90 €)", () => {
+    const p = prezziProdotto(3390n, P, { personale: null, online: 2500n });
+    expect(p.incaricata.punti).toBe(1334n);
+    expect(p.pubblico.punti).toBe(2500n);
+    const automatico = prezziProdotto(3390n, P);
+    expect(automatico.pubblico.punti).toBe(2223n);
+    expect(automatico.incaricata.punti).toBe(1334n);
+  });
+
+  it("promozione con punti a mano: valgono per acquisto personale e online, provvigione 50%", () => {
+    const p = prezziPromozione(2790n, P, 2000n);
+    expect(p.incaricata.punti).toBe(2000n);
+    expect(p.pubblico.punti).toBe(2000n);
+    expect(p.provvigioneAcquisto).toBe(1000n);
+    expect(prezziPromozione(2790n, P, null).incaricata.punti).toBe(1830n);
+  });
+
   it("i parametri si salvano e si rileggono uguali", () => {
     expect(parametriDaJson(parametriInJson(P))).toEqual(P);
   });

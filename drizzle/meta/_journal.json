@@ -36,6 +36,13 @@
       "when": 1793871244643,
       "tag": "0004_fase4_provvigioni",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1793879569910,
+      "tag": "0005_punti_manuali",
+      "breakpoints": true
     }
   ]
 }

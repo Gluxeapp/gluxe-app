@@ -11,10 +11,19 @@ export const QUANTITA_MASSIMA = 99;
 export type TipoOrdineCalcolabile = "start_kit" | "personale";
 
 export type Articolo = {
-  prodotto: { id: string; codice: string; nome: string; tipo: "prodotto" | "start_kit"; prezzoListino: Centesimi };
+  prodotto: {
+    id: string;
+    codice: string;
+    nome: string;
+    tipo: "prodotto" | "start_kit";
+    prezzoListino: Centesimi;
+    /** Punti per pezzo scritti a mano dalla sede (vuoti = automatici). */
+    puntiPersonaleManuali?: Centesimi | null;
+    puntiOnlineManuali?: Centesimi | null;
+  };
   quantita: number;
   /** Promozione valida oggi per il prodotto, se c'è. */
-  promozione?: { id: string; prezzoPromo: Centesimi };
+  promozione?: { id: string; prezzoPromo: Centesimi; puntiManuali?: Centesimi | null };
 };
 
 export type RigaCalcolata = {
@@ -47,12 +56,12 @@ function riga(a: Articolo, p: Parametri): RigaCalcolata {
     unita = prezziStartKit(prodotto.prezzoListino, p);
   } else if (promozione) {
     tipoPrezzo = "promozione";
-    const prezzi = prezziPromozione(promozione.prezzoPromo, p);
+    const prezzi = prezziPromozione(promozione.prezzoPromo, p, promozione.puntiManuali ?? null);
     unita = prezzi.incaricata;
     provvigione = prezzi.provvigioneAcquisto;
   } else {
     tipoPrezzo = "listino_scontato";
-    unita = prezziProdotto(prodotto.prezzoListino, p).incaricata;
+    unita = prezziProdotto(prodotto.prezzoListino, p, { personale: prodotto.puntiPersonaleManuali, online: prodotto.puntiOnlineManuali }).incaricata;
   }
 
   const q = BigInt(quantita);
