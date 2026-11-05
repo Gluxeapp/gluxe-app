@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Suspense } from "react";
 import { Caricamento, Scheda, Titolo } from "@/components/ui";
 import { richiediStaff } from "@/lib/accesso";
@@ -8,7 +9,7 @@ import { formatta, formattaEuro } from "@/lib/denaro";
 export default function Parametri() {
   return (
     <>
-      <Titolo sottotitolo="Valori del Piano Compensi G LUXE usati dall'app. La modifica dall'area sede arriverà con la Fase 4 (motore provvigioni).">
+      <Titolo sottotitolo="Valori del Piano Compensi G LUXE usati dall'app. Ogni modifica crea una nuova versione con la sua data di efficacia; le precedenti restano.">
         Parametri del piano
       </Titolo>
       <Suspense fallback={<Caricamento />}>
@@ -35,6 +36,7 @@ async function Contenuto() {
         ["Sconto calcolato sul prezzo", p.scontoSuPrezzoIvato ? "IVA inclusa" : "IVA esclusa"],
         ["Provvigione negozio online (sui punti)", pct(p.provvigioneOnline)],
         ["Punti start kit", punti(p.puntiStartKit)],
+        ["Provvigione della sponsor sullo start kit (sui punti, se attiva)", pct(p.provvigioneKitSponsor)],
         ["Spedizione per ordine", formattaEuro(p.speseSpedizione)],
       ],
     ],
@@ -42,7 +44,7 @@ async function Contenuto() {
       "Attività e qualifiche",
       [
         ["Punti personali per essere attiva", punti(p.sogliaAttivita)],
-        ["Tetto acquisti personali per le soglie", punti(p.tettoAcquistiQualifica)],
+        ["Tetto acquisti intestati all'incaricata (listino e promozioni) per le soglie", punti(p.tettoAcquistiQualifica)],
         ...p.qualifiche.map((q): [string, string] => [q.nome, `${punti(q.soglia)} punti → ${pct(q.percentuale)}`]),
       ],
     ],
@@ -53,14 +55,15 @@ async function Contenuto() {
           t.nome,
           `${t.linee} linee · gen. ${t.generazioni.map(pct).join(" + ")} · ${t.quotePool} quote · auto ${formattaEuro(t.bonusAuto)}`,
         ]),
-        ["Bloccate contano come linee", p.bloccateContanoComeLinee ? "Sì" : "No"],
-        ["Pool manager (sull'incasso)", pct(p.poolPercentuale)],
+        ["Linea forte: punti di gruppo del diretto", punti(p.sogliaLineaForte)],
+        ["Pool manager (sui punti aziendali)", pct(p.poolPercentuale)],
       ],
     ],
     [
       "Leader Fondatori",
       [
-        ["Massimo", String(p.fondatoriMassimo)],
+        ["Lancio del piano", p.dataLancioPiano ? dataItaliana(p.dataLancioPiano) : "Non ancora impostato"],
+        ["Massimo", `${p.fondatoriMassimo}, con ingresso entro ${p.fondatoriMesiIngresso} mesi dal lancio`],
         ["Qualifica bloccata / durata", `${pct(p.fondatoriPercentualeBloccata)} per ${p.fondatoriDurataMesi} mesi`],
         ["Bonus sui punti di gruppo reali", pct(p.fondatoriBonus)],
         ["Requisito", `${punti(p.fondatoriRequisitoPunti)} punti in ${p.fondatoriRequisitoGiorni} giorni`],
@@ -74,15 +77,21 @@ async function Contenuto() {
         ["Giorno di pagamento", `${p.giornoPagamento} (o primo giorno lavorativo successivo)`],
         ["Ritenuta d'imposta", `${pct(p.ritenutaAliquota)} sul ${pct(p.ritenutaBase)}`],
         ["INPS", p.inpsAliquota === 0n ? "In attesa del commercialista" : `${pct(p.inpsAliquota)}`],
+        ["Limite compensi del mese (bonus auto escluso)", `${pct(p.limiteCompensiSuPunti)} dei punti aziendali`],
       ],
     ],
   ];
 
   return (
     <>
-      <p className="mb-4 text-sm text-testo-tenue">
-        Versione in vigore dal {dataItaliana(p.validoDal)}.
-      </p>
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <p className="text-sm text-testo-tenue">
+          Versione n. {String(p.versioneId)} in vigore dal {dataItaliana(p.validoDal)}.
+        </p>
+        <Link href="/staff/parametri/nuova" className="rounded-lg border border-oro/60 px-4 py-2 text-sm text-oro-chiaro">
+          Crea una nuova versione
+        </Link>
+      </div>
       <div className="grid gap-4 lg:grid-cols-2">
         {gruppi.map(([titolo, righe]) => (
           <Scheda key={titolo}>
@@ -102,7 +111,8 @@ async function Contenuto() {
       <ul className="text-sm text-testo-tenue">
         {storico.map((v) => (
           <li key={String(v.id)}>
-            Dal {dataItaliana(v.validoDal)} · {v.note}
+            n. {String(v.id)} · dal {dataItaliana(v.validoDal)} · {v.note}
+            {v.id === p.versioneId && <span className="text-oro-chiaro"> · in vigore</span>}
           </li>
         ))}
       </ul>

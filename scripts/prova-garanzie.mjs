@@ -24,14 +24,14 @@ const esito = (ok, testo) => {
  * Esegue un tentativo vietato dentro una transazione annullata: deve essere rifiutato dalle nostre
  * protezioni (blocchi e controlli: codice 23514; doppioni: 23505), non da un errore qualsiasi.
  */
-async function deveFallire(descrizione, prova) {
+async function deveFallire(descrizione, prova, codici = ["23514", "23505"]) {
   try {
     await sql.begin(async (tx) => {
       await prova(tx);
       throw new Error("ACCETTATO");
     });
   } catch (e) {
-    const protetto = e.code === "23514" || e.code === "23505";
+    const protetto = codici.includes(e.code);
     esito(protetto, `rifiutato: ${descrizione}${protetto ? "" : ` (motivo inatteso: ${e.message})`}`);
   }
 }
@@ -67,6 +67,34 @@ try {
     values (${ordine.id}, ${prodotto.id}, 'X', 'X', 'listino_scontato', 2, 100, 82, 66, 0, 100, 82, 66, 0)`);
   await deveFallire("modificare lo storico degli stati", (tx) => tx`update app.storico_stati_ordine set stato = 'pagato' where ordine_id = ${ordine.id}`);
   await deveFallire("modificare il registro modifiche", (tx) => tx`update app.registro_modifiche set azione = 'x' where id = (select max(id) from app.registro_modifiche)`);
+
+  // 1b) Rete e accessi (migrazione 0004)
+  const [a, b] = await sql`select id from app.incaricati order by codice limit 2`;
+  await deveFallire("cambiare lo sponsor senza l'intervento tracciato della sede", (tx) =>
+    tx`update app.incaricati set sponsor_id = case when sponsor_id is null then ${a.id}::uuid else null end where id = ${b.id}`);
+  await deveFallire("creare un ciclo nella rete, anche come sede", async (tx) => {
+    await tx`select set_config('app.cambio_sponsor', 'tracciato', true)`;
+    await tx`update app.incaricati set sponsor_id = ${b.id} where id = ${a.id}`;
+    await tx`update app.incaricati set sponsor_id = ${a.id} where id = ${b.id}`;
+  });
+  const senzaProtezione = await sql`select tablename from pg_tables where schemaname = 'app' and not rowsecurity`;
+  esito(senzaProtezione.length === 0, `Row Level Security attiva su tutte le tabelle${senzaProtezione.length ? ` (mancano: ${senzaProtezione.map((t) => t.tablename).join(", ")})` : ""}`);
+  const vietato = ["42501"];
+  await deveFallire("leggere i dati delle incaricate con le chiavi pubbliche di Supabase", async (tx) => {
+    await tx`set local role anon`;
+    await tx`select codice_fiscale, iban from app.incaricati limit 1`;
+  }, vietato);
+  await deveFallire("scrivere punti o ordini con le chiavi pubbliche di Supabase", async (tx) => {
+    await tx`set local role authenticated`;
+    await tx`update app.ordini set punti = 0`;
+  }, vietato);
+  await deveFallire("scrivere qualifiche bloccate con le chiavi pubbliche di Supabase", async (tx) => {
+    await tx`set local role anon`;
+    await tx`insert into app.qualifiche_bloccate (incaricato_id, percentuale, dal, motivo) values (${a.id}, 2000, current_date, 'x')`;
+  }, vietato);
+  await deveFallire("modificare una versione dei parametri del piano", (tx) => tx`update app.parametri_versioni set note = 'x' where id = ${parametri.id}`);
+  await deveFallire("cancellare una versione dei parametri del piano", (tx) => tx`delete from app.parametri_versioni where id = ${parametri.id}`);
+  await deveFallire("qualifica bloccata oltre il 20%", (tx) => tx`insert into app.qualifiche_bloccate (incaricato_id, percentuale, dal, motivo) values (${a.id}, 2500, current_date, 'x')`);
 
   // 2) Conferme di pagamento contemporanee: 10 copie di due eventi diversi per lo stesso ordine.
   if (!segreto) throw new Error("Manca STRIPE_WEBHOOK_SECRET");

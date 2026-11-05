@@ -57,7 +57,7 @@ export function SchedaProdotto({ nome, linea, formato, descrizione, immagineId, 
           <dd className="text-right font-semibold text-oro-chiaro">{formattaEuro(prezzi.incaricata.ivaInclusa)}</dd>
           {prezzi.provvigioneAcquisto > 0n && (
             <>
-              <dt className="text-testo-tenue">Provvigione sul tuo acquisto</dt>
+              <dt className="text-testo-tenue">Provvigione sul tuo acquisto (se attiva)</dt>
               <dd className="text-right text-oro-chiaro">+{formattaEuro(prezzi.provvigioneAcquisto)}</dd>
             </>
           )}

@@ -140,6 +140,8 @@ export async function cambiaSponsor(_: EsitoModulo, formData: FormData): Promise
     if (!prima) return "assente" as const;
     if (prima.sponsorId === sponsor.id) return "uguale" as const;
 
+    // Il database accetta il cambio solo se dichiarato come intervento tracciato della sede (migrazione 0004).
+    await tx.execute(sql`select set_config('app.cambio_sponsor', 'tracciato', true)`);
     await tx.update(incaricati).set({ sponsorId: sponsor.id }).where(eq(incaricati.id, id));
     await tx.insert(storicoSponsor).values({ incaricatoId: id, sponsorId: sponsor.id, motivo, modificatoDa: staff.utenteId });
     await registra(tx, {

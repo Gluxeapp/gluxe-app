@@ -1,0 +1,3 @@
+#!/bin/sh
+# Prima di ogni commit: nessuna chiave o password nei file (scripts/controlla-segreti.mjs).
+node scripts/controlla-segreti.mjs --staged || exit 1
