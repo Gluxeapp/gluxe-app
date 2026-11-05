@@ -24,9 +24,10 @@ Verifica automatica: `npm run prova:garanzie` (app avviata, database di prova). 
 
 1. **Nessun contatore aggiornato a ogni ordine.** Non esiste un "totale punti" o "saldo" che si incrementa quando arriva un ordine: è lì che nascono i doppi conteggi con ordini contemporanei. Punti, qualifiche e provvigioni si **ricalcolano da zero** leggendo gli ordini pagati del mese.
 2. **Una sola regola per "ordine del mese":** ordine con data di pagamento nel mese, ora italiana. Ogni ordine ha una sola data di pagamento, quindi appartiene a **un solo mese**.
-3. **Motore puro e deterministico:** riceve l'elenco degli ordini e la rete, restituisce le voci. Stessi dati → stesso risultato, al centesimo, qualunque sia l'ordine di arrivo. Test automatici: i casi T1–T16 del piano, più lo stesso mese calcolato con gli ordini mescolati in ordini diversi (risultato identico) e calcolato due volte (risultato identico).
+3. **Motore puro e deterministico:** riceve l'elenco degli ordini e la rete, restituisce le voci. Stessi dati → stesso risultato, al centesimo, qualunque sia l'ordine di arrivo. Test automatici: i casi T1–T20 del piano, più lo stesso mese calcolato con gli ordini mescolati in ordini diversi (risultato identico) e calcolato due volte (risultato identico).
 4. **Ogni voce dice da dove viene:** incaricata, tipo di voce, mese, ordine o incaricata di origine. Così si vede subito se qualcosa compare due volte.
-5. **Controlli di quadratura** dopo ogni calcolo: totale punti = somma dei punti degli ordini del mese; ogni ordine pagato contato una e una sola volta; nessuna voce negativa fuori dalle rettifiche. Se un controllo non torna, il calcolo si ferma e non salva nulla.
+5. **Controlli di quadratura** dopo ogni calcolo: totale punti = somma dei punti degli ordini del mese; ogni ordine pagato contato una e una sola volta; ogni sponsor esiste e nessun ciclo nella rete; nessuna voce negativa fuori dalle rettifiche; compensi entro il limite del piano. Se un controllo sui dati non torna, il calcolo si ferma e non produce voci; se non torna il limite, l'anteprima si vede ma il mese non si può chiudere.
+7. **Rete protetta nel database** (migrazione 0004): lo sponsor si cambia solo con l'intervento tracciato della sede e mai creando un ciclo; Row Level Security su tutte le tabelle, così con le chiavi pubbliche di Supabase non si legge né si scrive nulla. Verificato da `npm run prova:garanzie`.
 6. **Anteprima** sempre ricalcolabile, quante volte si vuole: non scrive nulla di definitivo.
 
 ## 3. La chiusura del mese e il registro provvigioni (Fase 6)

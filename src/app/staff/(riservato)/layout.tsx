@@ -9,6 +9,7 @@ const voci: { href: string; etichetta: string; ruoli: RuoloStaff[] }[] = [
   { href: "/staff/incaricati", etichetta: "Incaricati", ruoli: ["amministrazione"] },
   { href: "/staff/catalogo", etichetta: "Catalogo", ruoli: ["amministrazione"] },
   { href: "/staff/catalogo/promozioni", etichetta: "Promozioni", ruoli: ["amministrazione"] },
+  { href: "/staff/provvigioni", etichetta: "Anteprima provvigioni", ruoli: ["amministrazione"] },
   { href: "/staff/parametri", etichetta: "Parametri del piano", ruoli: ["amministrazione"] },
   { href: "/staff/richieste", etichetta: "Richieste sponsor", ruoli: ["amministrazione"] },
   { href: "/staff/registro", etichetta: "Registro modifiche", ruoli: ["amministrazione"] },

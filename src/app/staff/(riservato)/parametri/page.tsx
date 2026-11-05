@@ -35,6 +35,7 @@ async function Contenuto() {
         ["Sconto calcolato sul prezzo", p.scontoSuPrezzoIvato ? "IVA inclusa" : "IVA esclusa"],
         ["Provvigione negozio online (sui punti)", pct(p.provvigioneOnline)],
         ["Punti start kit", punti(p.puntiStartKit)],
+        ["Provvigione della sponsor sullo start kit (sui punti, se attiva)", pct(p.provvigioneKitSponsor)],
         ["Spedizione per ordine", formattaEuro(p.speseSpedizione)],
       ],
     ],
@@ -42,7 +43,7 @@ async function Contenuto() {
       "Attività e qualifiche",
       [
         ["Punti personali per essere attiva", punti(p.sogliaAttivita)],
-        ["Tetto acquisti personali per le soglie", punti(p.tettoAcquistiQualifica)],
+        ["Tetto acquisti intestati all'incaricata (listino e promozioni) per le soglie", punti(p.tettoAcquistiQualifica)],
         ...p.qualifiche.map((q): [string, string] => [q.nome, `${punti(q.soglia)} punti → ${pct(q.percentuale)}`]),
       ],
     ],
@@ -53,8 +54,8 @@ async function Contenuto() {
           t.nome,
           `${t.linee} linee · gen. ${t.generazioni.map(pct).join(" + ")} · ${t.quotePool} quote · auto ${formattaEuro(t.bonusAuto)}`,
         ]),
-        ["Bloccate contano come linee", p.bloccateContanoComeLinee ? "Sì" : "No"],
-        ["Pool manager (sull'incasso)", pct(p.poolPercentuale)],
+        ["Linea forte: punti di gruppo del diretto", punti(p.sogliaLineaForte)],
+        ["Pool manager (sui punti aziendali)", pct(p.poolPercentuale)],
       ],
     ],
     [
@@ -74,6 +75,7 @@ async function Contenuto() {
         ["Giorno di pagamento", `${p.giornoPagamento} (o primo giorno lavorativo successivo)`],
         ["Ritenuta d'imposta", `${pct(p.ritenutaAliquota)} sul ${pct(p.ritenutaBase)}`],
         ["INPS", p.inpsAliquota === 0n ? "In attesa del commercialista" : `${pct(p.inpsAliquota)}`],
+        ["Limite compensi del mese (bonus auto escluso)", `${pct(p.limiteCompensiSuPunti)} dei punti aziendali`],
       ],
     ],
   ];

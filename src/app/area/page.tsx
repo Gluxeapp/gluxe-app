@@ -16,7 +16,7 @@ const sezioni = [
   { href: "/area/prodotti", titolo: "Prodotti", testo: "Listino e promozioni", fase: 0 },
   { href: "/area/ordini", titolo: "Ordini", testo: "Nuovo ordine e stato dei tuoi ordini", fase: 0 },
   { href: "/area/carriera", titolo: "Carriera", testo: "Qualifica, avanzamento e la tua rete", fase: 5 },
-  { href: "/area/provvigioni", titolo: "Provvigioni", testo: "Maturate, disponibili e pagate", fase: 6 },
+  { href: "/area/provvigioni", titolo: "Provvigioni", testo: "Punti, qualifica e stima del mese", fase: 0 },
 ];
 
 async function Contenuto() {

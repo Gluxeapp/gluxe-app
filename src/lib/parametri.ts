@@ -1,5 +1,5 @@
 /**
- * Parametri del Piano Compensi G LUXE (docs/piano-compensi.md, rev. 5).
+ * Parametri del Piano Compensi G LUXE (docs/piano-compensi.md, rev. 6).
  *
  * Nessun numero del piano va scritto nel codice: si legge da qui. I parametri si salvano
  * nel database in versioni con data di efficacia; questi sono i valori iniziali.
@@ -28,14 +28,18 @@ export const schemaParametri = z.object({
   puntiStartKit: centesimi,
   speseSpedizione: centesimi,
   provvigioneOnline: puntiBase,
+  /** Provvigione della sponsor sui punti dello start kit di una diretta (decisione 22). */
+  provvigioneKitSponsor: puntiBase,
   // Attività e qualifiche
   sogliaAttivita: centesimi,
   tettoAcquistiQualifica: centesimi,
   qualifiche: z.array(schemaQualifica),
   // Zona manager
-  bloccateContanoComeLinee: z.boolean(),
+  /** Punti di gruppo per qualifica perché un diretto sia una linea forte. */
+  sogliaLineaForte: centesimi,
   titoli: z.array(schemaTitolo),
   // Pool e figure speciali
+  /** Pool manager: percentuale dei punti aziendali del mese (1 punto = 1 €). */
   poolPercentuale: puntiBase,
   // Leader Fondatori
   fondatoriMassimo: z.number().int(),
@@ -56,11 +60,14 @@ export const schemaParametri = z.object({
   inpsQuotaAzienda: puntiBase,
   inpsBaseImponibile: puntiBase,
   inpsSogliaEsenzione: centesimi,
+  // Controlli prima della chiusura
+  /** Compensi del mese (bonus auto escluso) al massimo questa percentuale dei punti aziendali. */
+  limiteCompensiSuPunti: puntiBase,
 });
 
 export type Parametri = z.infer<typeof schemaParametri>;
 
-/** Valori iniziali della rev. 5. */
+/** Valori iniziali della rev. 6. */
 export const PARAMETRI_INIZIALI: Parametri = {
   aliquotaIva: 2200n,
   coefficientePunti: 8000n,
@@ -69,16 +76,17 @@ export const PARAMETRI_INIZIALI: Parametri = {
   puntiStartKit: 3300n,
   speseSpedizione: 690n,
   provvigioneOnline: 5000n,
+  provvigioneKitSponsor: 5000n,
   sogliaAttivita: 3300n,
   tettoAcquistiQualifica: 25000n,
   qualifiche: [
-    { nome: "New Star", soglia: 8000n, percentuale: 400n },
-    { nome: "Partner", soglia: 48000n, percentuale: 800n },
-    { nome: "Expert", soglia: 120000n, percentuale: 1200n },
-    { nome: "Director", soglia: 280000n, percentuale: 1600n },
-    { nome: "Leader", soglia: 560000n, percentuale: 2000n },
+    { nome: "New Star", soglia: 10000n, percentuale: 400n },
+    { nome: "Partner", soglia: 60000n, percentuale: 800n },
+    { nome: "Expert", soglia: 240000n, percentuale: 1200n },
+    { nome: "Director", soglia: 600000n, percentuale: 1600n },
+    { nome: "Leader", soglia: 1200000n, percentuale: 2000n },
   ],
-  bloccateContanoComeLinee: false,
+  sogliaLineaForte: 800000n,
   titoli: [
     { nome: "Leader in crescita", linee: 1, generazioni: [300n], quotePool: 0, bonusAuto: 0n },
     { nome: "Gold Leader", linee: 2, generazioni: [400n], quotePool: 1, bonusAuto: 0n },
@@ -86,11 +94,11 @@ export const PARAMETRI_INIZIALI: Parametri = {
     { nome: "President", linee: 4, generazioni: [400n, 300n, 200n], quotePool: 3, bonusAuto: 50000n },
     { nome: "Diamond President", linee: 5, generazioni: [400n, 300n, 200n, 200n, 150n], quotePool: 5, bonusAuto: 80000n },
   ],
-  poolPercentuale: 400n,
+  poolPercentuale: 300n,
   fondatoriMassimo: 10,
   fondatoriMesiIngresso: 12,
   fondatoriDurataMesi: 12,
-  fondatoriPercentualeBloccata: 1600n,
+  fondatoriPercentualeBloccata: 1200n,
   fondatoriBonus: 300n,
   fondatoriRequisitoPunti: 100000n,
   fondatoriRequisitoGiorni: 90,
@@ -105,6 +113,7 @@ export const PARAMETRI_INIZIALI: Parametri = {
   inpsQuotaAzienda: 0n,
   inpsBaseImponibile: 0n,
   inpsSogliaEsenzione: 0n,
+  limiteCompensiSuPunti: 5000n,
 };
 
 /** Per salvare nel database (JSON non conosce i bigint): i bigint diventano testo. */

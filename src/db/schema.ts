@@ -78,6 +78,9 @@ export const incaricati = app.table(
     sponsorId: uuid("sponsor_id").references((): AnyPgColumn => incaricati.id),
     stato: statoIncaricato("stato").notNull().default("attivo"),
     startKitPagato: boolean("start_kit_pagato").notNull().default(false),
+    /** Figure speciali (Giovanna Di Lillo): esclusa dal pool e dal bonus auto. */
+    esclusaPool: boolean("esclusa_pool").notNull().default(false),
+    esclusaBonusAuto: boolean("esclusa_bonus_auto").notNull().default(false),
     privacyAccettataIl: timestamp("privacy_accettata_il", { withTimezone: true }).notNull(),
     creatoIl: creatoIl(),
   },
@@ -373,4 +376,63 @@ export const rimborsi = app.table(
     creatoIl: creatoIl(),
   },
   (t) => [index("rimborsi_ordine").on(t.ordineId)],
+);
+
+// ── Fase 4: impostazioni per persona del piano compensi ──────────────────────
+// Ogni modifica a queste tabelle passa dall'area sede e va nel registro modifiche.
+
+/** Qualifica bloccata impostata dalla sede (docs/piano-compensi.md, sezione 4). */
+export const qualificheBloccate = app.table(
+  "qualifiche_bloccate",
+  {
+    id: bigserial("id", { mode: "bigint" }).primaryKey(),
+    incaricatoId: uuid("incaricato_id")
+      .notNull()
+      .references(() => incaricati.id),
+    /** Punti base: 20% = 2000. */
+    percentuale: integer("percentuale").notNull(),
+    dal: date("dal").notNull(),
+    /** Vuota = senza scadenza. */
+    al: date("al"),
+    motivo: text("motivo").notNull(),
+    /** Revoca anticipata: la riga resta, si segna solo quando è stata revocata. */
+    revocataIl: timestamp("revocata_il", { withTimezone: true }),
+    creatoDa: uuid("creato_da").references(() => utenti.id),
+    creatoIl: creatoIl(),
+  },
+  (t) => [index("qualifiche_bloccate_incaricato").on(t.incaricatoId)],
+);
+
+/** Programma Leader Fondatori (sezione 5g): una riga per fondatrice. */
+export const leaderFondatori = app.table("leader_fondatori", {
+  incaricatoId: uuid("incaricato_id")
+    .primaryKey()
+    .references(() => incaricati.id),
+  ingresso: date("ingresso").notNull(),
+  /** Primo giorno del mese da cui i privilegi decadono (requisito dei 90 giorni mancato). */
+  decadeDal: date("decade_dal"),
+  creatoDa: uuid("creato_da").references(() => utenti.id),
+  creatoIl: creatoIl(),
+});
+
+export const tipoQuotaSpeciale = app.enum("tipo_quota_speciale", ["master_president", "quota_riservata"]);
+
+/** Quote fisse sull'incasso aziendale per persona (sezioni 5e-bis, 5f e 6). */
+export const quoteSpeciali = app.table(
+  "quote_speciali",
+  {
+    id: bigserial("id", { mode: "bigint" }).primaryKey(),
+    incaricatoId: uuid("incaricato_id")
+      .notNull()
+      .references(() => incaricati.id),
+    tipo: tipoQuotaSpeciale("tipo").notNull(),
+    /** Punti base sull'incasso: 2% = 200. */
+    percentuale: integer("percentuale").notNull(),
+    soloSeAttiva: boolean("solo_se_attiva").notNull(),
+    dal: date("dal").notNull(),
+    al: date("al"),
+    creatoDa: uuid("creato_da").references(() => utenti.id),
+    creatoIl: creatoIl(),
+  },
+  (t) => [index("quote_speciali_incaricato").on(t.incaricatoId)],
 );
