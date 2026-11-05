@@ -449,16 +449,25 @@ describe("Garanzie del calcolo (docs/garanzie-calcolo.md)", () => {
     expect(calcolaMese(dati({ incaricate: rete(["a", null]), ordini: [online("a", -5)] })).ok).toBe(false);
   });
 
-  test("limite compensi sul 50% dei punti aziendali (bonus auto escluso)", () => {
-    const sotto = calcolaMese(dati({ incaricate: rete(["x", null]), ordini: [acquisto("x", 400)] }));
-    expect(sotto.controlli.find((x) => x.nome === "limite compensi")?.ok).toBe(true);
-    const sopra = calcolaMese(dati({
+  test("limite compensi al 70% dei punti aziendali (bonus auto escluso)", () => {
+    // T1: 196,86 € su 364,56 punti = 54%: sotto il limite.
+    const t1 = calcolaMese(dati({
       incaricate: rete(["anna", null]),
       ordini: Array.from({ length: 4 }, () => online("anna", 91.14, { imponibile: 11393n })),
+    }));
+    expect(t1.controlli.find((x) => x.nome === "limite compensi")?.ok).toBe(true);
+    // Online 50% + Leader 20% = esattamente 70%: ancora nel limite.
+    const alLimite = calcolaMese(dati({ incaricate: rete(["x", null]), ordini: [online("x", 12000)] }));
+    expect(alLimite.controlli.find((x) => x.nome === "limite compensi")?.ok).toBe(true);
+    // Con una quota sull'incasso in più si supera il 70%: il mese non si può chiudere.
+    const sopra = calcolaMese(dati({
+      incaricate: rete(["x", null]),
+      ordini: [online("x", 12000)],
+      quoteSpeciali: [{ incaricataId: "x", tipo: "master_president", percentuale: 200n, soloSeAttiva: false }],
     }));
     expect(sopra.controlli.find((x) => x.nome === "limite compensi")?.ok).toBe(false);
     expect(sopra.ok).toBe(false);
     // Le voci restano visibili nell'anteprima: è la chiusura a essere bloccata.
-    expect(voci(sopra, "anna")).toBe(c(196.86));
+    expect(voci(sopra, "x", "online")).toBe(c(6000));
   });
 });

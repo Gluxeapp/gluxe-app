@@ -1,6 +1,10 @@
 -- Annulla la migrazione 0004 (Fase 4). Le righe aggiunte al registro modifiche restano: il registro è solo in aggiunta.
-UPDATE "app"."prodotti" SET "prezzo_listino" = 3290 WHERE "codice" = 'HB-SH';
-DELETE FROM "app"."parametri_versioni" WHERE "note" = 'Piano Compensi rev. 6';
+UPDATE "app"."prodotti" SET "prezzo_listino" = 3290, "nome" = 'Shampoo Hair Botox' WHERE "codice" = 'HB-SH';
+UPDATE "app"."prodotti" SET "nome" = 'Mask Hair Botox' WHERE "codice" = 'HB-MA';
+UPDATE "app"."prodotti" SET "nome" = 'Final Spray Hair Botox' WHERE "codice" = 'HB-FS';
+-- Una versione dei parametri già usata da ordini resta nello storico (gli ordini la citano); le altre si tolgono.
+DELETE FROM "app"."parametri_versioni" v WHERE v."note" = 'Piano Compensi rev. 6'
+  AND NOT EXISTS (SELECT 1 FROM "app"."ordini" o WHERE o."parametri_versione_id" = v."id");
 DO $$
 DECLARE t record;
 BEGIN

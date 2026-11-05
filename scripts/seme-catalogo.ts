@@ -23,9 +23,9 @@ const prodotti: Prodotto[] = [
     prezzo: 10690,
     ordine: 0,
   },
-  { codice: "HB-SH", nome: "Shampoo Hair Botox", linea: "Hair Botox", prezzo: 3290, foto: "shampoo-hair-botox.png", ordine: 10 },
-  { codice: "HB-MA", nome: "Mask Hair Botox", linea: "Hair Botox", prezzo: 3990, foto: "mask-hair-botox.png", ordine: 20 },
-  { codice: "HB-FS", nome: "Final Spray Hair Botox", linea: "Hair Botox", prezzo: 3490, foto: "final-spray-hair-botox.png", ordine: 30 },
+  { codice: "HB-SH", nome: "Shampoo Botox", linea: "Hair Botox", prezzo: 3390, foto: "shampoo-hair-botox.png", ordine: 10 },
+  { codice: "HB-MA", nome: "Maschera Botox", linea: "Hair Botox", prezzo: 3990, foto: "mask-hair-botox.png", ordine: 20 },
+  { codice: "HB-FS", nome: "Spray Botox 10in1", linea: "Hair Botox", prezzo: 3490, foto: "final-spray-hair-botox.png", ordine: 30 },
   { codice: "DX-SH", nome: "Shampoo Detox", linea: "Detox", prezzo: 3290, foto: "shampoo-detox.png", ordine: 40 },
 ];
 

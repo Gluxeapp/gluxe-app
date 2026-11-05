@@ -113,7 +113,7 @@ export const PARAMETRI_INIZIALI: Parametri = {
   inpsQuotaAzienda: 0n,
   inpsBaseImponibile: 0n,
   inpsSogliaEsenzione: 0n,
-  limiteCompensiSuPunti: 5000n,
+  limiteCompensiSuPunti: 7000n,
 };
 
 /** Per salvare nel database (JSON non conosce i bigint): i bigint diventano testo. */

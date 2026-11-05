@@ -43,10 +43,9 @@ function pasqua(anno: number): Date {
   return new Date(Date.UTC(anno, mese - 1, giorno));
 }
 
-/** Festività nazionali italiane (San Francesco, 4 ottobre, di nuovo festivo dal 2026). */
+/** Festività nazionali italiane. Il 4 ottobre non si considera (decisione 26). */
 function festivi(anno: number): Set<string> {
   const fissi = ["01-01", "01-06", "04-25", "05-01", "06-02", "08-15", "11-01", "12-08", "12-25", "12-26"];
-  if (anno >= 2026) fissi.push("10-04");
   const lunediAngelo = pasqua(anno);
   lunediAngelo.setUTCDate(lunediAngelo.getUTCDate() + 1);
   return new Set([...fissi.map((g) => `${anno}-${g}`), testo(lunediAngelo)]);

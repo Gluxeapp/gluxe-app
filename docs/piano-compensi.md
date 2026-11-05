@@ -1,6 +1,6 @@
 # G LUXE · Piano Compensi (specifiche del motore di calcolo)
 
-Versione: 5 novembre 2026 · **rev. 6 "Piano Compensi G LUXE"**. Sostituisce la rev. 5 (resta solo nello storico di Git e non è mai stata applicata a ordini reali). Nasce dal testo del fondatore del 5/11/2026, con le sue modifiche: Giovanna Di Lillo, promozioni, start kit, Leader inattive e catalogo (decisioni 19–25).
+Versione: 5 novembre 2026 · **rev. 6 "Piano Compensi G LUXE"**. Sostituisce la rev. 5 (resta solo nello storico di Git e non è mai stata applicata a ordini reali). Nasce dal testo del fondatore del 5/11/2026, con le sue modifiche: Giovanna Di Lillo, promozioni, start kit, Leader inattive, catalogo, limite dei compensi e linee forti (decisioni 19–26).
 
 Questo documento traduce il piano compensi in regole univoche per il motore di calcolo dell'app G LUXE. Ogni regola deve dare un solo risultato possibile. È la fonte ufficiale: se il codice non coincide con il documento, vale il documento.
 
@@ -167,7 +167,7 @@ Il calcolo gira sul server, in quest'ordine. Durante il mese si può rilanciare 
 - **Pagamento mensile**: nessun acconto o saldo quindicinale.
 - **Saldo richiedibile** = importi non ancora richiesti dei mesi precedenti + voci pagabili del mese chiuso (tutte tranne il margine) ± storni.
 - Il pulsante **"Richiedi pagamento"** è attivo **dal 3 al 6 del mese successivo** (il mese si chiude il 1°), se il saldo è almeno **50 €**.
-- Le richieste vanno alla contabilità e si pagano **il 20 del mese**; se il 20 è sabato, domenica o festivo nazionale, il **primo giorno lavorativo successivo**. Bonifico all'IBAN del profilo.
+- Le richieste vanno alla contabilità e si pagano **il 20 del mese**; se il 20 è sabato, domenica o festivo nazionale (il 4 ottobre non si considera), il **primo giorno lavorativo successivo**. Bonifico all'IBAN del profilo.
 - Sotto 50 €, o se non richiesto, il saldo si riporta al mese dopo, senza scadenza. Un saldo negativo (per storni) si riporta e si compensa con i mesi successivi.
 - **Ritenuta d'imposta:** 23% sul 78% dell'importo (17,94%), calcolata su **ogni** pagamento e per **tutte** le incaricate, arrotondata al centesimo. Bonifico del netto.
 - **IVA e INPS:** per ogni incaricata "partita IVA sì/no" e "contributi INPS a carico dell'azienda sì/no". Parametri globali: aliquota IVA, aliquota contributiva, quota a carico dell'azienda, base imponibile in % dei compensi, soglia di esenzione annua. Il costo IVA e INPS a carico dell'azienda va in un report mensile separato dai compensi. Valori in attesa del commercialista: nessuna regola fiscale fissa nel codice.
@@ -191,7 +191,7 @@ Il calcolo gira sul server, in quest'ordine. Durante il mese si può rilanciare 
   - ogni ordine appartiene a un'incaricata esistente; ogni sponsor esiste; nessun ciclo nella genealogia;
   - nessun punto o voce negativa;
   - totale compensi = somma delle voci;
-  - compensi complessivi (bonus auto escluso, perché a carico del budget marketing) non oltre il **50% dei punti aziendali** del mese (parametro).
+  - compensi complessivi (bonus auto escluso, perché a carico del budget marketing) non oltre il **70% dei punti aziendali** del mese (parametro; decisione 26).
 - **Sponsor:** non si cambia dopo il primo ordine pagato dell'incaricata, salvo intervento della sede registrato con motivo.
 
 ## 11. Casi di test
@@ -243,7 +243,8 @@ Controlli aggiuntivi automatici: lo stesso mese calcolato con gli ordini e le in
 | 22 | Start kit | 33 punti alla nuova incaricata (attività e soglie, nessun guadagno per lei). La sponsor riceve il 50% dei punti più la differenza, solo se attiva; i 33 punti contano anche per la sua attività. L'upline guadagna la differenza normale |
 | 23 | Leader inattiva | Saltata (compressione): il suo team confluisce nella prima Leader del mese sopra di lei |
 | 24 | Catalogo | Shampoo Botox 33,90 €, Shampoo Detox 32,90 €, Maschera Botox 39,90 €, Spray Botox 10in1 34,90 €; Kit Routine Botox resta a 106,90 € |
-| 25 | Soluzioni tecniche | Calcoli sul server dell'app (non Edge Functions), importi e punti come interi in centesimi (esatti come `numeric`), Row Level Security su tutte le tabelle come seconda barriera. Cifratura di IBAN e codice fiscale nella Fase 9 |
+| 25 | Soluzioni tecniche | Calcoli sul server dell'app (non Edge Functions), importi e punti come interi in centesimi (esatti come `numeric`), Row Level Security su tutte le tabelle come seconda barriera. Nella Fase 9: cifratura di IBAN e codice fiscale, consensi separati (trattamento e marketing, con data e testo dell'informativa), esportazione e cancellazione o anonimizzazione dei dati |
+| 26 | Controlli e conteggi | Limite dei compensi del mese al 70% dei punti aziendali (bonus auto escluso). I 33 punti di uno start kit contano per l'attività della sponsor ma nei punti di gruppo una volta sola. Una linea forte conta anche se la diretta è inattiva, purché il suo gruppo arrivi a 8.000 punti. Il 4 ottobre non si considera festivo per il giorno di pagamento (fondatore, 5/11/2026) |
 
 Le decisioni 2–5, 10, 13, 14 e 16 della rev. 5 sono superate dalle decisioni 19–23.
 
