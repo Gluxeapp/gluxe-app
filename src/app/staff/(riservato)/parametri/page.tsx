@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Suspense } from "react";
 import { Caricamento, Scheda, Titolo } from "@/components/ui";
 import { richiediStaff } from "@/lib/accesso";
@@ -8,7 +9,7 @@ import { formatta, formattaEuro } from "@/lib/denaro";
 export default function Parametri() {
   return (
     <>
-      <Titolo sottotitolo="Valori del Piano Compensi G LUXE usati dall'app. La modifica dall'area sede arriverà con la Fase 4 (motore provvigioni).">
+      <Titolo sottotitolo="Valori del Piano Compensi G LUXE usati dall'app. Ogni modifica crea una nuova versione con la sua data di efficacia; le precedenti restano.">
         Parametri del piano
       </Titolo>
       <Suspense fallback={<Caricamento />}>
@@ -61,7 +62,8 @@ async function Contenuto() {
     [
       "Leader Fondatori",
       [
-        ["Massimo", String(p.fondatoriMassimo)],
+        ["Lancio del piano", p.dataLancioPiano ? dataItaliana(p.dataLancioPiano) : "Non ancora impostato"],
+        ["Massimo", `${p.fondatoriMassimo}, con ingresso entro ${p.fondatoriMesiIngresso} mesi dal lancio`],
         ["Qualifica bloccata / durata", `${pct(p.fondatoriPercentualeBloccata)} per ${p.fondatoriDurataMesi} mesi`],
         ["Bonus sui punti di gruppo reali", pct(p.fondatoriBonus)],
         ["Requisito", `${punti(p.fondatoriRequisitoPunti)} punti in ${p.fondatoriRequisitoGiorni} giorni`],
@@ -82,9 +84,14 @@ async function Contenuto() {
 
   return (
     <>
-      <p className="mb-4 text-sm text-testo-tenue">
-        Versione in vigore dal {dataItaliana(p.validoDal)}.
-      </p>
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <p className="text-sm text-testo-tenue">
+          Versione n. {String(p.versioneId)} in vigore dal {dataItaliana(p.validoDal)}.
+        </p>
+        <Link href="/staff/parametri/nuova" className="rounded-lg border border-oro/60 px-4 py-2 text-sm text-oro-chiaro">
+          Crea una nuova versione
+        </Link>
+      </div>
       <div className="grid gap-4 lg:grid-cols-2">
         {gruppi.map(([titolo, righe]) => (
           <Scheda key={titolo}>
@@ -104,7 +111,8 @@ async function Contenuto() {
       <ul className="text-sm text-testo-tenue">
         {storico.map((v) => (
           <li key={String(v.id)}>
-            Dal {dataItaliana(v.validoDal)} · {v.note}
+            n. {String(v.id)} · dal {dataItaliana(v.validoDal)} · {v.note}
+            {v.id === p.versioneId && <span className="text-oro-chiaro"> · in vigore</span>}
           </li>
         ))}
       </ul>

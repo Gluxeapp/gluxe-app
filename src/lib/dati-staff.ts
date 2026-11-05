@@ -151,6 +151,14 @@ export const NOMI_AZIONI: Record<string, string> = {
   "prodotto.disattivato": "Prodotto disattivato",
   "promozione.creata": "Promozione creata",
   "promozione.disattivata": "Promozione disattivata",
+  "parametri.nuova_versione": "Nuova versione dei parametri",
+  "piano.qualifica_bloccata": "Qualifica bloccata",
+  "piano.qualifica_bloccata_revocata": "Qualifica bloccata revocata",
+  "piano.leader_fondatore": "Leader Fondatore",
+  "piano.quota_speciale": "Quota sull'incasso",
+  "piano.quota_speciale_terminata": "Quota sull'incasso terminata",
+  "piano.esclusioni": "Esclusioni da pool e bonus auto",
+  "piano.figure_speciali": "Figure speciali del piano",
 };
 
 export function dataOra(d: Date): string {

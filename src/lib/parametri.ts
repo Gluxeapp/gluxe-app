@@ -42,6 +42,8 @@ export const schemaParametri = z.object({
   /** Pool manager: percentuale dei punti aziendali del mese (1 punto = 1 €). */
   poolPercentuale: puntiBase,
   // Leader Fondatori
+  /** Data di lancio del piano ("AAAA-MM-GG"): i fondatori entrano entro N mesi da qui. Vuota finché non è decisa. */
+  dataLancioPiano: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().default(null),
   fondatoriMassimo: z.number().int(),
   fondatoriMesiIngresso: z.number().int(),
   fondatoriDurataMesi: z.number().int(),
@@ -95,6 +97,7 @@ export const PARAMETRI_INIZIALI: Parametri = {
     { nome: "Diamond President", linee: 5, generazioni: [400n, 300n, 200n, 200n, 150n], quotePool: 5, bonusAuto: 80000n },
   ],
   poolPercentuale: 300n,
+  dataLancioPiano: null,
   fondatoriMassimo: 10,
   fondatoriMesiIngresso: 12,
   fondatoriDurataMesi: 12,

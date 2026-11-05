@@ -92,6 +92,8 @@ try {
     await tx`set local role anon`;
     await tx`insert into app.qualifiche_bloccate (incaricato_id, percentuale, dal, motivo) values (${a.id}, 2000, current_date, 'x')`;
   }, vietato);
+  await deveFallire("modificare una versione dei parametri del piano", (tx) => tx`update app.parametri_versioni set note = 'x' where id = ${parametri.id}`);
+  await deveFallire("cancellare una versione dei parametri del piano", (tx) => tx`delete from app.parametri_versioni where id = ${parametri.id}`);
   await deveFallire("qualifica bloccata oltre il 20%", (tx) => tx`insert into app.qualifiche_bloccate (incaricato_id, percentuale, dal, motivo) values (${a.id}, 2500, current_date, 'x')`);
 
   // 2) Conferme di pagamento contemporanee: 10 copie di due eventi diversi per lo stesso ordine.
