@@ -62,11 +62,11 @@ export function SchedaProdotto({ nome, linea, formato, descrizione, immagineId, 
             </>
           )}
           <dt className="text-testo-tenue">Punti (tuo acquisto)</dt>
-          <dd className="text-right">{formatta(prezzi.incaricata.punti)}</dd>
-          <dt className="text-testo-tenue">Dal tuo negozio</dt>
-          <dd className="text-right">
-            +{formattaEuro(prezzi.provvigioneOnline)} · {formatta(prezzi.pubblico.punti)} pt
-          </dd>
+          <dd className="text-right">{formatta(prezzi.incaricata.punti)} pt</dd>
+          <dt className="text-testo-tenue">Punti (dal tuo negozio)</dt>
+          <dd className="text-right">{formatta(prezzi.pubblico.punti)} pt</dd>
+          <dt className="text-testo-tenue">Provvigione dal negozio</dt>
+          <dd className="text-right">+{formattaEuro(prezzi.provvigioneOnline)}</dd>
         </dl>
       </div>
     </article>

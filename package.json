@@ -20,7 +20,8 @@
     "prova:garanzie": "node --env-file=.env.local scripts/prova-garanzie.mjs",
     "controlla:segreti": "node scripts/controlla-segreti.mjs",
     "prebuild": "node scripts/controlla-segreti.mjs",
-    "prepare": "node -e \"if(require('fs').existsSync('.git'))require('child_process').execSync('git config core.hooksPath .githooks')\""
+    "prepare": "node -e \"if(require('fs').existsSync('.git'))require('child_process').execSync('git config core.hooksPath .githooks')\"",
+    "db:seme-rete-prova": "node --env-file=.env.local scripts/seme-rete-prova.mjs"
   },
   "dependencies": {
     "@node-rs/argon2": "^2.2.2",
