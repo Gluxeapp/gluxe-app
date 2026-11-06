@@ -173,6 +173,33 @@ Il calcolo gira sul server, in quest'ordine. Durante il mese si può rilanciare 
 - **IVA e INPS:** per ogni incaricata "partita IVA sì/no" e "contributi INPS a carico dell'azienda sì/no". Parametri globali: aliquota IVA, aliquota contributiva, quota a carico dell'azienda, base imponibile in % dei compensi, soglia di esenzione annua. Il costo IVA e INPS a carico dell'azienda va in un report mensile separato dai compensi. Valori in attesa del commercialista: nessuna regola fiscale fissa nel codice.
 - **Export per la contabilità:** compensi per incaricata e per voce (provvigione online, promozioni, kit, qualifica, differenze, generazioni, Leader Fondatori, pool, quota riservata, Master President, bonus auto), con dati fiscali.
 
+### 8a. Documento delle provvigioni per l'incaricata (decisione 28)
+
+- Per ogni pagamento l'app prepara il documento che l'incaricata emette verso G LUXE per le provvigioni da vendita a domicilio (Legge 173/2005). Nasce quando la **contabilità approva** la richiesta, porta la **data del pagamento** (il 20 o il primo giorno lavorativo successivo) e un **numero progressivo per incaricata e per anno**. Dopo non si modifica più: una correzione diventa un nuovo documento.
+- Intestazione: dati dell'incaricata (nome, indirizzo, telefono, email, codice fiscale, partita IVA se c'è); destinataria G LUXE (ragione sociale, sede, codice fiscale e partita IVA dalle impostazioni dell'azienda). Righe: richiesta di pagamento con il mese di competenza dei guadagni; in fondo IBAN dell'incaricata. Lo scaricano in PDF l'incaricata (solo i suoi) e amministrazione e contabilità.
+- Il tipo dipende dal profilo dell'incaricata (campo "regime": nessuna partita IVA, partita IVA ordinaria, partita IVA forfettaria):
+
+| Regime | Documento | Righe, nell'ordine |
+| --- | --- | --- |
+| Senza partita IVA | **Ricevuta** "Provvigioni per vendite a domicilio (Legge 173/2005)" | Imponibile; ritenuta 23% sul 78%; **bollo 2,00 € tolto all'incaricata** se l'imponibile supera 77,47 € (parametri), con la dicitura del bollo virtuale e il numero di autorizzazione dell'Agenzia delle Entrate; totale da pagare |
+| Partita IVA ordinaria | **Fattura proforma** per provvigioni incaricato vendite a domicilio | Imponibile; IVA 22% (parametro); ritenuta 23% sul 78% dell'imponibile; ritenuta INPS gestione separata (quota dell'incaricata, parametri; 0,00 finché non superata la soglia annua); totale da pagare = imponibile + IVA − ritenute |
+| Partita IVA forfettaria | **Fattura proforma** senza IVA, con la dicitura del regime forfettario | Imponibile; ritenuta (parametro, iniziale 23% sul 78%, da confermare con il commercialista); bollo 2,00 € tolto all'incaricata sopra 77,47 €; totale da pagare |
+
+- Chi ha la partita IVA riceve una **proforma**: la fattura elettronica valida (Sistema di Interscambio) la emette lei con il suo programma, con gli stessi importi.
+- Il bonifico è il **totale da pagare** del documento.
+
+### 8b. F24 delle ritenute (decisione 28)
+
+- Le ritenute dei pagamenti fatti in un mese si versano con l'F24 entro il **16 del mese successivo** (se è sabato, domenica o festivo, il primo giorno lavorativo successivo).
+- L'app compila l'F24 in automatico, sezione Erario: **codice tributo 1038**, mese di riferimento e anno = mese e anno dei pagamenti, importo = somma delle ritenute d'imposta di quei pagamenti, dati di G LUXE come contribuente. Si scarica in PDF da stampare o ricopiare nell'home banking, con l'elenco dei pagamenti che lo compongono. La contabilità segna "versato" con la data.
+- La quota INPS (quando i parametri saranno diversi da zero) avrà la sua sezione: da definire con il commercialista.
+
+### 8c. File dei bonifici SEPA (decisione 28)
+
+- Per ogni data di pagamento la contabilità scarica un **file XML SEPA Credit Transfer** nel formato **ISO 20022 pain.001.001.03, profilo italiano CBI**, da caricare nell'home banking: un bonifico per ogni richiesta approvata, importo = totale da pagare, IBAN e nome dell'incaricata, causale "Provvigioni MM/AAAA, documento n. X", data di esecuzione = data del pagamento, addebito sul conto di G LUXE (IBAN e codice CUC della banca nelle impostazioni dell'azienda).
+- Prima di creare il file l'app controlla ogni IBAN (formato e codice di controllo) e scarta con un avviso le richieste con IBAN non valido. Ogni file scaricato si registra (chi, quando, quali bonifici); un bonifico già messo in un file non si rimette in un altro senza annullare prima il file.
+- F24, file bonifici e documenti di tutte le incaricate: solo **amministrazione e contabilità** (lo staff "ordini" non li vede).
+
 ## 9. Resi, storni e riacquisti
 
 - **Reso nello stesso mese, prima della chiusura** (per esempio recesso entro 14 giorni): l'ordine si esclude dal calcolo.
@@ -220,6 +247,12 @@ Importi in euro. Tutte attive salvo dove indicato. "Totale" esclude il margine s
 | T18 Tetto anche sulle promozioni per sé | 300 punti AP e 250 punti PR, nessun ON, nessuna squadra | PPQ = MIN(550; 250) = 250 → New Star 4%. Promozione 50% × 250 = 125,00; qualifica 550 × 4% = 22,00 | 147,00 |
 | T19 Kit di una sponsor senza altri punti | Bea non compra nulla; Mara (sua diretta) paga lo start kit. Sponsor di Bea: Cleo, Partner 8% | Bea: KS 33 → attiva; PGQ 33 → nessuna qualifica; provvigione kit 16,50; differenza 0. Cleo: differenza 33 × 8% = 2,64 | Bea 16,50; Cleo 2,64 |
 | T20 Giovanna inattiva | Giovanna senza punti nel mese, incasso aziendale 10.000 € | Master President 200,00; nessun'altra voce | 200,00 |
+| T21 Ricevuta senza partita IVA | Pagamento di 104,87 € | Ritenuta 104,87 × 17,94% = 18,81; bollo 2,00 (oltre 77,47 €) | Totale da pagare 84,06 |
+| T22 Ricevuta sotto la soglia del bollo | Pagamento di 60,00 € | Ritenuta 10,76; nessun bollo | Totale da pagare 49,24 |
+| T23 Fattura partita IVA ordinaria | Pagamento di 132,20 € | IVA 22% 29,08; ritenuta 23,72; INPS 0,00 (parametri a zero) | Totale da pagare 137,56 |
+| T24 Fattura forfettaria | Pagamento di 132,20 € | Niente IVA; ritenuta 23,72 (parametro iniziale); bollo 2,00 | Totale da pagare 106,48 |
+| T25 F24 | Pagamenti del 21/12/2026 di T21 e T23 | Codice tributo 1038, mese 12, anno 2026, importo 18,81 + 23,72 = 42,53. Il 16/01/2027 è sabato → scadenza lunedì 18/01/2027 | 42,53 |
+| T26 Numerazione | Seconda ricevuta dell'anno della stessa incaricata; prima del nuovo anno | N. 2; a gennaio si riparte da 1 | — |
 
 Controlli aggiuntivi automatici: lo stesso mese calcolato con gli ordini e le incaricate in ordine mescolato dà lo stesso risultato al centesimo; lo stesso calcolo ripetuto due volte dà lo stesso risultato; se tutti gli ordini di un mese vengono resi, gli storni riportano a zero le voci stornabili.
 
@@ -247,9 +280,12 @@ Controlli aggiuntivi automatici: lo stesso mese calcolato con gli ordini e le in
 | 27 | Punti scritti a mano | Lo staff (amministrazione, contabilità, ordini) può scrivere a mano i punti per pezzo di ogni prodotto, separati per acquisto personale e vendita online, e di ogni promozione (un valore unico per acquisto personale e online). Campo vuoto = calcolo automatico. Provvigione online e sulle promozioni = 50% dei punti, anche se scritti a mano. Start kit escluso (33 punti, parametro). Ogni modifica va nel registro modifiche; gli ordini già fatti non cambiano (fondatore, 5/11/2026) |
 | 26 | Controlli e conteggi | Limite dei compensi del mese al 70% dei punti aziendali (bonus auto escluso). I 33 punti di uno start kit contano per l'attività della sponsor ma nei punti di gruppo una volta sola. Una linea forte conta anche se la diretta è inattiva, purché il suo gruppo arrivi a 8.000 punti. Il 4 ottobre non si considera festivo per il giorno di pagamento (fondatore, 5/11/2026) |
 
+| 28 | Documenti, F24 e bonifici | Ricevuta (senza partita IVA) o fattura proforma (partita IVA ordinaria o forfettaria, scelta nel profilo) creata all'approvazione della richiesta, con la data del pagamento e numero progressivo per incaricata e anno; bollo 2,00 € tolto all'incaricata sopra 77,47 €. F24 compilato in automatico (codice tributo 1038, mese di riferimento) da versare il 16 del mese dopo i pagamenti. File bonifici SEPA XML pain.001.001.03 profilo CBI. F24, bonifici e documenti di tutte: solo amministrazione e contabilità (fondatore, 6/11/2026) |
+
 Le decisioni 2–5, 10, 13, 14 e 16 della rev. 5 sono superate dalle decisioni 19–23.
 
 ## 13. Verifiche esterne prima del lancio
 
-- Commercialista: base dello sconto (IVA inclusa o esclusa), IVA sugli acquisti delle incaricate, ritenuta, contributi INPS, trattamento fiscale di Master President e quota riservata.
+- Commercialista: base dello sconto (IVA inclusa o esclusa), IVA sugli acquisti delle incaricate, ritenuta, contributi INPS, trattamento fiscale di Master President e quota riservata. Per la decisione 28: ritenuta e bollo per le forfettarie, compilazione del campo "mese di riferimento" dell'F24 con il codice 1038, sezione INPS dell'F24.
+- Azienda: autorizzazione al bollo virtuale (numero e data), codice CUC e versione del tracciato CBI indicati dalla banca.
 - Legale: conformità del piano alla Legge 173/2005.

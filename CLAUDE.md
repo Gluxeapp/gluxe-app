@@ -85,6 +85,7 @@ App per gli incaricati alle vendite di G LUXE (haircare, vendita diretta multili
 - **Leader Fondatori**: per 12 mesi qualifica bloccata al 12% (dentro il piano) + bonus 3% sui punti di gruppo reali, se attive.
 - **Figure speciali**: Giovanna Di Lillo (GL000001, fondatrice) Master President 2% dell'incasso aziendale anche se inattiva, bloccata al 20%, esclusa da pool e bonus auto; Margherita Suma (Leader Fondatrice) quota riservata 1% dell'incasso solo se attiva, separata dal pool (3% dei punti aziendali). Dettagli nella sezione 6 di `docs/piano-compensi.md`.
 - **Fisco**: ritenuta d'imposta 23% sul 78% su tutti i pagamenti, per tutte le incaricate. IVA (partita IVA sì/no) e INPS (a carico azienda sì/no) come parametri, in attesa del commercialista.
+- **Documenti e versamenti (decisione 28)**: per ogni pagamento approvato, ricevuta (senza partita IVA, bollo 2 € tolto sopra 77,47 €) o fattura proforma (partita IVA ordinaria o forfettaria) in PDF per l'incaricata; F24 compilato in automatico (codice tributo 1038, mese di riferimento, scadenza il 16 del mese dopo); file bonifici SEPA XML pain.001.001.03 profilo CBI. F24 e bonifici solo amministrazione e contabilità. Dettagli in `docs/piano-compensi.md`, sezioni 8a–8c.
 - **Grafica**: nero e oro, caratteri con grazie eleganti, come il logo in `assets/brand/logo-g-luxe.png`.
 
 ## Cartella del progetto
@@ -129,7 +130,7 @@ Il progetto vive in `C:\Progetti\gluxe-app`, **fuori da OneDrive** (la sincroniz
 | 3 | Ordini con pagamento Stripe (carta, PayPal, Klarna): start kit in registrazione, spedizione 6,90 €, stati, storico, conferma riordino 70%, ruolo staff "ordini" | completata (online dal 29/10/2026; pagamenti da accendere quando l'account Stripe è completo) |
 | 4 | Motore provvigioni (rev. 6): prima i test di `docs/piano-compensi.md`, poi il codice; parametri versionati; qualifiche bloccate, Leader Fondatori, figure speciali; anteprima | completata (online dal 5/11/2026) |
 | 5 | Carriera e rete: qualifica, avanzamento, albero grafico della rete | completata (online dal 6/11/2026) |
-| 6 | Chiusura mese, registro provvigioni, storni, richieste di pagamento (3–6), area contabilità, ritenute, report IVA/INPS, export | da fare |
+| 6 | Chiusura mese, registro provvigioni, storni, richieste di pagamento (3–6), area contabilità, ritenute, report IVA/INPS, export; ricevuta o fattura proforma per l'incaricata, F24 (codice 1038), file bonifici SEPA CBI | da fare (regole scritte il 6/11/2026) |
 | 7 | Negozio personale online, clienti legati, controllo clienti fittizi, indicatore vendite a clienti finali | da fare |
 | 8 | API e webhook per siti esterni | da fare |
 | 9 | Collaudo con dati simulati, sicurezza, GDPR, backup, pilota con 5–10 incaricati | da fare |
