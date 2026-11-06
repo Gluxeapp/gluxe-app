@@ -1,5 +1,6 @@
 import { Suspense } from "react";
-import { AlberoRete } from "@/components/albero-rete";
+import Link from "next/link";
+import { ReteGrafica, ReteLista, SceltaVista, trovaNodo } from "@/components/albero-rete";
 import { Caricamento, Scheda, Titolo } from "@/components/ui";
 import { richiediIncaricataOperativa } from "@/lib/accesso";
 import { carrieraIncaricata, mesiDisponibili } from "@/lib/carriera";
@@ -25,7 +26,8 @@ const pct = (pb: bigint) => `${formatta(pb)}%`.replace(",00%", "%");
 
 async function Contenuto({ searchParams }: Pick<PageProps<"/area/carriera">, "searchParams">) {
   const { incaricato } = await richiediIncaricataOperativa();
-  const [{ mese: richiesto }, mesi] = await Promise.all([searchParams, mesiDisponibili()]);
+  const [{ mese: richiesto, vista: vistaRichiesta, da }, mesi] = await Promise.all([searchParams, mesiDisponibili()]);
+  const vista = vistaRichiesta === "lista" ? "lista" : "grafica";
   const mese = typeof richiesto === "string" && mesi.includes(richiesto) ? richiesto : mesi[0];
   const { albero, io, parametri: p, nodoRete } = await carrieraIncaricata(incaricato.id, mese);
 
@@ -34,6 +36,13 @@ async function Contenuto({ searchParams }: Pick<PageProps<"/area/carriera">, "se
   const conteggi = contaRete(nodoRete);
   const titolo = prossimoTitolo(io?.lineeForti ?? 0, p.titoli);
   const attivita = (io?.pp ?? 0n) + (io?.ks ?? 0n);
+  // Il grafico può ripartire solo da una persona della propria rete: chiunque altro viene ignorato.
+  const partenza = (typeof da === "string" && trovaNodo(albero, da)) || albero;
+  const indirizzo = (v: { vista?: string; da?: string }) => {
+    const q = new URLSearchParams({ mese, vista: v.vista ?? vista });
+    if (v.da) q.set("da", v.da);
+    return `/area/carriera?${q}`;
+  };
 
   return (
     <div className="grid gap-4">
@@ -118,11 +127,29 @@ async function Contenuto({ searchParams }: Pick<PageProps<"/area/carriera">, "se
         <p className="mt-1 text-sm text-testo-tenue">
           {conteggi.persone === 0
             ? "Non hai ancora incaricate nella tua rete."
-            : `${conteggi.persone} persone, ${conteggi.dirette} dirette, ${conteggi.livelli} ${conteggi.livelli === 1 ? "livello" : "livelli"}. Tocca una scheda per aprire o chiudere il ramo. Telefono ed email si vedono solo per le tue dirette.`}
+            : `${conteggi.persone} persone, ${conteggi.dirette} dirette, ${conteggi.livelli} ${conteggi.livelli === 1 ? "livello" : "livelli"}. Telefono ed email si vedono solo per le tue dirette, nella vista Lista.`}
         </p>
         {conteggi.persone > 0 && (
-          <div className="mt-3">
-            <AlberoRete radice={albero} mostraRadice={false} />
+          <div className="mt-3 grid gap-3">
+            <SceltaVista attiva={vista} href={(v) => indirizzo({ vista: v, da: v === "grafica" && partenza !== albero ? partenza.id : undefined })} />
+            {vista === "lista" ? (
+              <ReteLista radice={albero} />
+            ) : (
+              <>
+                {partenza !== albero && (
+                  <p className="text-sm">
+                    Rete di <strong>{partenza.nome}</strong> ·{" "}
+                    <Link href={indirizzo({})} className="text-oro-chiaro">
+                      torna alla tua rete
+                    </Link>
+                  </p>
+                )}
+                <p className="text-xs text-testo-tenue">
+                  In ogni scheda: codice, nome, qualifica e punti personali / di gruppo. Tocca una persona che ha una sua rete per ripartire da lei; scorri di lato se il grafico è largo.
+                </p>
+                <ReteGrafica radice={partenza} riparti={(id) => indirizzo({ da: id })} />
+              </>
+            )}
           </div>
         )}
       </Scheda>
