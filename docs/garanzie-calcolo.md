@@ -40,6 +40,22 @@ Verifica automatica: `npm run prova:garanzie` (app avviata, database di prova). 
 5. **Saldo = somma dei movimenti**, mai un numero salvato a parte.
 6. **Richiesta di pagamento:** una per incaricata per periodo (chiave univoca); al momento della richiesta il saldo si ricalcola con l'incaricata bloccata, così due richieste contemporanee non possono superare il saldo.
 
+Come è fatto (migrazione 0006, attiva dalla Fase 6):
+
+| Garanzia | Come è ottenuta |
+| --- | --- |
+| Un mese si chiude una volta sola, in ordine e solo dopo la sua fine | Chiave del mese in `mesi_chiusi`; blocco esclusivo durante la chiusura; il prossimo mese da chiudere è sempre quello dopo l'ultimo chiuso |
+| Un mese chiuso non cambia più, nemmeno se cambiano parametri, rete o impostazioni | Alla chiusura si salva la **fotografia** di tutti i dati in ingresso al motore; da lì il motore ridà le stesse voci al centesimo (test). Mesi chiusi, ordini chiusi, rettifiche, storni, movimenti, documenti e F24 versati: solo in aggiunta (blocchi nel database) |
+| Ogni ordine conta in un solo mese chiuso | Chiave dell'ordine in `ordini_chiusi`. Un pagamento arrivato tardi per un mese già chiuso entra nel primo mese aperto (decisione 18) |
+| Un reso dopo la chiusura si storna una volta sola | Chiave dell'ordine in `ordini_stornati`. Storni fatti in mesi diversi sullo stesso mese d'origine si calcolano "a scalare" (storno di tutti i resi finora − storno dei resi precedenti): se tutto viene reso il mese torna a zero al centesimo (test) |
+| La stessa voce non entra due volte nel registro | Indice univoco mese + incaricata + tipo + origine (voci) e rettifica + incaricata + tipo + origine (storni); ogni tipo di movimento ha segno e collegamenti controllati |
+| Richieste di pagamento | Una per incaricata per mese (una rifiutata non conta); importo, incaricata e date non cambiano; gli stati vanno solo avanti (richiesta → approvata o rifiutata; approvata → pagata); non si cancellano. Il rifiuto restituisce l'importo con un movimento nuovo |
+| Documenti | Numero progressivo per incaricata e anno con chiave univoca (l'incaricata si blocca durante l'approvazione); totale = imponibile + IVA − ritenute − bollo controllato dal database; dati di incaricata e azienda fotografati |
+| File bonifici | Una richiesta sta in un solo file valido (indice univoco); un file si può solo annullare, una volta, e non dopo che i bonifici sono segnati pagati |
+| Mesi prima del piano rev. 6 | Le versioni dei parametri delle Fasi 2 e 3 non hanno le regole delle provvigioni: per quei mesi vale la prima versione completa (a parità di data, l'ultima registrata), perché il piano si applica dal primo ordine (decisione 1) |
+
+Verifiche: `npm run prova:garanzie` tenta tutte le modifiche vietate qui sopra; `npm run prova:fase6` (database di prova, rete finta con ordini del mese scorso) chiude il mese, prova tre richieste contemporanee della stessa incaricata (ne passa una), approva e rifiuta, crea il file bonifici e l'F24, poi riporta il database di prova a prima della chiusura.
+
 ## Decisioni
 
 - **Pagamento confermato da Stripe dopo la chiusura del suo mese** (caso raro: Stripe ritenta l'avviso per qualche giorno se il sito non risponde): conta nel **primo mese ancora aperto**, come le rettifiche (fondatore, 29/10/2026).

@@ -51,12 +51,34 @@ function festivi(anno: number): Set<string> {
   return new Set([...fissi.map((g) => `${anno}-${g}`), testo(lunediAngelo)]);
 }
 
-/** Giorno di pagamento del mese indicato: il 20, o il primo giorno lavorativo successivo. */
-export function dataPagamento(anno: number, mese: number, p: Parametri): string {
-  const giorno = new Date(Date.UTC(anno, mese - 1, p.giornoPagamento));
-  const chiusi = festivi(anno);
-  while (giorno.getUTCDay() === 0 || giorno.getUTCDay() === 6 || chiusi.has(testo(giorno))) {
+/** Il giorno indicato o, se è sabato, domenica o festivo nazionale, il primo giorno lavorativo successivo. */
+function lavorativo(giorno: Date): string {
+  while (giorno.getUTCDay() === 0 || giorno.getUTCDay() === 6 || festivi(giorno.getUTCFullYear()).has(testo(giorno))) {
     giorno.setUTCDate(giorno.getUTCDate() + 1);
   }
   return testo(giorno);
+}
+
+/** Giorno di pagamento del mese indicato: il 20, o il primo giorno lavorativo successivo. */
+export function dataPagamento(anno: number, mese: number, p: Parametri): string {
+  return lavorativo(new Date(Date.UTC(anno, mese - 1, p.giornoPagamento)));
+}
+
+/** Codice tributo F24 delle ritenute sulle provvigioni per vendite a domicilio. */
+export const CODICE_TRIBUTO_RITENUTE = "1038";
+
+/**
+ * F24 delle ritenute dei pagamenti fatti in un mese (sezione 8b): si versa entro il 16 del mese
+ * successivo, o il primo giorno lavorativo dopo. Mese di riferimento e anno = quelli dei pagamenti.
+ */
+export function datiF24(periodo: string, ritenute: Centesimi[]) {
+  const [anno, mese] = periodo.split("-").map(Number);
+  return {
+    codiceTributo: CODICE_TRIBUTO_RITENUTE,
+    /** Campo "rateazione/regione/prov./mese rif." nel formato 00MM. */
+    meseRiferimento: `00${String(mese).padStart(2, "0")}`,
+    annoRiferimento: String(anno),
+    importo: ritenute.reduce((t, r) => t + r, 0n),
+    scadenza: lavorativo(new Date(Date.UTC(anno, mese, 16))),
+  };
 }

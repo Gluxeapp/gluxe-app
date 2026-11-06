@@ -102,3 +102,23 @@ body {
     padding-top: 0;
   }
 }
+
+/* Stampa (ricevute, fatture, F24): solo il foglio, su bianco; menu e pulsanti nascosti. */
+@media print {
+  header,
+  nav,
+  .non-stampare {
+    display: none !important;
+  }
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+  main {
+    padding: 0 !important;
+  }
+  @page {
+    size: A4;
+    margin: 14mm;
+  }
+}

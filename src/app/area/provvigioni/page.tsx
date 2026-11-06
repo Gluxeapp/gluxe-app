@@ -1,14 +1,18 @@
+import Link from "next/link";
 import { Suspense } from "react";
 import { Caricamento, Scheda, Titolo } from "@/components/ui";
 import { richiediIncaricataOperativa } from "@/lib/accesso";
 import { formatta, formattaEuro } from "@/lib/denaro";
+import { dataItaliana } from "@/lib/dati-incaricato";
+import { contoIncaricata, statoRichiesta } from "@/lib/provvigioni/conti";
+import { PulsanteRichiesta } from "./richiesta";
 import { calcoloDelMese, ETICHETTE_VOCE, meseCorrente } from "@/lib/provvigioni/dati";
 import { TIPI_VOCE } from "@/lib/provvigioni/motore";
 
 export default function Pagina() {
   return (
     <>
-      <Titolo sottotitolo="Situazione del mese in corso, calcolata dal server sugli ordini già pagati. Gli importi sono una stima finché il mese non viene chiuso.">
+      <Titolo sottotitolo="Situazione del mese in corso (una stima finché il mese non viene chiuso), saldo dei mesi chiusi e richieste di pagamento.">
         Provvigioni
       </Titolo>
       <Suspense fallback={<Caricamento />}>
@@ -111,13 +115,110 @@ async function Contenuto() {
         )}
       </Scheda>
 
-      <Scheda>
-        <p className="text-sm text-testo-tenue">
-          Il mese si chiude il 1° del mese successivo. Dal {p.richiestaDalGiorno} al {p.richiestaAlGiorno} puoi chiedere il pagamento, se il
-          saldo è almeno {formattaEuro(p.pagamentoMinimo)}; sotto questa cifra l&apos;importo si somma al mese dopo. Storico dei pagamenti e
-          pulsante &quot;Richiedi pagamento&quot; arrivano con la Fase 6.
-        </p>
-      </Scheda>
+      <Suspense fallback={<Caricamento />}>
+        <Conto incaricataId={incaricato.id} />
+      </Suspense>
     </div>
+  );
+}
+
+const STATI_RICHIESTA = { richiesta: "In controllo", approvata: "Approvata, in pagamento", rifiutata: "Rifiutata", pagata: "Pagata" } as const;
+const ETICHETTE_MOVIMENTO = { storno: "Storno per resi", richiesta: "Richiesta di pagamento", richiesta_rifiutata: "Richiesta rifiutata: importo restituito" } as const;
+const nomeMeseDi = (m: string) => `${NOMI_MESI[Number(m.slice(5, 7)) - 1]} ${m.slice(0, 4)}`;
+
+/** Saldo, richiesta di pagamento, documenti e registro dei mesi chiusi: solo i dati dell'incaricata collegata. */
+async function Conto({ incaricataId }: { incaricataId: string }) {
+  const [s, conto] = await Promise.all([statoRichiesta(incaricataId), contoIncaricata(incaricataId)]);
+  const mesi = [...new Set(conto.movimenti.map((m) => m.mese))];
+
+  return (
+    <>
+      <Scheda>
+        <h2 className="font-titoli text-xl text-oro-chiaro">Saldo disponibile</h2>
+        <p className={`font-titoli text-3xl ${s.saldo < 0n ? "text-errore" : "text-oro-chiaro"}`}>{formattaEuro(s.saldo)}</p>
+        <p className="mt-1 text-sm text-testo-tenue">Compensi dei mesi chiusi non ancora chiesti, al lordo della ritenuta.</p>
+        <div className="mt-4">
+          {s.puoRichiedere ? (
+            <>
+              <PulsanteRichiesta importo={formattaEuro(s.saldo)} />
+              <p className="mt-2 text-sm text-testo-tenue">
+                Il pagamento arriva con bonifico il {dataItaliana(s.dataPagamento)}, al netto della ritenuta (ed eventuale bollo).
+              </p>
+            </>
+          ) : (
+            <p className="text-sm text-testo-tenue">
+              {s.giaRichiesta
+                ? "Hai già chiesto il pagamento di questo mese: trovi la richiesta qui sotto."
+                : !s.finestra
+                  ? `Il pagamento si chiede dal ${s.dal} al ${s.al} di ogni mese, dopo la chiusura del mese precedente.`
+                  : !s.meseAppenaChiuso
+                    ? "La sede non ha ancora chiuso il mese scorso: il pulsante compare appena lo chiude."
+                    : `Servono almeno ${formattaEuro(s.minimo)}: il saldo si somma ai mesi successivi.`}
+            </p>
+          )}
+        </div>
+      </Scheda>
+
+      {conto.richieste.length > 0 && (
+        <Scheda>
+          <h2 className="mb-2 font-titoli text-xl text-oro-chiaro">Richieste e documenti</h2>
+          <ul className="divide-y divide-bordo text-sm">
+            {conto.richieste.map(({ richiesta: r, documentoId, numero, anno, totale }) => (
+              <li key={r.id} className="flex flex-wrap items-center justify-between gap-2 py-3">
+                <div>
+                  <p>
+                    {formattaEuro(r.lordo)} lordi · {STATI_RICHIESTA[r.stato]}
+                  </p>
+                  <p className="text-testo-tenue">
+                    Chiesta il {dataItaliana(r.creatoIl)}
+                    {totale !== null && ` · bonifico di ${formattaEuro(totale)} il ${dataItaliana(r.dataPagamento)}`}
+                    {r.stato === "rifiutata" && r.motivoRifiuto && ` · motivo: ${r.motivoRifiuto}`}
+                  </p>
+                </div>
+                {documentoId && (
+                  <Link href={`/area/provvigioni/documento/${documentoId}`} className="text-oro-chiaro underline">
+                    Documento n. {numero}/{anno}
+                  </Link>
+                )}
+              </li>
+            ))}
+          </ul>
+        </Scheda>
+      )}
+
+      {mesi.length > 0 && (
+        <Scheda>
+          <h2 className="mb-2 font-titoli text-xl text-oro-chiaro">Mesi chiusi, voce per voce</h2>
+          <div className="grid gap-4">
+            {mesi.map((mese) => {
+              const del = conto.movimenti.filter((m) => m.mese === mese);
+              const voci = TIPI_VOCE.map((t) => [t, del.filter((m) => m.tipo === "voce" && m.tipoVoce === t).reduce((x, m) => x + m.importo, 0n)] as const).filter(([, x]) => x !== 0n);
+              const altri = (["storno", "richiesta", "richiesta_rifiutata"] as const)
+                .map((t) => [t, del.filter((m) => m.tipo === t).reduce((x, m) => x + m.importo, 0n)] as const)
+                .filter(([, x]) => x !== 0n);
+              return (
+                <div key={mese}>
+                  <h3 className="text-sm font-semibold capitalize">{nomeMeseDi(mese)}</h3>
+                  <dl className="mt-1 grid gap-1 text-sm">
+                    {voci.map(([t, x]) => (
+                      <div key={t} className="flex justify-between gap-4">
+                        <dt className="text-testo-tenue">{ETICHETTE_VOCE[t]}</dt>
+                        <dd>{formattaEuro(x)}</dd>
+                      </div>
+                    ))}
+                    {altri.map(([t, x]) => (
+                      <div key={t} className="flex justify-between gap-4">
+                        <dt className="text-testo-tenue">{ETICHETTE_MOVIMENTO[t]}</dt>
+                        <dd>{formattaEuro(x)}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </div>
+              );
+            })}
+          </div>
+        </Scheda>
+      )}
+    </>
   );
 }

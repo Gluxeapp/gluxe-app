@@ -8,7 +8,7 @@ import { db } from "@/db";
 import { incaricati, richiesteContatto, storicoSponsor, utenti } from "@/db/schema";
 import { erroriPerCampo, valoriDa, type EsitoModulo } from "@/components/ui";
 import { richiediStaff } from "@/lib/accesso";
-import { cercaSponsor, creaIncaricato, ErroreDatiDuplicati, schemaAnagrafica } from "@/lib/incaricati";
+import { cercaSponsor, creaIncaricato, ErroreDatiDuplicati, regimeDa, schemaAnagrafica } from "@/lib/incaricati";
 import { inviaLinkPassword } from "@/lib/password";
 import { registra } from "@/lib/registro";
 import { normalizzaCodiceIncaricato } from "@/lib/validazioni";
@@ -17,6 +17,7 @@ function letturaAnagrafica(formData: FormData) {
   return schemaAnagrafica.safeParse({
     ...Object.fromEntries(formData),
     haPartitaIva: formData.get("haPartitaIva") === "si",
+    forfettario: formData.get("regimePartitaIva") === "forfettario",
   });
 }
 
@@ -60,7 +61,7 @@ export async function modificaAnagrafica(_: EsitoModulo, formData: FormData): Pr
   if (!letto.success) {
     return { messaggio: "Controlla i campi evidenziati.", errori: erroriPerCampo(letto.error.issues), valori };
   }
-  const { email, haPartitaIva, partitaIva, ...dati } = letto.data;
+  const { email, haPartitaIva, partitaIva, forfettario, ...dati } = letto.data;
 
   try {
     await db().transaction(async (tx) => {
@@ -72,7 +73,7 @@ export async function modificaAnagrafica(_: EsitoModulo, formData: FormData): Pr
         .for("update");
       if (!prima) throw new Error("Incaricato non trovato");
 
-      const nuovi = { ...dati, partitaIva: haPartitaIva ? (partitaIva ?? null) : null };
+      const nuovi = { ...dati, partitaIva: haPartitaIva ? (partitaIva ?? null) : null, regimeFiscale: regimeDa({ haPartitaIva, forfettario }) };
       await tx.update(incaricati).set(nuovi).where(eq(incaricati.id, id));
       await tx
         .update(utenti)

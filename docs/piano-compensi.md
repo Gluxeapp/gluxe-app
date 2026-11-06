@@ -193,6 +193,7 @@ Il calcolo gira sul server, in quest'ordine. Durante il mese si può rilanciare 
 - Le ritenute dei pagamenti fatti in un mese si versano con l'F24 entro il **16 del mese successivo** (se è sabato, domenica o festivo, il primo giorno lavorativo successivo).
 - L'app compila l'F24 in automatico, sezione Erario: **codice tributo 1038**, mese di riferimento e anno = mese e anno dei pagamenti, importo = somma delle ritenute d'imposta di quei pagamenti, dati di G LUXE come contribuente. Si scarica in PDF da stampare o ricopiare nell'home banking, con l'elenco dei pagamenti che lo compongono. La contabilità segna "versato" con la data.
 - La quota INPS (quando i parametri saranno diversi da zero) avrà la sua sezione: da definire con il commercialista.
+- INPS provvisorio, finché il commercialista non conferma: contributo = aliquota × base imponibile (% dei compensi) sulla parte dei compensi dell'anno oltre la soglia di esenzione; l'azienda paga la sua quota (report separato), il resto si trattiene all'incaricata. Vale per chi non è forfettaria. Con i parametri a zero (oggi) il contributo è zero.
 
 ### 8c. File dei bonifici SEPA (decisione 28)
 

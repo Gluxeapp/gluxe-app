@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { Caricamento, Scheda, Titolo } from "@/components/ui";
+import { ETICHETTE_REGIME } from "@/lib/provvigioni/documento";
 import { dataItaliana, ibanNascosto, mioProfilo } from "@/lib/dati-incaricato";
 
 export default function Profilo() {
@@ -26,6 +27,7 @@ async function Contenuto() {
     ["Email", p.email],
     ["IBAN", ibanNascosto(p.iban)],
     ["Partita IVA", p.partitaIva ?? "No"],
+    ["Regime fiscale", ETICHETTE_REGIME[p.regimeFiscale]],
     ["Incaricata dal", dataItaliana(p.creatoIl)],
   ];
   return (

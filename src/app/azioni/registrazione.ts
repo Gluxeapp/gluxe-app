@@ -39,6 +39,7 @@ export async function registraIncaricato(_: EsitoModulo, formData: FormData): Pr
   const letto = schemaRegistrazione.safeParse({
     ...Object.fromEntries(formData),
     haPartitaIva: formData.get("haPartitaIva") === "si",
+    forfettario: formData.get("regimePartitaIva") === "forfettario",
     privacy: formData.get("privacy") === "on",
   });
   if (!letto.success) {

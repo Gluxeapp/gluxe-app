@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { PARAMETRI_INIZIALI as P } from "../parametri";
-import { dataPagamento, finestraRichiestaAperta, pagamentoRichiedibile, ritenuta } from "./pagamenti";
+import { dataPagamento, datiF24, finestraRichiestaAperta, pagamentoRichiedibile, ritenuta } from "./pagamenti";
 
 describe("Pagamenti delle provvigioni (sezione 8)", () => {
   test("T9 Pagamento minimo: 42 € non si possono richiedere, 50 € sì", () => {
@@ -22,6 +22,18 @@ describe("Pagamenti delle provvigioni (sezione 8)", () => {
     expect(dataPagamento(2026, 11, P)).toBe("2026-11-20"); // venerdì
     expect(dataPagamento(2027, 3, P)).toBe("2027-03-22"); // 20 sabato → lunedì 22
     expect(dataPagamento(2027, 6, P)).toBe("2027-06-21"); // 20 domenica → lunedì 21
+  });
+
+  test("T25 F24: codice 1038, mese e anno dei pagamenti, scadenza il 16 del mese dopo (sabato → lunedì)", () => {
+    expect(datiF24("2026-12", [1881n, 2372n])).toEqual({
+      codiceTributo: "1038",
+      meseRiferimento: "0012",
+      annoRiferimento: "2026",
+      importo: 4253n,
+      scadenza: "2027-01-18",
+    });
+    expect(datiF24("2026-11", []).scadenza).toBe("2026-12-16"); // mercoledì
+    expect(datiF24("2027-07", []).scadenza).toBe("2027-08-16"); // lunedì: Ferragosto è domenica 15
   });
 
   test("finestra di richiesta dal 3 al 6", () => {

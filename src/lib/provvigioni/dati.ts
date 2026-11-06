@@ -1,8 +1,9 @@
 import "server-only";
-import { desc, lte, sql, type SQL } from "drizzle-orm";
+import { desc, eq, sql, type SQL } from "drizzle-orm";
 import { db } from "@/db";
-import { parametriVersioni } from "@/db/schema";
-import { parametriDaJson, type Parametri } from "../parametri";
+import { mesiChiusi, parametriVersioni } from "@/db/schema";
+import { datiDaFotografia } from "./congelamento";
+import { schemaParametri, type Parametri } from "../parametri";
 import { meseDecadenzaFondatore, puntiRequisitoFondatore, type OrdinePagato } from "./fondatori";
 import { calcolaMese, type DatiMese, type EsitoMese, type IncaricataRete } from "./motore";
 
@@ -35,7 +36,7 @@ export type CalcoloDelMese = EsitoMese & {
  * Ordini pagati tra due date (ora italiana, estremi compresi), annullati e resi esclusi,
  * con i punti delle righe in promozione separati (punti PR degli acquisti personali).
  */
-async function ordiniPagati(dal: string, al: SQL): Promise<OrdinePagato[]> {
+async function ordiniPagati(dal: string | null, al: SQL, soloNonChiusi = false): Promise<OrdinePagato[]> {
   const righe = await db().execute<{
     id: string;
     incaricato_id: string;
@@ -52,7 +53,9 @@ async function ordiniPagati(dal: string, al: SQL): Promise<OrdinePagato[]> {
     from app.ordini o
     where o.pagato_il is not null
       and o.stato not in ('annullato', 'reso')
-      and (o.pagato_il at time zone 'Europe/Rome')::date between ${dal}::date and ${al}`);
+      and (o.pagato_il at time zone 'Europe/Rome')::date <= ${al}
+      and (${dal}::date is null or (o.pagato_il at time zone 'Europe/Rome')::date >= ${dal}::date)
+      and (not ${soloNonChiusi} or not exists (select 1 from app.ordini_chiusi c where c.ordine_id = o.id))`);
   return righe.rows.map((o) => ({
     id: o.id,
     incaricataId: o.incaricato_id,
@@ -116,23 +119,64 @@ export async function reteCompleta() {
   return righe.rows;
 }
 
-export async function calcoloDelMese(mese: string): Promise<CalcoloDelMese> {
-  if (!MESE_VALIDO.test(mese)) throw new Error("Mese non valido");
-  const inizio = `${mese}-01`;
-  const fine = sql`(${inizio}::date + interval '1 month' - interval '1 day')::date`;
+/** Mese successivo, "AAAA-MM". */
+export function meseDopo(mese: string): string {
+  const [a, m] = mese.split("-").map(Number);
+  return new Date(Date.UTC(a, m, 1)).toISOString().slice(0, 7);
+}
 
-  const [versione] = await db()
+/** Ultimo mese chiuso, se c'è. */
+export async function ultimoMeseChiuso(): Promise<string | null> {
+  const [r] = await db().select({ mese: sql<string | null>`max(${mesiChiusi.mese})` }).from(mesiChiusi);
+  return r?.mese ?? null;
+}
+
+/**
+ * Versione dei parametri valida a fine mese. Le versioni di prima del piano rev. 6 (Fasi 2 e 3) non
+ * contengono le regole delle provvigioni: per i mesi precedenti vale la prima versione completa,
+ * perché il piano si applica dal primo ordine (decisione 1).
+ */
+async function versionePerIlMese(fine: SQL) {
+  const versioni = await db()
     .select()
     .from(parametriVersioni)
-    .where(lte(parametriVersioni.validoDal, fine))
-    .orderBy(desc(parametriVersioni.validoDal), desc(parametriVersioni.id))
-    .limit(1);
-  if (!versione) throw new Error("Nessuna versione dei parametri valida per il mese");
-  const parametri = parametriDaJson(versione.valori);
+    .orderBy(desc(parametriVersioni.validoDal), desc(parametriVersioni.id));
+  const {
+    rows: [{ giorno }],
+  } = await db().execute<{ giorno: string }>(sql`select ${fine}::text as giorno`);
+  const complete = versioni.flatMap((v) => {
+    const letto = schemaParametri.safeParse(v.valori);
+    return letto.success ? [{ versione: v, parametri: letto.data }] : [];
+  });
+  // A parità di data vale l'ultima registrata (l'elenco è già in quest'ordine).
+  const primaData = complete.at(-1)?.versione.validoDal;
+  const scelta = complete.find((c) => c.versione.validoDal <= giorno) ?? complete.find((c) => c.versione.validoDal === primaData);
+  if (!scelta) throw new Error("Nessuna versione dei parametri valida per il mese");
+  return scelta;
+}
+
+export type DatiDelMese = { dati: DatiMese; versioneParametri: bigint; chiuso: boolean };
+
+/**
+ * Dati in ingresso al motore per un mese. Mese chiuso: la sua fotografia (non cambia più).
+ * Mese aperto: ordini pagati nel mese non ancora entrati in un mese chiuso; il primo mese aperto
+ * prende anche i pagamenti arrivati in ritardo per mesi già chiusi (decisione 18).
+ */
+export async function datiDelMese(mese: string): Promise<DatiDelMese> {
+  if (!MESE_VALIDO.test(mese)) throw new Error("Mese non valido");
+  const [chiuso] = await db().select().from(mesiChiusi).where(eq(mesiChiusi.mese, mese)).limit(1);
+  if (chiuso) return { dati: datiDaFotografia(chiuso.fotografia), versioneParametri: chiuso.parametriVersioneId, chiuso: true };
+
+  const inizio = `${mese}-01`;
+  const fine = sql`(${inizio}::date + interval '1 month' - interval '1 day')::date`;
+  const ultimo = await ultimoMeseChiuso();
+  const primoAperto = ultimo !== null && meseDopo(ultimo) === mese;
+
+  const { versione, parametri } = await versionePerIlMese(fine);
 
   const [incaricate, ordini, bloccate, fondatori, quote] = await Promise.all([
     reteCompleta(),
-    ordiniPagati(inizio, fine),
+    ordiniPagati(primoAperto ? null : inizio, fine, true),
     db().execute<{ incaricato_id: string; percentuale: number }>(sql`
       select incaricato_id, percentuale from app.qualifiche_bloccate
       where dal <= ${fine} and (al is null or al >= ${inizio}::date)
@@ -180,10 +224,16 @@ export async function calcoloDelMese(mese: string): Promise<CalcoloDelMese> {
     esclusiBonusAuto: incaricate.filter((i) => i.esclusa_bonus_auto).map((i) => i.id),
   };
 
+  return { dati, versioneParametri: versione.id, chiuso: false };
+}
+
+export async function calcoloDelMese(mese: string): Promise<CalcoloDelMese & { chiuso: boolean }> {
+  const [{ dati, versioneParametri, chiuso }, incaricate] = await Promise.all([datiDelMese(mese), reteCompleta()]);
   return {
     ...calcolaMese(dati),
-    versioneParametri: versione.id,
-    parametri,
+    versioneParametri,
+    parametri: dati.parametri,
+    chiuso,
     nomi: new Map(incaricate.map((i) => [i.id, { codice: i.codice, nome: i.nome }])),
   };
 }

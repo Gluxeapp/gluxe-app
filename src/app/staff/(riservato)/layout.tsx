@@ -11,6 +11,8 @@ const voci: { href: string; etichetta: string; ruoli: RuoloStaff[] }[] = [
   { href: "/staff/catalogo", etichetta: "Catalogo", ruoli: ["amministrazione", "contabilita", "ordini"] },
   { href: "/staff/catalogo/promozioni", etichetta: "Promozioni", ruoli: ["amministrazione", "contabilita", "ordini"] },
   { href: "/staff/provvigioni", etichetta: "Anteprima provvigioni", ruoli: ["amministrazione"] },
+  { href: "/staff/chiusura", etichetta: "Chiusura del mese", ruoli: ["amministrazione"] },
+  { href: "/staff/contabilita", etichetta: "Contabilità", ruoli: ["amministrazione", "contabilita"] },
   { href: "/staff/piano", etichetta: "Impostazioni del piano", ruoli: ["amministrazione"] },
   { href: "/staff/parametri", etichetta: "Parametri del piano", ruoli: ["amministrazione"] },
   { href: "/staff/richieste", etichetta: "Richieste sponsor", ruoli: ["amministrazione"] },

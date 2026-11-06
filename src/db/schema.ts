@@ -28,6 +28,7 @@ export const ruolo = app.enum("ruolo", ["incaricato", "amministrazione", "contab
 export const statoIncaricato = app.enum("stato_incaricato", ["attivo", "sospeso", "cessato", "cliente"]);
 export const scopoCodice = app.enum("scopo_codice", ["accesso_staff", "recupero_password"]);
 export const statoRichiesta = app.enum("stato_richiesta", ["nuova", "gestita"]);
+export const regimeFiscale = app.enum("regime_fiscale", ["nessuna_piva", "piva_ordinaria", "piva_forfettaria"]);
 
 /** Sequenza dei codici incaricato: GL000001, GL000002… I numeri non si riutilizzano mai. */
 export const sequenzaCodiceIncaricato = app.sequence("sequenza_codice_incaricato", { startWith: 1 });
@@ -75,6 +76,8 @@ export const incaricati = app.table(
     telefono: text("telefono").notNull(),
     iban: text("iban").notNull(),
     partitaIva: text("partita_iva"),
+    /** Regime fiscale per ricevuta o fattura delle provvigioni (decisione 28). */
+    regimeFiscale: regimeFiscale("regime_fiscale").notNull().default("nessuna_piva"),
     sponsorId: uuid("sponsor_id").references((): AnyPgColumn => incaricati.id),
     stato: statoIncaricato("stato").notNull().default("attivo"),
     startKitPagato: boolean("start_kit_pagato").notNull().default(false),
@@ -441,3 +444,213 @@ export const quoteSpeciali = app.table(
   },
   (t) => [index("quote_speciali_incaricato").on(t.incaricatoId)],
 );
+
+// ── Fase 6: chiusura del mese, registro provvigioni, pagamenti e contabilità ─
+// Tabelle solo in aggiunta dove indicato: il database rifiuta modifiche e cancellazioni
+// (docs/garanzie-calcolo.md, sezione 3).
+
+/** Mese chiuso e congelato, con la fotografia dei dati in ingresso al motore. Un mese = una chiusura. */
+export const mesiChiusi = app.table("mesi_chiusi", {
+  mese: text("mese").primaryKey(),
+  parametriVersioneId: bigint("parametri_versione_id", { mode: "bigint" })
+    .notNull()
+    .references(() => parametriVersioni.id),
+  fotografia: jsonb("fotografia").notNull(),
+  puntiAziendali: bigint("punti_aziendali", { mode: "bigint" }).notNull(),
+  incasso: bigint("incasso", { mode: "bigint" }).notNull(),
+  totaleCompensi: bigint("totale_compensi", { mode: "bigint" }).notNull(),
+  chiusoDa: uuid("chiuso_da").references(() => utenti.id),
+  chiusoIl: timestamp("chiuso_il", { withTimezone: true }).notNull().defaultNow(),
+});
+
+/** Ogni ordine pagato entra in un solo mese chiuso (chiave primaria): mai contato due volte. */
+export const ordiniChiusi = app.table(
+  "ordini_chiusi",
+  {
+    ordineId: uuid("ordine_id")
+      .primaryKey()
+      .references(() => ordini.id),
+    mese: text("mese")
+      .notNull()
+      .references(() => mesiChiusi.mese),
+  },
+  (t) => [index("ordini_chiusi_mese").on(t.mese)],
+);
+
+/** Rettifica: storno degli ordini resi o annullati dopo la chiusura del loro mese, registrato nel mese che si chiude. */
+export const rettifiche = app.table("rettifiche", {
+  id: bigserial("id", { mode: "bigint" }).primaryKey(),
+  /** Mese chiuso in cui si registra lo storno. */
+  mese: text("mese")
+    .notNull()
+    .references(() => mesiChiusi.mese),
+  /** Mese chiuso a cui appartenevano gli ordini. */
+  meseOrigine: text("mese_origine")
+    .notNull()
+    .references(() => mesiChiusi.mese),
+  creatoIl: creatoIl(),
+});
+
+/** Un ordine reso si storna una volta sola (chiave primaria). */
+export const ordiniStornati = app.table("ordini_stornati", {
+  ordineId: uuid("ordine_id")
+    .primaryKey()
+    .references(() => ordiniChiusi.ordineId),
+  rettificaId: bigint("rettifica_id", { mode: "bigint" })
+    .notNull()
+    .references(() => rettifiche.id),
+});
+
+export const tipoMovimento = app.enum("tipo_movimento", ["voce", "storno", "richiesta", "richiesta_rifiutata"]);
+export const statoRichiestaPagamento = app.enum("stato_richiesta_pagamento", ["richiesta", "approvata", "rifiutata", "pagata"]);
+
+/** Richiesta di pagamento: una per incaricata per mese chiuso (indice univoco nella migrazione). */
+export const richiestePagamento = app.table(
+  "richieste_pagamento",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    incaricatoId: uuid("incaricato_id")
+      .notNull()
+      .references(() => incaricati.id),
+    /** Mese chiuso dopo il quale si è chiesto il pagamento (finestra dal 3 al 6 del mese dopo). */
+    mese: text("mese")
+      .notNull()
+      .references(() => mesiChiusi.mese),
+    lordo: bigint("lordo", { mode: "bigint" }).notNull(),
+    stato: statoRichiestaPagamento("stato").notNull().default("richiesta"),
+    dataPagamento: date("data_pagamento").notNull(),
+    decisaDa: uuid("decisa_da").references(() => utenti.id),
+    decisaIl: timestamp("decisa_il", { withTimezone: true }),
+    motivoRifiuto: text("motivo_rifiuto"),
+    pagataDa: uuid("pagata_da").references(() => utenti.id),
+    pagataIl: timestamp("pagata_il", { withTimezone: true }),
+    creatoIl: creatoIl(),
+  },
+  (t) => [index("richieste_pagamento_incaricato").on(t.incaricatoId), index("richieste_pagamento_stato").on(t.stato, t.dataPagamento)],
+);
+
+/**
+ * Registro provvigioni, solo in aggiunta (CLAUDE.md, regole 8 e 9): il saldo di un'incaricata è la
+ * somma dei suoi movimenti. Voci del mese chiuso, storni dei resi, richieste di pagamento (in meno)
+ * e richieste rifiutate (restituite).
+ */
+export const movimenti = app.table(
+  "movimenti",
+  {
+    id: bigserial("id", { mode: "bigint" }).primaryKey(),
+    incaricatoId: uuid("incaricato_id")
+      .notNull()
+      .references(() => incaricati.id),
+    tipo: tipoMovimento("tipo").notNull(),
+    /** Mese chiuso in cui il movimento conta (per le richieste: il mese chiuso della richiesta). */
+    mese: text("mese")
+      .notNull()
+      .references(() => mesiChiusi.mese),
+    tipoVoce: text("tipo_voce"),
+    base: bigint("base", { mode: "bigint" }),
+    percentuale: integer("percentuale"),
+    importo: bigint("importo", { mode: "bigint" }).notNull(),
+    /** Incaricata da cui vengono i punti (differenze, generazioni, kit). */
+    origineId: uuid("origine_id").references(() => incaricati.id),
+    rettificaId: bigint("rettifica_id", { mode: "bigint" }).references(() => rettifiche.id),
+    richiestaId: uuid("richiesta_id").references(() => richiestePagamento.id),
+    creatoIl: creatoIl(),
+  },
+  (t) => [index("movimenti_incaricato").on(t.incaricatoId, t.mese), index("movimenti_mese").on(t.mese)],
+);
+
+export const tipoDocumento = app.enum("tipo_documento", ["ricevuta", "fattura_ordinaria", "fattura_forfettaria"]);
+
+/** Ricevuta o fattura proforma delle provvigioni: nasce all'approvazione, poi non cambia più. */
+export const documentiProvvigioni = app.table(
+  "documenti_provvigioni",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    richiestaId: uuid("richiesta_id")
+      .notNull()
+      .unique()
+      .references(() => richiestePagamento.id),
+    incaricatoId: uuid("incaricato_id")
+      .notNull()
+      .references(() => incaricati.id),
+    anno: integer("anno").notNull(),
+    numero: integer("numero").notNull(),
+    tipo: tipoDocumento("tipo").notNull(),
+    data: date("data").notNull(),
+    imponibile: bigint("imponibile", { mode: "bigint" }).notNull(),
+    iva: bigint("iva", { mode: "bigint" }).notNull(),
+    aliquotaIva: integer("aliquota_iva").notNull(),
+    ritenuta: bigint("ritenuta", { mode: "bigint" }).notNull(),
+    inpsBase: bigint("inps_base", { mode: "bigint" }).notNull(),
+    inpsIncaricata: bigint("inps_incaricata", { mode: "bigint" }).notNull(),
+    inpsAzienda: bigint("inps_azienda", { mode: "bigint" }).notNull(),
+    bollo: bigint("bollo", { mode: "bigint" }).notNull(),
+    totale: bigint("totale", { mode: "bigint" }).notNull(),
+    /** Fotografia dei dati di incaricata e azienda al momento del documento. */
+    incaricata: jsonb("incaricata").notNull(),
+    azienda: jsonb("azienda").notNull(),
+    /** Mese di competenza dei guadagni, per esempio "10/2026". */
+    competenza: text("competenza").notNull(),
+    parametriVersioneId: bigint("parametri_versione_id", { mode: "bigint" })
+      .notNull()
+      .references(() => parametriVersioni.id),
+    creatoIl: creatoIl(),
+  },
+  (t) => [uniqueIndex("documenti_numero").on(t.incaricatoId, t.anno, t.numero), index("documenti_data").on(t.data)],
+);
+
+/** File dei bonifici SEPA scaricati: chi, quando, quali richieste. */
+export const distinteBonifici = app.table("distinte_bonifici", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  dataPagamento: date("data_pagamento").notNull(),
+  idMessaggio: text("id_messaggio").notNull().unique(),
+  numeroBonifici: integer("numero_bonifici").notNull(),
+  totale: bigint("totale", { mode: "bigint" }).notNull(),
+  xml: text("xml").notNull(),
+  creataDa: uuid("creata_da").references(() => utenti.id),
+  creataIl: timestamp("creata_il", { withTimezone: true }).notNull().defaultNow(),
+  annullataDa: uuid("annullata_da").references(() => utenti.id),
+  annullataIl: timestamp("annullata_il", { withTimezone: true }),
+});
+
+/** Una richiesta sta in un solo file valido alla volta (indice univoco nella migrazione). */
+export const righeDistinta = app.table(
+  "righe_distinta",
+  {
+    id: bigserial("id", { mode: "bigint" }).primaryKey(),
+    distintaId: uuid("distinta_id")
+      .notNull()
+      .references(() => distinteBonifici.id),
+    richiestaId: uuid("richiesta_id")
+      .notNull()
+      .references(() => richiestePagamento.id),
+    annullata: boolean("annullata").notNull().default(false),
+  },
+  (t) => [index("righe_distinta_distinta").on(t.distintaId)],
+);
+
+/** F24 delle ritenute segnato come versato (uno per mese dei pagamenti). */
+export const versamentiF24 = app.table("versamenti_f24", {
+  periodo: text("periodo").primaryKey(),
+  importo: bigint("importo", { mode: "bigint" }).notNull(),
+  versatoIl: date("versato_il").notNull(),
+  registratoDa: uuid("registrato_da").references(() => utenti.id),
+  creatoIl: creatoIl(),
+});
+
+/** Dati di G LUXE per documenti, F24 e bonifici: una sola riga, modificabile dalla sede con registro. */
+export const datiAzienda = app.table("dati_azienda", {
+  id: integer("id").primaryKey().default(1),
+  ragioneSociale: text("ragione_sociale").notNull().default(""),
+  indirizzo: text("indirizzo").notNull().default(""),
+  cap: text("cap").notNull().default(""),
+  citta: text("citta").notNull().default(""),
+  provincia: text("provincia").notNull().default(""),
+  codiceFiscale: text("codice_fiscale").notNull().default(""),
+  partitaIva: text("partita_iva").notNull().default(""),
+  iban: text("iban").notNull().default(""),
+  cuc: text("cuc").notNull().default(""),
+  /** Dicitura del bollo virtuale, per esempio "Autorizzazione Agenzia delle Entrate di … n. … del …". */
+  autorizzazioneBollo: text("autorizzazione_bollo").notNull().default(""),
+  modificatoIl: timestamp("modificato_il", { withTimezone: true }).notNull().defaultNow(),
+});

@@ -25,6 +25,7 @@ export async function mioProfilo() {
       email: utenti.email,
       iban: incaricati.iban,
       partitaIva: incaricati.partitaIva,
+      regimeFiscale: incaricati.regimeFiscale,
       stato: incaricati.stato,
       creatoIl: incaricati.creatoIl,
       sponsorNome: sponsor.nome,
