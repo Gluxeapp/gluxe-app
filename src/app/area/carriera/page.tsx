@@ -145,7 +145,7 @@ async function Contenuto({ searchParams }: Pick<PageProps<"/area/carriera">, "se
                   </p>
                 )}
                 <p className="text-xs text-testo-tenue">
-                  In ogni scheda: codice, nome, qualifica e punti personali / di gruppo. Tocca una persona che ha una sua rete per ripartire da lei; scorri di lato se il grafico è largo.
+                  In ogni scheda: codice, nome, qualifica e punti personali / di gruppo. Tocca una persona che ha una sua rete per ripartire da lei; scorri di lato se il grafico è largo. Sul telefono si vedono due livelli alla volta: «+N» indica quante persone ci sono sotto.
                 </p>
                 <ReteGrafica radice={partenza} riparti={(id) => indirizzo({ da: id })} />
               </>

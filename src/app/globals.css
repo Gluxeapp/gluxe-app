@@ -43,59 +43,62 @@ body {
 }
 
 /* Organigramma Unilevel (pagina Carriera e rete della sede): linee che collegano ogni persona alle sue dirette. */
-.organigramma ul {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  padding-top: 1.25rem;
-}
-.organigramma li {
-  position: relative;
-  list-style: none;
-  padding: 1.25rem 0.25rem 0;
-  text-align: center;
-}
-.organigramma li::before,
-.organigramma li::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  right: 50%;
-  width: 50%;
-  height: 1.25rem;
-  border-top: 1px solid color-mix(in srgb, var(--oro) 45%, transparent);
-}
-.organigramma li::after {
-  right: auto;
-  left: 50%;
-  border-left: 1px solid color-mix(in srgb, var(--oro) 45%, transparent);
-}
-.organigramma li:only-child::before,
-.organigramma li:only-child::after {
-  display: none;
-}
-.organigramma li:only-child {
-  padding-top: 0;
-}
-.organigramma li:first-child::before,
-.organigramma li:last-child::after {
-  border: 0 none;
-}
-.organigramma li:last-child::before {
-  border-right: 1px solid color-mix(in srgb, var(--oro) 45%, transparent);
-  border-radius: 0 0.375rem 0 0;
-}
-.organigramma li:first-child::after {
-  border-radius: 0.375rem 0 0 0;
-}
-.organigramma ul ul::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 50%;
-  height: 1.25rem;
-  border-left: 1px solid color-mix(in srgb, var(--oro) 45%, transparent);
-}
-.organigramma > ul {
-  padding-top: 0;
+/* In @layer components: le classi di Tailwind (per esempio hidden sm:flex) possono prevalere. */
+@layer components {
+  .organigramma ul {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    padding-top: 1.25rem;
+  }
+  .organigramma li {
+    position: relative;
+    list-style: none;
+    padding: 1.25rem 0.25rem 0;
+    text-align: center;
+  }
+  .organigramma li::before,
+  .organigramma li::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 50%;
+    width: 50%;
+    height: 1.25rem;
+    border-top: 1px solid color-mix(in srgb, var(--oro) 45%, transparent);
+  }
+  .organigramma li::after {
+    right: auto;
+    left: 50%;
+    border-left: 1px solid color-mix(in srgb, var(--oro) 45%, transparent);
+  }
+  .organigramma li:only-child::before,
+  .organigramma li:only-child::after {
+    display: none;
+  }
+  .organigramma li:only-child {
+    padding-top: 0;
+  }
+  .organigramma li:first-child::before,
+  .organigramma li:last-child::after {
+    border: 0 none;
+  }
+  .organigramma li:last-child::before {
+    border-right: 1px solid color-mix(in srgb, var(--oro) 45%, transparent);
+    border-radius: 0 0.375rem 0 0;
+  }
+  .organigramma li:first-child::after {
+    border-radius: 0.375rem 0 0 0;
+  }
+  .organigramma ul ul::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 50%;
+    height: 1.25rem;
+    border-left: 1px solid color-mix(in srgb, var(--oro) 45%, transparent);
+  }
+  .organigramma > ul {
+    padding-top: 0;
+  }
 }
