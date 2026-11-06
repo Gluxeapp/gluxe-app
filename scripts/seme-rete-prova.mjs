@@ -26,6 +26,7 @@ const PERSONE = [
 // Ordini del mese: personali (Shampoo Botox con sconto 40%) e online (Kit Routine Botox a listino pieno).
 const ORDINI = [
   { chi: "GL000002", tipo: "personale", shampoo: 3 },
+  { chi: "GL000002", tipo: "online", kit: 2 },
   { chi: "alice.finta@gluxe.test", tipo: "online", kit: 8 },
   { chi: "alice.finta@gluxe.test", tipo: "personale", shampoo: 2 },
   { chi: "bruna.finta@gluxe.test", tipo: "online", kit: 1 },
