@@ -91,7 +91,12 @@ async function Contenuto({ params }: Pick<PageProps<"/staff/incaricati/[id]">, "
           </Scheda>
 
           <Scheda>
-            <h2 className="font-titoli text-xl text-oro-chiaro">Diretti ({s.diretti.length})</h2>
+            <div className="flex items-baseline justify-between gap-3">
+              <h2 className="font-titoli text-xl text-oro-chiaro">Diretti ({s.diretti.length})</h2>
+              <Link href={`/staff/rete?da=${i.id}`} className="text-sm text-oro-chiaro">
+                Albero della rete
+              </Link>
+            </div>
             <ul className="mt-2 space-y-1 text-sm">
               {s.diretti.map((d) => (
                 <li key={d.id}>
