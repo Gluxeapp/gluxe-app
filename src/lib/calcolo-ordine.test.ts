@@ -41,6 +41,21 @@ describe("calcolaOrdine", () => {
     expect(o.totale).toBe(2790n + 690n);
   });
 
+  test("punti scritti a mano: l'ordine fotografa i punti del prodotto e della promozione", () => {
+    const conPunti = { ...shampoo, puntiPersonaleManuali: 1500n, puntiOnlineManuali: 2500n };
+    const o = calcolaOrdine(
+      [
+        { prodotto: conPunti, quantita: 2 },
+        { prodotto: conPunti, quantita: 1, promozione: { id: "pr", prezzoPromo: 2790n, puntiManuali: 2000n } },
+      ],
+      "personale",
+      p,
+    );
+    expect(o.righe[0]).toMatchObject({ puntiUnitari: 1500n, totalePunti: 3000n, provvigioneUnitaria: 0n });
+    expect(o.righe[1]).toMatchObject({ puntiUnitari: 2000n, provvigioneUnitaria: 1000n });
+    expect(o.punti).toBe(5000n);
+  });
+
   test("T8: start kit con 33 punti fissi e spedizione", () => {
     const o = calcolaOrdine([{ prodotto: startKit, quantita: 1 }], "start_kit", p);
     expect(o.righe[0]).toMatchObject({ tipoPrezzo: "start_kit", prezzoUnitarioIvato: 5990n, prezzoUnitarioIvaEsclusa: 4910n, puntiUnitari: 3300n });

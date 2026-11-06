@@ -11,8 +11,11 @@ function puntiDi(ivaEsclusa: Centesimi, p: Parametri): Centesimi {
   return percentuale(ivaEsclusa, p.coefficientePunti);
 }
 
+/** Punti per pezzo scritti a mano dalla sede (decisione 27); vuoti = calcolo automatico. */
+export type PuntiManuali = { personale?: Centesimi | null; online?: Centesimi | null };
+
 /** Prezzo al pubblico (ordini dal negozio online) e prezzo per l'acquisto personale dell'incaricata. */
-export function prezziProdotto(listinoIvato: Centesimi, p: Parametri) {
+export function prezziProdotto(listinoIvato: Centesimi, p: Parametri, manuali: PuntiManuali = {}) {
   const pubblicoIvaEsclusa = scorporaIva(listinoIvato, p.aliquotaIva);
   const pagaPercentuale = CENTO_PER_CENTO - p.scontoIncaricata;
 
@@ -26,11 +29,15 @@ export function prezziProdotto(listinoIvato: Centesimi, p: Parametri) {
     incaricataIvaInclusa = percentuale(incaricataIvaEsclusa, CENTO_PER_CENTO + p.aliquotaIva);
   }
 
-  const pubblico: Prezzo = { ivaInclusa: listinoIvato, ivaEsclusa: pubblicoIvaEsclusa, punti: puntiDi(pubblicoIvaEsclusa, p) };
+  const pubblico: Prezzo = {
+    ivaInclusa: listinoIvato,
+    ivaEsclusa: pubblicoIvaEsclusa,
+    punti: manuali.online ?? puntiDi(pubblicoIvaEsclusa, p),
+  };
   const incaricata: Prezzo = {
     ivaInclusa: incaricataIvaInclusa,
     ivaEsclusa: incaricataIvaEsclusa,
-    punti: puntiDi(incaricataIvaEsclusa, p),
+    punti: manuali.personale ?? puntiDi(incaricataIvaEsclusa, p),
   };
   return {
     pubblico,
@@ -48,9 +55,10 @@ export function prezziProdotto(listinoIvato: Centesimi, p: Parametri) {
  * Prodotto in promozione: niente sconto per l'incaricata (paga il prezzo in promozione), ma
  * riceve come provvigione la stessa percentuale dei punti di una vendita dal negozio (decisione 16).
  */
-export function prezziPromozione(prezzoPromoIvato: Centesimi, p: Parametri) {
+export function prezziPromozione(prezzoPromoIvato: Centesimi, p: Parametri, puntiManuali: Centesimi | null = null) {
   const ivaEsclusa = scorporaIva(prezzoPromoIvato, p.aliquotaIva);
-  const prezzo: Prezzo = { ivaInclusa: prezzoPromoIvato, ivaEsclusa, punti: puntiDi(ivaEsclusa, p) };
+  // Punti della promozione scritti a mano (uguali per acquisto personale e vendita online), altrimenti automatici.
+  const prezzo: Prezzo = { ivaInclusa: prezzoPromoIvato, ivaEsclusa, punti: puntiManuali ?? puntiDi(ivaEsclusa, p) };
   const provvigione = percentuale(prezzo.punti, p.provvigioneOnline);
   return {
     pubblico: prezzo,

@@ -26,6 +26,89 @@ const prezzo = (nome: string) =>
     }
   });
 
+/** Punti per pezzo scritti a mano: vuoto = calcolo automatico (decisione 27). */
+const puntiFacoltativi = (nome: string) =>
+  z.string().optional().transform((v, ctx) => {
+    const testo = (v ?? "").trim();
+    if (testo === "") return null;
+    try {
+      const c = daTesto(testo);
+      if (c < 0n) throw new RangeError();
+      return c;
+    } catch {
+      ctx.addIssue({ code: "custom", message: `${nome}: punti non validi (es. 22,23), oppure lascia vuoto` });
+      return z.NEVER;
+    }
+  });
+
+const schemaPunti = z.object({
+  id: z.uuid(),
+  puntiPersonaleManuali: puntiFacoltativi("Acquisto personale"),
+  puntiOnlineManuali: puntiFacoltativi("Vendita online"),
+  motivo: z.string().trim().min(3, "Indica il motivo"),
+});
+
+const testoPunti = (v: bigint | null) => (v === null ? null : v.toString());
+
+/** Punti scritti a mano di un prodotto: li può cambiare tutto lo staff; i prezzi solo l'amministrazione. */
+export async function salvaPuntiProdotto(_: EsitoModulo, formData: FormData): Promise<EsitoModulo> {
+  const staff = await richiediStaff();
+  const valori = valoriDa(formData);
+  const letto = schemaPunti.safeParse(Object.fromEntries(formData));
+  if (!letto.success) return { errori: erroriPerCampo(letto.error.issues), valori };
+  const { id, puntiPersonaleManuali, puntiOnlineManuali, motivo } = letto.data;
+  const esito = await db().transaction(async (tx) => {
+    const [prima] = await tx.select().from(prodotti).where(eq(prodotti.id, id)).for("update");
+    if (!prima) return "assente";
+    if (prima.tipo === "start_kit") return "kit";
+    await tx.update(prodotti).set({ puntiPersonaleManuali, puntiOnlineManuali }).where(eq(prodotti.id, id));
+    await registra(tx, {
+      utenteId: staff.utenteId,
+      azione: "prodotto.punti_modificati",
+      entita: "prodotto",
+      entitaId: id,
+      prima: { puntiPersonaleManuali: testoPunti(prima.puntiPersonaleManuali), puntiOnlineManuali: testoPunti(prima.puntiOnlineManuali) },
+      dopo: { puntiPersonaleManuali: testoPunti(puntiPersonaleManuali), puntiOnlineManuali: testoPunti(puntiOnlineManuali), motivo },
+    });
+    return "ok";
+  });
+  if (esito === "kit") return { messaggio: "I punti dello start kit sono un parametro del piano.", valori };
+  if (esito === "assente") return { messaggio: "Prodotto non trovato.", valori };
+  revalidatePath("/staff/catalogo");
+  revalidatePath(`/staff/catalogo/${id}`);
+  revalidatePath("/area/prodotti");
+  return { ok: true, messaggio: "Punti salvati: valgono per i nuovi ordini (quelli già fatti non cambiano).", valori };
+}
+
+const schemaPuntiPromo = z.object({ id: z.uuid(), puntiManuali: puntiFacoltativi("Punti in promozione"), motivo: z.string().trim().min(3, "Indica il motivo") });
+
+/** Punti scritti a mano di una promozione (uguali per acquisto personale e online). Tutto lo staff. */
+export async function salvaPuntiPromozione(_: EsitoModulo, formData: FormData): Promise<EsitoModulo> {
+  const staff = await richiediStaff();
+  const valori = valoriDa(formData);
+  const letto = schemaPuntiPromo.safeParse(Object.fromEntries(formData));
+  if (!letto.success) return { errori: erroriPerCampo(letto.error.issues), valori };
+  const { id, puntiManuali, motivo } = letto.data;
+  const trovata = await db().transaction(async (tx) => {
+    const [prima] = await tx.select().from(promozioni).where(eq(promozioni.id, id)).for("update");
+    if (!prima) return false;
+    await tx.update(promozioni).set({ puntiManuali }).where(eq(promozioni.id, id));
+    await registra(tx, {
+      utenteId: staff.utenteId,
+      azione: "promozione.punti_modificati",
+      entita: "promozione",
+      entitaId: id,
+      prima: { puntiManuali: testoPunti(prima.puntiManuali) },
+      dopo: { puntiManuali: testoPunti(puntiManuali), motivo },
+    });
+    return true;
+  });
+  if (!trovata) return { messaggio: "Promozione non trovata.", valori };
+  revalidatePath("/staff/catalogo/promozioni");
+  revalidatePath("/area/prodotti");
+  return { ok: true, messaggio: "Punti salvati.", valori };
+}
+
 const schemaProdotto = z.object({
   codice: z.string().trim().toUpperCase().regex(/^[A-Z0-9-]{2,20}$/, "Codice: lettere, numeri e trattini (es. HB-SH)"),
   nome: z.string().trim().min(2, "Nome obbligatorio").max(80),
@@ -128,6 +211,7 @@ const schemaPromozione = z
     prodottoId: z.uuid("Scegli un prodotto"),
     titolo: z.string().trim().min(2, "Titolo obbligatorio").max(80),
     prezzoPromo: prezzo("Prezzo in promozione"),
+    puntiManuali: puntiFacoltativi("Punti in promozione"),
     dal: z.iso.date("Data di inizio non valida"),
     al: z.iso.date("Data di fine non valida"),
   })
@@ -152,7 +236,7 @@ export async function creaPromozione(_: EsitoModulo, formData: FormData): Promis
       azione: "promozione.creata",
       entita: "promozione",
       entitaId: nuova.id,
-      dopo: { ...letto.data, prodotto: prodotto.nome, prezzoPromo: letto.data.prezzoPromo.toString() },
+      dopo: { ...letto.data, prodotto: prodotto.nome, prezzoPromo: letto.data.prezzoPromo.toString(), puntiManuali: testoPunti(letto.data.puntiManuali) },
     });
   });
   revalidatePath("/staff/catalogo/promozioni");

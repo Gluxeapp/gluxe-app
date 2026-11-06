@@ -214,6 +214,9 @@ export const prodotti = app.table(
     tipo: tipoProdotto("tipo").notNull().default("prodotto"),
     /** Prezzo al pubblico IVA inclusa, in centesimi. */
     prezzoListino: bigint("prezzo_listino", { mode: "bigint" }).notNull(),
+    /** Punti per pezzo scritti a mano dalla sede (centesimi di punto); vuoti = 0,80 × prezzo IVA esclusa. */
+    puntiPersonaleManuali: bigint("punti_personale_manuali", { mode: "bigint" }),
+    puntiOnlineManuali: bigint("punti_online_manuali", { mode: "bigint" }),
     immagineId: uuid("immagine_id").references(() => immagini.id),
     attivo: boolean("attivo").notNull().default(true),
     ordine: integer("ordine").notNull().default(0),
@@ -233,6 +236,8 @@ export const promozioni = app.table(
     titolo: text("titolo").notNull(),
     /** Prezzo al pubblico IVA inclusa durante la promozione, in centesimi. */
     prezzoPromo: bigint("prezzo_promo", { mode: "bigint" }).notNull(),
+    /** Punti per pezzo in promozione scritti a mano (acquisto personale e online); vuoti = automatici. */
+    puntiManuali: bigint("punti_manuali", { mode: "bigint" }),
     dal: date("dal").notNull(),
     al: date("al").notNull(),
     attiva: boolean("attiva").notNull().default(true),

@@ -117,7 +117,7 @@ export async function creaOrdinePersonale(dati: {
     const prodotto = trovati.find((p) => p.id === r.prodottoId);
     if (!prodotto) throw new ErroreOrdine("Un prodotto scelto non è più disponibile: ricarica la pagina.");
     const promozione = promo.get(prodotto.id);
-    return { prodotto, quantita: r.quantita, promozione: promozione && { id: promozione.id, prezzoPromo: promozione.prezzoPromo } };
+    return { prodotto, quantita: r.quantita, promozione: promozione && { id: promozione.id, prezzoPromo: promozione.prezzoPromo, puntiManuali: promozione.puntiManuali } };
   });
   return db().transaction((tx) =>
     inserisciOrdine(tx, { ...dati, tipo: "personale", articoli }),

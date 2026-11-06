@@ -151,6 +151,8 @@ export const NOMI_AZIONI: Record<string, string> = {
   "prodotto.disattivato": "Prodotto disattivato",
   "promozione.creata": "Promozione creata",
   "promozione.disattivata": "Promozione disattivata",
+  "prodotto.punti_modificati": "Punti del prodotto modificati",
+  "promozione.punti_modificati": "Punti della promozione modificati",
   "parametri.nuova_versione": "Nuova versione dei parametri",
   "piano.qualifica_bloccata": "Qualifica bloccata",
   "piano.qualifica_bloccata_revocata": "Qualifica bloccata revocata",
