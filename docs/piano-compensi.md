@@ -214,7 +214,8 @@ Il calcolo gira sul server, in quest'ordine. Durante il mese si può rilanciare 
 
 - **Riordino responsabile:** dal secondo acquisto personale l'incaricata conferma con una spunta di aver venduto o consumato almeno il 70% dell'acquisto precedente; si salva con data e ora.
 - **Clienti fittizi:** segnalare alla sede (solo la segnalazione, calcolata sul server) i clienti con stesso indirizzo di consegna, stesso metodo di pagamento, stessa email o stesso telefono dell'incaricata a cui sono legati.
-- **Vendite a clienti finali:** per ogni incaricata e per la rete, quota mensile di punti ON sul totale dei PP. Visibile nell'area sede.
+  - Confronti (decisione 29): indirizzo = via e CAP normalizzati (maiuscole, senza punteggiatura e spazi doppi) di un ordine del cliente uguali a quelli del profilo o di un ordine personale dell'incaricata; metodo di pagamento = stessa impronta della carta (o stesso conto PayPal) fornita da Stripe; email senza differenze tra maiuscole e minuscole; telefono confrontato sulle sole cifre, senza prefisso +39.
+- **Vendite a clienti finali:** per ogni incaricata e per la rete, quota mensile di punti ON sul totale dei PP. Visibile nell'area sede. Rete = l'incaricata più tutta la sua downline (punti reali, senza tetto). Senza PP la quota non si calcola (si mostra "—").
 - **Controlli prima della chiusura** (bloccano la chiusura se falliscono, l'anteprima li mostra):
   - totale punti delle incaricate = punti aziendali; ogni ordine pagato contato una e una sola volta;
   - ogni ordine appartiene a un'incaricata esistente; ogni sponsor esiste; nessun ciclo nella genealogia;
@@ -283,6 +284,7 @@ Controlli aggiuntivi automatici: lo stesso mese calcolato con gli ordini e le in
 | 26 | Controlli e conteggi | Limite dei compensi del mese al 70% dei punti aziendali (bonus auto escluso). I 33 punti di uno start kit contano per l'attività della sponsor ma nei punti di gruppo una volta sola. Una linea forte conta anche se la diretta è inattiva, purché il suo gruppo arrivi a 8.000 punti. Il 4 ottobre non si considera festivo per il giorno di pagamento (fondatore, 5/11/2026) |
 
 | 28 | Documenti, F24 e bonifici | Ricevuta (senza partita IVA) o fattura proforma (partita IVA ordinaria o forfettaria, scelta nel profilo) creata all'approvazione della richiesta, con la data del pagamento e numero progressivo per incaricata e anno; bollo 2,00 € tolto all'incaricata sopra 77,47 €. F24 compilato in automatico (codice tributo 1038, mese di riferimento) da versare il 16 del mese dopo i pagamenti. File bonifici SEPA XML pain.001.001.03 profilo CBI. F24, bonifici e documenti di tutte: solo amministrazione e contabilità (fondatore, 6/11/2026) |
+| 29 | Negozio online e clienti | Il cliente compra come ospite (nome, cognome, email, telefono, indirizzo; nessuna password) e si riconosce dall'email. Al primo ordine si lega per sempre all'incaricata del link: gli ordini successivi vanno a lei anche se usa il link di un'altra; solo la sede (amministrazione) può spostarlo, con motivo, nel registro modifiche. L'incaricata vede dei suoi clienti nome, cognome e ordini; email e telefono solo se il cliente ha dato il consenso (spunta facoltativa all'ordine, revocabile); mai l'indirizzo. Il negozio è chiuso al pubblico se l'incaricata è sospesa, cessata, tornata cliente o non ha pagato lo start kit (fondatore, 9/11/2026) |
 
 Le decisioni 2–5, 10, 13, 14 e 16 della rev. 5 sono superate dalle decisioni 19–23.
 

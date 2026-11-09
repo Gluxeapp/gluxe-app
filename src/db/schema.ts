@@ -268,6 +268,50 @@ export const tipoPrezzoRiga = app.enum("tipo_prezzo_riga", ["listino_scontato", 
 export const sequenzaNumeroOrdine = app.sequence("sequenza_numero_ordine", { startWith: 1 });
 
 /**
+ * Clienti del negozio online (decisione 29): comprano come ospiti e si riconoscono dall'email.
+ * Al primo ordine si legano per sempre all'incaricata del link; solo la sede li sposta (storico_legami_clienti).
+ * Dati personali: li vedono amministrazione e contabilità; l'incaricata nome e cognome dei suoi clienti,
+ * email e telefono solo con il consenso (consenso_contatti_il), mai l'indirizzo (CLAUDE.md, regola 16).
+ */
+export const clienti = app.table(
+  "clienti",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    incaricatoId: uuid("incaricato_id")
+      .notNull()
+      .references(() => incaricati.id),
+    /** Sempre in minuscolo. */
+    email: text("email").notNull(),
+    nome: text("nome").notNull(),
+    cognome: text("cognome").notNull(),
+    telefono: text("telefono").notNull(),
+    /** Consenso a far vedere email e telefono alla sua incaricata; vuoto = nessun consenso (o revocato). */
+    consensoContattiIl: timestamp("consenso_contatti_il", { withTimezone: true }),
+    privacyAccettataIl: timestamp("privacy_accettata_il", { withTimezone: true }).notNull(),
+    creatoIl: creatoIl(),
+  },
+  (t) => [uniqueIndex("clienti_email").on(t.email), index("clienti_incaricato").on(t.incaricatoId)],
+);
+
+/** Storico dei legami cliente → incaricata: il primo e ogni spostamento fatto dalla sede, con motivo. */
+export const storicoLegamiClienti = app.table(
+  "storico_legami_clienti",
+  {
+    id: bigserial("id", { mode: "bigint" }).primaryKey(),
+    clienteId: uuid("cliente_id")
+      .notNull()
+      .references(() => clienti.id),
+    incaricatoId: uuid("incaricato_id")
+      .notNull()
+      .references(() => incaricati.id),
+    dal: timestamp("dal", { withTimezone: true }).notNull().defaultNow(),
+    motivo: text("motivo").notNull(),
+    modificatoDa: uuid("modificato_da").references(() => utenti.id),
+  },
+  (t) => [index("storico_legami_clienti_cliente").on(t.clienteId)],
+);
+
+/**
  * Ordini. Prezzi, punti e indirizzo sono "fotografati" alla creazione (CLAUDE.md, regola 10):
  * se poi cambiano listino o parametri, l'ordine resta com'era.
  * Lo stato "pagato" lo imposta solo il webhook di Stripe; pagato_il decide il mese di competenza.
@@ -304,6 +348,12 @@ export const ordini = app.table(
     telefono: text("telefono").notNull(),
     /** Spunta "ho venduto o consumato almeno il 70% dell'acquisto precedente", con data e ora. */
     riordinoConfermatoIl: timestamp("riordino_confermato_il", { withTimezone: true }),
+    /** Ordini dal negozio online: il cliente (l'ordine è attribuito alla sua incaricata, in incaricato_id). */
+    clienteId: uuid("cliente_id").references(() => clienti.id),
+    /** Impronta del codice segreto del link che il cliente usa per seguire l'ordine (il codice non si salva). */
+    accessoClienteImpronta: text("accesso_cliente_impronta").unique(),
+    /** Impronta del metodo di pagamento data da Stripe (carta o conto PayPal): serve al controllo dei clienti fittizi. */
+    metodoImpronta: text("metodo_impronta"),
     stripeSessioneId: text("stripe_sessione_id").unique(),
     stripePagamentoId: text("stripe_pagamento_id"),
     pagatoIl: timestamp("pagato_il", { withTimezone: true }),
@@ -316,6 +366,8 @@ export const ordini = app.table(
     index("ordini_stato").on(t.stato, t.creatoIl),
     index("ordini_pagato_il").on(t.pagatoIl),
     index("ordini_stripe_pagamento").on(t.stripePagamentoId),
+    index("ordini_cliente").on(t.clienteId),
+    index("ordini_metodo_impronta").on(t.metodoImpronta),
   ],
 );
 

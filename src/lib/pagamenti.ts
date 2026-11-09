@@ -2,9 +2,9 @@ import "server-only";
 import { and, eq, isNull } from "drizzle-orm";
 import type Stripe from "stripe";
 import { db, type Esecutore } from "@/db";
-import { eventiStripe, incaricati, ordini, righeOrdine, rimborsi, utenti } from "@/db/schema";
+import { clienti, eventiStripe, incaricati, ordini, righeOrdine, rimborsi, utenti } from "@/db/schema";
 import { ErroreOrdine } from "./calcolo-ordine";
-import { formattaEuro } from "./denaro";
+import { formatta, formattaEuro } from "./denaro";
 import { inviaEmail } from "./email";
 import { indirizzoApp } from "./indirizzo-app";
 import { leggiOrdine, numeroOrdine, ORE_PER_PAGARE, registraStato } from "./ordini";
@@ -22,6 +22,20 @@ const MINUTI_SESSIONE = 30;
 export async function apriPagamento(ordineId: string, incaricatoId: string, email: string): Promise<string> {
   const letto = await leggiOrdine(ordineId, incaricatoId);
   if (!letto) throw new ErroreOrdine("Ordine non trovato.");
+  return paginaDiPagamento(letto, email, `${indirizzoApp()}/area/ordini/${letto.ordine.id}`);
+}
+
+/**
+ * Pagamento di un ordine dal negozio online, aperto dal cliente con il link segreto del suo ordine.
+ * Il chiamante ha già verificato il codice del link (ordineDelCliente).
+ */
+export async function apriPagamentoCliente(ordineId: string, email: string, ritorno: string): Promise<string> {
+  const letto = await leggiOrdine(ordineId);
+  if (!letto || letto.ordine.tipo !== "online") throw new ErroreOrdine("Ordine non trovato.");
+  return paginaDiPagamento(letto, email, ritorno);
+}
+
+async function paginaDiPagamento(letto: NonNullable<Awaited<ReturnType<typeof leggiOrdine>>>, email: string, ritorno: string): Promise<string> {
   const { ordine, righe, scaduto } = letto;
   if (ordine.stato !== "inserito") throw new ErroreOrdine("Questo ordine non è in attesa di pagamento.");
   if (scaduto) {
@@ -43,7 +57,7 @@ export async function apriPagamento(ordineId: string, incaricatoId: string, emai
   // Due clic ravvicinati su "Paga" (stesso minuto) devono ricevere la stessa pagina di pagamento: stessa chiave
   // e stessi dati per Stripe, scadenza compresa. Un tentativo in un minuto diverso apre una pagina nuova.
   const minuto = Math.floor(Date.now() / 60_000);
-  const ritorno = `${indirizzoApp()}/area/ordini/${ordine.id}`;
+  const conEsito = `${ritorno}${ritorno.includes("?") ? "&" : "?"}esito=pagato`;
   const sessione = await stripe().checkout.sessions.create(
     {
       mode: "payment",
@@ -68,7 +82,7 @@ export async function apriPagamento(ordineId: string, incaricatoId: string, emai
           price_data: { currency: "eur", unit_amount: Number(ordine.speseSpedizione), product_data: { name: "Spedizione" } },
         },
       ],
-      success_url: `${ritorno}?esito=pagato`,
+      success_url: conEsito,
       cancel_url: ritorno,
     },
     { idempotencyKey: `checkout-${ordine.id}-${minuto}` },
@@ -99,6 +113,7 @@ type DaInviare = Parameters<typeof inviaEmail>[0];
  */
 export async function gestisciEventoStripe(evento: Stripe.Event): Promise<void> {
   const email: DaInviare[] = [];
+  const metodo = await improntaMetodo(evento);
   await db().transaction(async (tx) => {
     const [nuovo] = await tx
       .insert(eventiStripe)
@@ -124,7 +139,7 @@ export async function gestisciEventoStripe(evento: Stripe.Event): Promise<void> 
         const pagamento = typeof sessione.payment_intent === "string" ? sessione.payment_intent : (sessione.payment_intent?.id ?? null);
         await tx
           .update(ordini)
-          .set({ pagatoIl, stripePagamentoId: pagamento, stripeSessioneId: sessione.id })
+          .set({ pagatoIl, stripePagamentoId: pagamento, stripeSessioneId: sessione.id, metodoImpronta: metodo })
           .where(eq(ordini.id, ordine.id));
         await registraStato(tx, ordine.id, "pagato", {
           nota: ordine.stato === "annullato" ? "Pagamento arrivato dopo l'annullamento" : undefined,
@@ -132,7 +147,7 @@ export async function gestisciEventoStripe(evento: Stripe.Event): Promise<void> 
         if (ordine.tipo === "start_kit") {
           await tx.update(incaricati).set({ startKitPagato: true }).where(eq(incaricati.id, ordine.incaricatoId));
         }
-        email.push(await emailPagato(tx, ordine.id, ordine.incaricatoId));
+        email.push(...(await emailPagato(tx, ordine.id, ordine.incaricatoId)));
         return;
       }
 
@@ -174,7 +189,29 @@ export async function gestisciEventoStripe(evento: Stripe.Event): Promise<void> 
   for (const messaggio of email) await inviaEmail(messaggio);
 }
 
-async function emailPagato(tx: Esecutore, ordineId: string, incaricatoId: string): Promise<DaInviare> {
+/**
+ * Impronta del metodo di pagamento (carta o conto PayPal) di un pagamento appena confermato, per il controllo
+ * dei clienti fittizi. Se Stripe non risponde si va avanti senza: il pagamento conta comunque.
+ */
+async function improntaMetodo(evento: Stripe.Event): Promise<string | null> {
+  if (evento.type !== "checkout.session.completed" && evento.type !== "checkout.session.async_payment_succeeded") return null;
+  const sessione = evento.data.object;
+  const pagamento = typeof sessione.payment_intent === "string" ? sessione.payment_intent : sessione.payment_intent?.id;
+  if (sessione.payment_status !== "paid" || !pagamento) return null;
+  try {
+    const intento = await stripe().paymentIntents.retrieve(pagamento, { expand: ["latest_charge"] });
+    const addebito = typeof intento.latest_charge === "object" ? intento.latest_charge : null;
+    const dettagli = addebito?.payment_method_details;
+    if (dettagli?.card?.fingerprint) return `carta:${dettagli.card.fingerprint}`;
+    if (dettagli?.paypal?.payer_id) return `paypal:${dettagli.paypal.payer_id}`;
+    return null;
+  } catch (e) {
+    console.error(`Impronta del pagamento non letta: ${e instanceof Error ? e.message : "errore"}`);
+    return null;
+  }
+}
+
+async function emailPagato(tx: Esecutore, ordineId: string, incaricatoId: string): Promise<DaInviare[]> {
   const [persona] = await tx
     .select({ email: utenti.email, nome: incaricati.nome })
     .from(incaricati)
@@ -183,7 +220,30 @@ async function emailPagato(tx: Esecutore, ordineId: string, incaricatoId: string
   const [ordine] = await tx.select().from(ordini).where(eq(ordini.id, ordineId));
   const righe = await tx.select().from(righeOrdine).where(eq(righeOrdine.ordineId, ordineId));
   const elenco = righe.map((r) => `- ${r.quantita} × ${r.nome}: ${formattaEuro(r.totaleIvato)}`).join("\n");
-  return {
+
+  if (ordine.tipo === "online" && ordine.clienteId) {
+    const [cliente] = await tx.select().from(clienti).where(eq(clienti.id, ordine.clienteId));
+    return [
+      {
+        a: cliente.email,
+        oggetto: `G LUXE: grazie per il tuo ordine ${numeroOrdine(ordine.numero)}`,
+        testo:
+          `Ciao ${cliente.nome},\n\nabbiamo ricevuto il pagamento del tuo ordine ${numeroOrdine(ordine.numero)}.\n\n${elenco}\n` +
+          `- Spedizione: ${formattaEuro(ordine.speseSpedizione)}\nTotale: ${formattaEuro(ordine.totale)}\n\n` +
+          `Ti scriveremo quando sarà spedito. La tua consulente G LUXE è ${persona.nome}.\n\nG LUXE`,
+      },
+      {
+        a: persona.email,
+        oggetto: `G LUXE: nuovo ordine dal tuo negozio (${numeroOrdine(ordine.numero)})`,
+        testo:
+          `Ciao ${persona.nome},\n\n${cliente.nome} ${cliente.cognome} ha pagato un ordine dal tuo negozio online.\n\n${elenco}\n\n` +
+          `Punti: ${formatta(ordine.punti)} · provvigione online: ${formattaEuro(ordine.provvigioneAcquisto)}\n\n` +
+          `Lo trovi nell'app: ${indirizzoApp()}/area/negozio\n\nG LUXE`,
+      },
+    ];
+  }
+
+  return [{
     a: persona.email,
     oggetto: `G LUXE: ordine ${numeroOrdine(ordine.numero)} pagato`,
     testo:
@@ -191,5 +251,5 @@ async function emailPagato(tx: Esecutore, ordineId: string, incaricatoId: string
       `- Spedizione: ${formattaEuro(ordine.speseSpedizione)}\nTotale: ${formattaEuro(ordine.totale)}\n\n` +
       (ordine.tipo === "start_kit" ? "Il tuo account è attivo: da ora puoi ordinare con lo sconto del 40%.\n\n" : "") +
       `Segui l'ordine nell'app: ${indirizzoApp()}/area/ordini/${ordine.id}\n\nG LUXE`,
-  };
+  }];
 }

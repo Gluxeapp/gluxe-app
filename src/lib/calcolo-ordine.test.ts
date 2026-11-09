@@ -57,6 +57,40 @@ describe("calcolaOrdine", () => {
     expect(o.punti).toBe(5000n);
   });
 
+  test("T1 negozio online: kit routine 139,00 € a listino pieno, 91,14 punti ON, provvigione 45,57 €", () => {
+    const o = calcolaOrdine([{ prodotto: kitRoutine, quantita: 4 }], "online", p);
+    expect(o.righe[0]).toMatchObject({
+      tipoPrezzo: "listino_pieno",
+      prezzoUnitarioIvato: 13900n,
+      prezzoUnitarioIvaEsclusa: 11393n,
+      puntiUnitari: 9114n,
+      provvigioneUnitaria: 4557n,
+      listinoUnitarioIvato: 13900n,
+    });
+    expect(o.punti).toBe(36456n);
+    expect(o.provvigioneAcquisto).toBe(18228n);
+    expect(o.totale).toBe(55600n + 690n);
+  });
+
+  test("negozio online: promozione al prezzo in promozione, punti online scritti a mano per il listino", () => {
+    const conPunti = { ...shampoo, puntiPersonaleManuali: 1500n, puntiOnlineManuali: 2500n };
+    const o = calcolaOrdine(
+      [
+        { prodotto: conPunti, quantita: 1 },
+        { prodotto: shampoo, quantita: 2, promozione: { id: "pr", prezzoPromo: 2790n } },
+      ],
+      "online",
+      p,
+    );
+    expect(o.righe[0]).toMatchObject({ tipoPrezzo: "listino_pieno", prezzoUnitarioIvato: 3290n, puntiUnitari: 2500n, provvigioneUnitaria: 1250n });
+    expect(o.righe[1]).toMatchObject({ tipoPrezzo: "promozione", promozioneId: "pr", prezzoUnitarioIvato: 2790n, puntiUnitari: 1830n, provvigioneUnitaria: 915n });
+    expect(o.punti).toBe(2500n + 3660n);
+  });
+
+  test("negozio online: lo start kit non si vende", () => {
+    expect(() => calcolaOrdine([{ prodotto: startKit, quantita: 1 }], "online", p)).toThrow(/non si può ordinare/);
+  });
+
   test("T8: start kit con 33 punti fissi e spedizione", () => {
     const o = calcolaOrdine([{ prodotto: startKit, quantita: 1 }], "start_kit", p);
     expect(o.righe[0]).toMatchObject({ tipoPrezzo: "start_kit", prezzoUnitarioIvato: 5990n, prezzoUnitarioIvaEsclusa: 4910n, puntiUnitari: 3300n });

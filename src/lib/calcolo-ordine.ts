@@ -8,7 +8,7 @@ import { prezziProdotto, prezziPromozione, prezziStartKit } from "./prezzi";
 
 export const QUANTITA_MASSIMA = 99;
 
-export type TipoOrdineCalcolabile = "start_kit" | "personale";
+export type TipoOrdineCalcolabile = "start_kit" | "personale" | "online";
 
 export type Articolo = {
   prodotto: {
@@ -30,7 +30,7 @@ export type RigaCalcolata = {
   prodottoId: string;
   codice: string;
   nome: string;
-  tipoPrezzo: "listino_scontato" | "promozione" | "start_kit";
+  tipoPrezzo: "listino_scontato" | "promozione" | "start_kit" | "listino_pieno";
   promozioneId: string | null;
   quantita: number;
   prezzoUnitarioIvato: Centesimi;
@@ -47,7 +47,7 @@ export type RigaCalcolata = {
 
 export class ErroreOrdine extends Error {}
 
-function riga(a: Articolo, p: Parametri): RigaCalcolata {
+function riga(a: Articolo, tipo: TipoOrdineCalcolabile, p: Parametri): RigaCalcolata {
   const { prodotto, quantita, promozione } = a;
   let tipoPrezzo: RigaCalcolata["tipoPrezzo"];
   let unita: { ivaInclusa: Centesimi; ivaEsclusa: Centesimi; punti: Centesimi };
@@ -56,6 +56,14 @@ function riga(a: Articolo, p: Parametri): RigaCalcolata {
   if (prodotto.tipo === "start_kit") {
     tipoPrezzo = "start_kit";
     unita = prezziStartKit(prodotto.prezzoListino, p);
+  } else if (tipo === "online") {
+    // Negozio online: il cliente paga il listino pieno o il prezzo in promozione; provvigione = 50% dei punti online.
+    const prezzi = promozione
+      ? prezziPromozione(promozione.prezzoPromo, p, promozione.puntiManuali ?? null)
+      : prezziProdotto(prodotto.prezzoListino, p, { personale: prodotto.puntiPersonaleManuali, online: prodotto.puntiOnlineManuali });
+    tipoPrezzo = promozione ? "promozione" : "listino_pieno";
+    unita = prezzi.pubblico;
+    provvigione = prezzi.provvigioneOnline;
   } else if (promozione) {
     tipoPrezzo = "promozione";
     const prezzi = prezziPromozione(promozione.prezzoPromo, p, promozione.puntiManuali ?? null);
@@ -104,7 +112,7 @@ export function calcolaOrdine(articoli: Articolo[], tipo: TipoOrdineCalcolabile,
     throw new ErroreOrdine("Lo start kit si ordina da solo, in una sola unità.");
   }
 
-  const righe = articoli.map((a) => riga(a, p));
+  const righe = articoli.map((a) => riga(a, tipo, p));
   const merceIvaInclusa = somma(righe, "totaleIvato");
   return {
     righe,

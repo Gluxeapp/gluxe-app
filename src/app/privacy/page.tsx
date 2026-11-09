@@ -20,6 +20,17 @@ export default function Privacy() {
           contabilità di G LUXE. Il tuo sponsor e la tua rete vedono solo nome, qualifica e volumi; telefono ed email
           solo il tuo sponsor diretto.
         </p>
+        <h2 id="clienti" className="pt-2 font-titoli text-xl text-oro-chiaro">Clienti del negozio online</h2>
+        <p>
+          Se acquisti dal negozio di una consulente G LUXE, nome, cognome, email, telefono e indirizzo servono a gestire
+          l&apos;ordine, il pagamento (tramite Stripe) e la spedizione. Sono visibili all&apos;amministrazione, alla
+          contabilità e, per la sola spedizione, a chi prepara gli ordini.
+        </p>
+        <p>
+          Resti cliente della consulente da cui hai fatto il primo acquisto: lei vede il tuo nome e i tuoi ordini. Email
+          e telefono li vede solo se ci dai il consenso con l&apos;apposita spunta; il consenso si revoca togliendo la
+          spunta al prossimo ordine o scrivendo all&apos;azienda. Il tuo indirizzo non lo vede mai.
+        </p>
         <p>Puoi chiedere in qualsiasi momento di consultare, correggere o cancellare i tuoi dati scrivendo all&apos;azienda.</p>
       </div>
     </PaginaPubblica>

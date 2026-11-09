@@ -1,5 +1,5 @@
 import "server-only";
-import { and, asc, desc, eq, inArray, isNotNull, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNotNull, ne, sql } from "drizzle-orm";
 import { db, type Esecutore } from "@/db";
 import { incaricati, ordini, prodotti, righeOrdine, storicoStatiOrdine, utenti } from "@/db/schema";
 import { calcolaOrdine, ErroreOrdine, type Articolo, type TipoOrdineCalcolabile } from "./calcolo-ordine";
@@ -61,7 +61,7 @@ export async function serveConfermaRiordino(incaricatoId: string): Promise<boole
   return Boolean(riga);
 }
 
-async function inserisciOrdine(
+export async function inserisciOrdine(
   tx: Esecutore,
   dati: {
     incaricatoId: string;
@@ -69,6 +69,9 @@ async function inserisciOrdine(
     articoli: Articolo[];
     spedizione: Spedizione;
     riordinoConfermato: boolean;
+    /** Solo ordini dal negozio online. */
+    clienteId?: string;
+    accessoClienteImpronta?: string;
   },
 ) {
   const parametri = await parametriCorrenti();
@@ -87,6 +90,8 @@ async function inserisciOrdine(
       totale: calcolo.totale,
       ...dati.spedizione,
       riordinoConfermatoIl: dati.riordinoConfermato ? new Date() : null,
+      clienteId: dati.clienteId ?? null,
+      accessoClienteImpronta: dati.accessoClienteImpronta ?? null,
     })
     .returning({ id: ordini.id });
   await tx.insert(righeOrdine).values(calcolo.righe.map((r) => ({ ...r, ordineId: nuovo.id })));
@@ -152,13 +157,16 @@ export async function ordineStartKit(incaricatoId: string, spedizione: Spedizion
   );
 }
 
-/** Ordine con righe e storico. Con incaricatoId restituisce solo un ordine di quell'incaricata. */
+/**
+ * Ordine con righe e storico. Con incaricatoId restituisce solo un acquisto di quell'incaricata (personale o
+ * start kit): gli ordini dei suoi clienti contengono l'indirizzo del cliente e si leggono con ordineDelNegozio.
+ */
 export async function leggiOrdine(id: string, incaricatoId?: string) {
   if (!/^[0-9a-f-]{36}$/.test(id)) return undefined;
   const [ordine] = await db()
     .select()
     .from(ordini)
-    .where(incaricatoId ? and(eq(ordini.id, id), eq(ordini.incaricatoId, incaricatoId)) : eq(ordini.id, id))
+    .where(incaricatoId ? and(eq(ordini.id, id), eq(ordini.incaricatoId, incaricatoId), ne(ordini.tipo, "online")) : eq(ordini.id, id))
     .limit(1);
   if (!ordine) return undefined;
   const [righe, storico] = await Promise.all([
@@ -187,7 +195,8 @@ export async function ordiniDellIncaricata(incaricatoId: string) {
       creatoIl: ordini.creatoIl,
     })
     .from(ordini)
-    .where(eq(ordini.incaricatoId, incaricatoId))
+    // Gli ordini dei clienti dal negozio online stanno nella pagina Negozio.
+    .where(and(eq(ordini.incaricatoId, incaricatoId), ne(ordini.tipo, "online")))
     .orderBy(desc(ordini.creatoIl))
     .limit(100);
 }

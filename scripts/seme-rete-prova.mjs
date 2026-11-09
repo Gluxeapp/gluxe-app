@@ -70,12 +70,31 @@ try {
           ? { prodotto: prodotti["HB-SH-10"], tipo: "listino_pieno", q: o.kit, ivato: 10690, iva: 8762, punti: 7010 }
           : { prodotto: prodotti["HB-SH"], tipo: "listino_scontato", q: o.shampoo, ivato: 2034, iva: 1667, punti: 1334 };
       const t = { ivato: riga.ivato * riga.q, iva: riga.iva * riga.q, punti: riga.punti * riga.q };
+      // Fase 7: ogni ordine online ha il suo cliente (uno per incaricata). Il cliente di Carla usa il telefono di Carla:
+      // la sede lo vede segnalato come possibile cliente fittizio.
+      let clienteId = null;
+      if (o.tipo === "online") {
+        const [inc] = await tx`select codice, telefono from app.incaricati where id = ${id.get(o.chi)}`;
+        const email = `cliente.${inc.codice.toLowerCase()}@gluxe.test`;
+        const telefono = o.chi === "carla.finta@gluxe.test" ? inc.telefono : "3470000000";
+        const [c] = await tx`
+          insert into app.clienti (incaricato_id, email, nome, cognome, telefono, consenso_contatti_il, privacy_accettata_il)
+          values (${id.get(o.chi)}, ${email}, 'Cliente', ${`di ${inc.codice}`}, ${telefono}, now(), now())
+          on conflict (email) do update set nome = excluded.nome
+          returning id, (xmax = 0) as nuovo`;
+        if (c.nuovo) {
+          await tx`insert into app.storico_legami_clienti (cliente_id, incaricato_id, motivo) values (${c.id}, ${id.get(o.chi)}, 'Cliente finto per le prove')`;
+        }
+        clienteId = c.id;
+      }
       const [ordine] = await tx`
         insert into app.ordini (incaricato_id, tipo, stato, parametri_versione_id, merce_iva_inclusa, merce_iva_esclusa, punti,
-          provvigione_acquisto, spese_spedizione, totale, destinatario, indirizzo, cap, citta, provincia, telefono, pagato_il)
+          provvigione_acquisto, spese_spedizione, totale, destinatario, indirizzo, cap, citta, provincia, telefono, pagato_il, cliente_id)
         values (${id.get(o.chi)}, ${o.tipo}, 'pagato', ${parametri.id}, ${t.ivato}, ${t.iva}, ${t.punti}, 0, 690, ${t.ivato + 690},
-          'Cliente Finta', 'Via delle Prove 1', '20100', 'Milano', 'MI', '3330000000',
-          ${meseScorso ? sql`date_trunc('month', now() at time zone 'Europe/Rome') at time zone 'Europe/Rome' - interval '10 days'` : sql`now()`})
+          ${o.tipo === "online" ? "Cliente Finta" : "Incaricata Finta"}, ${o.tipo === "online" ? "Via dei Clienti 5" : "Via delle Prove 1"},
+          ${o.tipo === "online" ? "20121" : "20100"}, 'Milano', 'MI', ${o.tipo === "online" ? "3470000000" : "3330000000"},
+          ${meseScorso ? sql`date_trunc('month', now() at time zone 'Europe/Rome') at time zone 'Europe/Rome' - interval '10 days'` : sql`now()`},
+          ${clienteId})
         returning id, numero`;
       await tx`
         insert into app.righe_ordine (ordine_id, prodotto_id, codice, nome, tipo_prezzo, quantita, prezzo_unitario_ivato,
