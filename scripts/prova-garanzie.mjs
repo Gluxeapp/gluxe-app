@@ -212,6 +212,59 @@ try {
   await deveFallire("regime con partita IVA senza numero di partita IVA", (tx) =>
     tx`update app.incaricati set regime_fiscale = 'piva_ordinaria', partita_iva = null where id = ${a.id}`);
 
+  // 1d) Fase 7: negozio online e clienti (migrazione 0008), in transazioni annullate.
+  const cliente = async (tx, email = `garanzie-${randomUUID()}@gluxe.test`) => {
+    const [c] = await tx`insert into app.clienti (incaricato_id, email, nome, cognome, telefono, privacy_accettata_il)
+      values (${a.id}, ${email}, 'Prova', 'Garanzie', '3470000000', now()) returning id`;
+    return c.id;
+  };
+  const ordineOnline = (tx, clienteId) => tx`
+    insert into app.ordini (incaricato_id, tipo, parametri_versione_id, merce_iva_inclusa, merce_iva_esclusa, punti,
+      provvigione_acquisto, spese_spedizione, totale, destinatario, indirizzo, cap, citta, provincia, telefono, cliente_id)
+    values (${a.id}, 'online', ${parametri.id}, 3390, 2779, 2223, 1112, 690, 4080, 'Prova', 'Via Prova 2', '20100', 'Milano', 'MI', '3470000000', ${clienteId})
+    returning id`;
+  await deveFallire("ordine dal negozio senza cliente", (tx) => ordineOnline(tx, null));
+  await deveFallire("acquisto personale con un cliente", async (tx) => {
+    const c = await cliente(tx);
+    await tx`update app.ordini set cliente_id = ${c} where id = ${ordine.id}`;
+  });
+  await deveFallire("cambiare il cliente di un ordine dal negozio", async (tx) => {
+    const [o] = await ordineOnline(tx, await cliente(tx));
+    await tx`update app.ordini set cliente_id = ${await cliente(tx)} where id = ${o.id}`;
+  });
+  await deveFallire("due clienti con la stessa email", async (tx) => {
+    await cliente(tx, "doppio-garanzie@gluxe.test");
+    await cliente(tx, "doppio-garanzie@gluxe.test");
+  });
+  await deveFallire("email del cliente con le maiuscole", (tx) => cliente(tx, "Maiuscole@gluxe.test"));
+  await deveFallire("spostare un cliente senza l'intervento tracciato della sede", async (tx) => {
+    const c = await cliente(tx);
+    await tx`update app.clienti set incaricato_id = ${b.id} where id = ${c}`;
+  });
+  await deveFallire("cambiare l'email di un cliente", async (tx) => {
+    const c = await cliente(tx);
+    await tx`update app.clienti set email = 'altra-garanzie@gluxe.test' where id = ${c}`;
+  });
+  await deveFallire("cancellare un cliente", async (tx) => {
+    const c = await cliente(tx);
+    await tx`delete from app.clienti where id = ${c}`;
+  });
+  await deveFallire("modificare lo storico dei legami dei clienti", async (tx) => {
+    const c = await cliente(tx);
+    await tx`insert into app.storico_legami_clienti (cliente_id, incaricato_id, motivo) values (${c}, ${a.id}, 'prova')`;
+    await tx`update app.storico_legami_clienti set motivo = 'x' where cliente_id = ${c}`;
+  });
+  try {
+    await sql.begin(async (tx) => {
+      const c = await cliente(tx);
+      await tx`select set_config('app.sposta_cliente', 'tracciato', true)`;
+      await tx`update app.clienti set incaricato_id = ${b.id} where id = ${c}`;
+      throw new Error("ANNULLA");
+    });
+  } catch (e) {
+    esito(e.message === "ANNULLA", "accettato: spostamento di un cliente come intervento tracciato della sede");
+  }
+
   // 2) Conferme di pagamento contemporanee: 10 copie di due eventi diversi per lo stesso ordine.
   if (!segreto) throw new Error("Manca STRIPE_WEBHOOK_SECRET");
   const sessione = `cs_test_prova_${randomUUID()}`;

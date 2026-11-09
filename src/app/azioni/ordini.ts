@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { erroriPerCampo, valoriDa, type EsitoModulo } from "@/components/ui";
 import { db } from "@/db";
-import { incaricati, ordini, utenti } from "@/db/schema";
+import { clienti, incaricati, ordini, utenti } from "@/db/schema";
 import { richiediStaff, verificaIncaricataOperativa, verificaIncaricato } from "@/lib/accesso";
 import { ErroreOrdine, QUANTITA_MASSIMA } from "@/lib/calcolo-ordine";
 import { inviaEmail } from "@/lib/email";
@@ -14,25 +14,8 @@ import { indirizzoApp } from "@/lib/indirizzo-app";
 import { creaOrdinePersonale, ETICHETTE_STATO, leggiOrdine, numeroOrdine, ordineStartKit, registraStato, type StatoOrdine } from "@/lib/ordini";
 import { apriPagamento, chiudiPagamento } from "@/lib/pagamenti";
 import { registra } from "@/lib/registro";
+import { schemaSpedizione } from "@/lib/spedizione";
 
-const testo = (nome: string, max: number) =>
-  z.string().trim().min(1, `${nome}: campo obbligatorio`).max(max, `${nome}: testo troppo lungo`);
-
-const schemaSpedizione = z.object({
-  destinatario: testo("Destinatario", 120),
-  indirizzo: testo("Indirizzo", 160),
-  cap: z.string().trim().regex(/^\d{5}$/, "CAP non valido (5 cifre)"),
-  citta: testo("Città", 80),
-  provincia: z
-    .string()
-    .trim()
-    .toUpperCase()
-    .regex(/^[A-Z]{2}$/, "Provincia: 2 lettere (es. MI)"),
-  telefono: z
-    .string()
-    .trim()
-    .regex(/^\+?[\d\s]{8,16}$/, "Numero di telefono non valido"),
-});
 
 /** Errori di Stripe o di rete: messaggio semplice per l'incaricata, dettagli solo nel log del server. */
 function erroreDiPagamento(e: unknown): EsitoModulo {
@@ -188,7 +171,17 @@ export async function cambiaStatoOrdine(_: EsitoModulo, formData: FormData): Pro
     return { ok: true, messaggio: `Ordine ${numeroOrdine(ordine.numero)}: ${ETICHETTE_STATO[stato].toLowerCase()}.`, ordine };
   });
 
-  if ("ordine" in esito && esito.ordine && stato === "spedito") {
+  if ("ordine" in esito && esito.ordine && stato === "spedito" && esito.ordine.clienteId) {
+    // Ordine dal negozio: l'avviso va al cliente.
+    const [cliente] = await db().select({ email: clienti.email, nome: clienti.nome }).from(clienti).where(eq(clienti.id, esito.ordine.clienteId));
+    await inviaEmail({
+      a: cliente.email,
+      oggetto: `G LUXE: ordine ${numeroOrdine(esito.ordine.numero)} spedito`,
+      testo:
+        `Ciao ${cliente.nome},\n\nil tuo ordine ${numeroOrdine(esito.ordine.numero)} è partito.\n` +
+        `Corriere: ${corriere}\nNumero di tracciamento: ${tracciamento}\n\nGrazie per aver scelto G LUXE.`,
+    });
+  } else if ("ordine" in esito && esito.ordine && stato === "spedito") {
     const [persona] = await db()
       .select({ email: utenti.email, nome: incaricati.nome })
       .from(incaricati)

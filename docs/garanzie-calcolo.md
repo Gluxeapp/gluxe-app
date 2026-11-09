@@ -56,6 +56,23 @@ Come è fatto (migrazione 0006, attiva dalla Fase 6):
 
 Verifiche: `npm run prova:garanzie` tenta tutte le modifiche vietate qui sopra; `npm run prova:fase6` (database di prova, rete finta con ordini del mese scorso) chiude il mese, prova tre richieste contemporanee della stessa incaricata (ne passa una), approva e rifiuta, crea il file bonifici e l'F24, poi riporta il database di prova a prima della chiusura.
 
+## 4. Il negozio online e i clienti (Fase 7)
+
+Rischi: lo stesso cliente creato due volte da due ordini contemporanei (e quindi legato a due incaricate), un ordine attribuito all'incaricata sbagliata, un legame cambiato senza traccia, un ordine aperto da chi non ne ha il link.
+
+| Garanzia | Come è ottenuta (migrazione 0008, attiva dalla Fase 7) |
+| --- | --- |
+| Un cliente esiste una volta sola | Email in minuscolo con chiave univoca; ordini contemporanei della stessa email si mettono in fila (blocco sull'email nella transazione): un solo cliente, un solo legame (prova con tre ordini insieme da due negozi) |
+| L'ordine va all'incaricata del cliente | Al primo ordine il cliente si lega all'incaricata del link; gli ordini dopo vanno a lei qualunque link usi. Incaricata e cliente dell'ordine sono fotografati: non cambiano più |
+| Il legame non cambia di nascosto | Il database rifiuta il cambio di incaricata di un cliente se non è dichiarato come intervento tracciato della sede; ogni spostamento lascia una riga nello storico dei legami (solo in aggiunta) e nel registro modifiche, e vale solo per gli ordini futuri |
+| Ordini online sempre con il cliente, e solo loro | Controllo nel database (tipo "online" ⇔ cliente presente) |
+| Clienti non cancellabili, email e identità non modificabili | Blocco nel database |
+| Solo il cliente apre il suo ordine | Link con un codice casuale lungo; nel database se ne salva solo l'impronta (come per le password). L'incaricata vede gli ordini dei suoi clienti senza indirizzo |
+| Abusi | Al massimo 5 ordini non pagati per cliente nelle 24 ore; campo nascosto contro i programmi automatici |
+| Punti e provvigioni | Come per tutti gli ordini: contano solo con il pagamento confermato dal webhook di Stripe (una volta sola) |
+
+Verifiche: `npm run prova:garanzie` (tentativi vietati sui clienti e sugli ordini online) e `npm run prova:fase7` (database di prova: ordini dal negozio, legame, consenso, ordini contemporanei, limite, clienti fittizi, spostamento, apertura del pagamento Stripe di prova).
+
 ## Decisioni
 
 - **Pagamento confermato da Stripe dopo la chiusura del suo mese** (caso raro: Stripe ritenta l'avviso per qualche giorno se il sito non risponde): conta nel **primo mese ancora aperto**, come le rettifiche (fondatore, 29/10/2026).

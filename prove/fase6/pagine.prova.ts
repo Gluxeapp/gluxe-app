@@ -17,5 +17,7 @@ test("pagine di contabilità e provvigioni", async () => {
   for (const r of rows) {
     await contoIncaricata(r.id);
     await statoRichiesta(r.id);
+    const m = await margineDellAnno(r.id, 2026);
+    expect(m.totale).toBe(m.mesi.reduce((t, [, x]) => t + x, 0n));
   }
 });

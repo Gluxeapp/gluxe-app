@@ -42,7 +42,8 @@ async function Contenuto({ params }: Pick<PageProps<"/staff/ordini/[id]">, "para
       <Titolo
         sottotitolo={
           <>
-            {ordine.tipo === "start_kit" ? "Start kit" : "Acquisto personale"} · creato il {dataOra(ordine.creatoIl)}
+            {{ start_kit: "Start kit", personale: "Acquisto personale", online: "Negozio online" }[ordine.tipo]} · creato il{" "}
+            {dataOra(ordine.creatoIl)}
             {ordine.pagatoIl && ` · pagato il ${dataOra(ordine.pagatoIl)}`}
           </>
         }
@@ -108,6 +109,21 @@ async function Contenuto({ params }: Pick<PageProps<"/staff/ordini/[id]">, "para
             <h2 className="font-titoli text-xl text-oro-chiaro">Stato</h2>
             <ModuloStato id={ordine.id} stato={ordine.stato} />
           </Scheda>
+
+          {ordine.clienteId && (
+            <Scheda>
+              <h2 className="font-titoli text-xl text-oro-chiaro">Cliente del negozio</h2>
+              <p className="mt-2 text-sm">
+                {staff.ruolo === "amministrazione" ? (
+                  <Link href={`/staff/clienti/${ordine.clienteId}`} className="text-oro-chiaro">
+                    Scheda del cliente
+                  </Link>
+                ) : (
+                  "Ordine di un cliente: punti e provvigione all'incaricata qui sotto."
+                )}
+              </p>
+            </Scheda>
+          )}
 
           <Scheda>
             <h2 className="font-titoli text-xl text-oro-chiaro">Incaricata</h2>

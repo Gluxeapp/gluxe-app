@@ -8,6 +8,8 @@ const voci: { href: string; etichetta: string; ruoli: RuoloStaff[] }[] = [
   { href: "/staff/ordini", etichetta: "Ordini", ruoli: ["amministrazione", "ordini"] },
   { href: "/staff/incaricati", etichetta: "Incaricati", ruoli: ["amministrazione"] },
   { href: "/staff/rete", etichetta: "Rete", ruoli: ["amministrazione"] },
+  { href: "/staff/clienti", etichetta: "Clienti", ruoli: ["amministrazione", "contabilita"] },
+  { href: "/staff/vendite", etichetta: "Vendite a clienti finali", ruoli: ["amministrazione", "contabilita"] },
   { href: "/staff/catalogo", etichetta: "Catalogo", ruoli: ["amministrazione", "contabilita", "ordini"] },
   { href: "/staff/catalogo/promozioni", etichetta: "Promozioni", ruoli: ["amministrazione", "contabilita", "ordini"] },
   { href: "/staff/provvigioni", etichetta: "Anteprima provvigioni", ruoli: ["amministrazione"] },
