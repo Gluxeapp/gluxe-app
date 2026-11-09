@@ -50,6 +50,13 @@
       "when": 1793980727218,
       "tag": "0006_fase6_chiusura_pagamenti",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1794237891258,
+      "tag": "0007_margine_acquisti",
+      "breakpoints": true
     }
   ]
 }

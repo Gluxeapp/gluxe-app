@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { PARAMETRI_INIZIALI as P, parametriDaJson, parametriInJson } from "./parametri";
-import { prezziProdotto, prezziPromozione, prezziStartKit } from "./prezzi";
+import { margineRighe, prezziProdotto, prezziPromozione, prezziStartKit } from "./prezzi";
 
 describe("prezzi e punti (piano rev. 5)", () => {
   it("kit routine 139,00 €: 113,93 € IVA esclusa, 91,14 punti, provvigione online 45,57 € (caso T1)", () => {
@@ -69,6 +69,20 @@ describe("prezzi e punti (piano rev. 5)", () => {
     expect(p.pubblico.punti).toBe(2000n);
     expect(p.provvigioneAcquisto).toBe(1000n);
     expect(prezziPromozione(2790n, P, null).incaricata.punti).toBe(1830n);
+  });
+
+  it("margine degli acquisti personali: solo righe a listino scontato, listino − pagato × quantità", () => {
+    const shampoo = prezziProdotto(3390n, P);
+    expect(
+      margineRighe([
+        // 2 Shampoo Botox: 33,90 − 20,34 = 13,56 a pezzo → 27,12
+        { tipoPrezzo: "listino_scontato", quantita: 2, prezzoUnitarioIvato: shampoo.incaricata.ivaInclusa, listinoUnitarioIvato: 3390n },
+        // promozione e start kit: nessuno sconto, nessun margine
+        { tipoPrezzo: "promozione", quantita: 1, prezzoUnitarioIvato: 2790n, listinoUnitarioIvato: 3390n },
+        { tipoPrezzo: "start_kit", quantita: 1, prezzoUnitarioIvato: 5990n, listinoUnitarioIvato: 5990n },
+      ]),
+    ).toBe(2712n);
+    expect(margineRighe([])).toBe(0n);
   });
 
   it("i parametri si salvano e si rileggono uguali", () => {

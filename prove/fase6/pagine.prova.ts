@@ -4,6 +4,7 @@ import { expect, test } from "vitest";
 import { db } from "@/db";
 import { contoIncaricata, f24DelPeriodo, leggiDatiAzienda, quadroContabilita, statoRichiesta } from "@/lib/provvigioni/conti";
 import { meseDaChiudere, stornoInSospeso } from "@/lib/provvigioni/chiusura";
+import { margineDellAnno } from "@/lib/provvigioni/margine";
 
 test("pagine di contabilità e provvigioni", async () => {
   const q = await quadroContabilita();

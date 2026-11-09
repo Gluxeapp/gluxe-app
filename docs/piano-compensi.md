@@ -50,6 +50,7 @@ I punti KS **non** entrano in PP, PPQ, PGQ, PGR né nei team: i 33 punti del kit
 - Lo start kit attiva l'account. **Sconto del 40% e negozio online si attivano dall'ordine successivo.**
 - **Spedizione:** 6,90 € per ogni ordine, a carico di chi ordina, senza soglia di gratuità. Non genera punti né compensi e non entra nell'incasso aziendale.
 - Esempio acquisto personale: Shampoo Botox 33,90 € → pagato 20,34 € IVA inclusa → 16,67 € IVA esclusa → 13,34 punti.
+- **Margine (solo informativo)** = (listino IVA inclusa − prezzo pagato IVA inclusa) × quantità, solo sulle righe a listino scontato (promozioni e start kit non hanno margine). Il listino si fotografa nella riga d'ordine. Conta nel mese in cui Stripe conferma il pagamento; ordini annullati o resi esclusi. L'incaricata lo vede nella pagina Provvigioni (mese in corso, mesi precedenti e totale dell'anno); non entra nel saldo né nei pagamenti. Esempio: 3 Shampoo Botox → (33,90 − 20,34) × 3 = 40,68 €.
 
 ## 3. Attività e tetto
 

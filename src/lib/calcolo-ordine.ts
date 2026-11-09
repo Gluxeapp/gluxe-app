@@ -37,6 +37,8 @@ export type RigaCalcolata = {
   prezzoUnitarioIvaEsclusa: Centesimi;
   puntiUnitari: Centesimi;
   provvigioneUnitaria: Centesimi;
+  /** Prezzo di listino del pezzo, fotografato: serve al margine sugli acquisti personali. */
+  listinoUnitarioIvato: Centesimi;
   totaleIvato: Centesimi;
   totaleIvaEsclusa: Centesimi;
   totalePunti: Centesimi;
@@ -76,6 +78,7 @@ function riga(a: Articolo, p: Parametri): RigaCalcolata {
     prezzoUnitarioIvaEsclusa: unita.ivaEsclusa,
     puntiUnitari: unita.punti,
     provvigioneUnitaria: provvigione,
+    listinoUnitarioIvato: prodotto.prezzoListino,
     totaleIvato: unita.ivaInclusa * q,
     totaleIvaEsclusa: unita.ivaEsclusa * q,
     totalePunti: unita.punti * q,

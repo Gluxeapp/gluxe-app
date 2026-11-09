@@ -16,6 +16,7 @@ describe("calcolaOrdine", () => {
       prezzoUnitarioIvaEsclusa: 1618n,
       puntiUnitari: 1294n,
       provvigioneUnitaria: 0n,
+      listinoUnitarioIvato: 3290n,
       totaleIvato: 5922n,
       totaleIvaEsclusa: 4854n,
       totalePunti: 3882n,

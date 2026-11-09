@@ -8,6 +8,7 @@ import { contoIncaricata, statoRichiesta } from "@/lib/provvigioni/conti";
 import { PulsanteRichiesta } from "./richiesta";
 import { calcoloDelMese, ETICHETTE_VOCE, meseCorrente } from "@/lib/provvigioni/dati";
 import { TIPI_VOCE } from "@/lib/provvigioni/motore";
+import { margineDellAnno } from "@/lib/provvigioni/margine";
 
 export default function Pagina() {
   return (
@@ -116,13 +117,59 @@ async function Contenuto() {
       </Scheda>
 
       <Suspense fallback={<Caricamento />}>
+        <Margine incaricataId={incaricato.id} mese={mese} />
+      </Suspense>
+
+      <Suspense fallback={<Caricamento />}>
         <Conto incaricataId={incaricato.id} />
       </Suspense>
     </div>
   );
 }
 
-const STATI_RICHIESTA = { richiesta: "In controllo", approvata: "Approvata, in pagamento", rifiutata: "Rifiutata", pagata: "Pagata" } as const;
+/** Guadagno stimato rivendendo a prezzo di listino gli acquisti personali con lo sconto: solo informativo. */
+async function Margine({ incaricataId, mese }: { incaricataId: string; mese: string }) {
+  const anno = Number(mese.slice(0, 4));
+  const { mesi, totale } = await margineDellAnno(incaricataId, anno);
+  const delMese = mesi.find(([m]) => m === mese)?.[1] ?? 0n;
+  const precedenti = mesi.filter(([m]) => m !== mese);
+
+  return (
+    <Scheda>
+      <h2 className="font-titoli text-xl text-oro-chiaro">Guadagno stimato dagli acquisti personali</h2>
+      <p className="mt-1 text-sm text-testo-tenue">
+        Quanto guadagni se rivendi a prezzo di listino i prodotti comprati con lo sconto del 40%. È una stima: non è una
+        provvigione, non entra nel saldo e non si chiede in pagamento.
+      </p>
+      <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
+        <div>
+          <p className="text-testo-tenue">Mese di {nomeMeseDi(mese)}</p>
+          <p className="font-titoli text-2xl text-oro-chiaro">{formattaEuro(delMese)}</p>
+        </div>
+        <div>
+          <p className="text-testo-tenue">Da inizio {anno}</p>
+          <p className="font-titoli text-2xl text-oro-chiaro">{formattaEuro(totale)}</p>
+        </div>
+      </div>
+      {precedenti.length > 0 && (
+        <dl className="mt-3 grid gap-1 border-t border-bordo pt-2 text-sm">
+          {precedenti.map(([m, x]) => (
+            <div key={m} className="flex justify-between gap-4">
+              <dt className="capitalize text-testo-tenue">{nomeMeseDi(m)}</dt>
+              <dd>{formattaEuro(x)}</dd>
+            </div>
+          ))}
+        </dl>
+      )}
+      <p className="mt-3 text-xs text-testo-tenue">
+        Contano gli ordini personali pagati (non annullati né resi). Prodotti in promozione e start kit non hanno lo sconto, quindi non
+        sono compresi.
+      </p>
+    </Scheda>
+  );
+}
+
+const STATI_RICHIESTA ={ richiesta: "In controllo", approvata: "Approvata, in pagamento", rifiutata: "Rifiutata", pagata: "Pagata" } as const;
 const ETICHETTE_MOVIMENTO = { storno: "Storno per resi", richiesta: "Richiesta di pagamento", richiesta_rifiutata: "Richiesta rifiutata: importo restituito" } as const;
 const nomeMeseDi = (m: string) => `${NOMI_MESI[Number(m.slice(5, 7)) - 1]} ${m.slice(0, 4)}`;
 
