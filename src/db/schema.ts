@@ -339,6 +339,8 @@ export const righeOrdine = app.table(
     prezzoUnitarioIvaEsclusa: bigint("prezzo_unitario_iva_esclusa", { mode: "bigint" }).notNull(),
     puntiUnitari: bigint("punti_unitari", { mode: "bigint" }).notNull(),
     provvigioneUnitaria: bigint("provvigione_unitaria", { mode: "bigint" }).notNull(),
+    /** Prezzo di listino di un pezzo al momento dell'ordine, per il margine (vuoto negli ordini precedenti alla colonna). */
+    listinoUnitarioIvato: bigint("listino_unitario_ivato", { mode: "bigint" }),
     // …e della riga (unità × quantità)
     totaleIvato: bigint("totale_ivato", { mode: "bigint" }).notNull(),
     totaleIvaEsclusa: bigint("totale_iva_esclusa", { mode: "bigint" }).notNull(),

@@ -69,6 +69,27 @@ export function prezziPromozione(prezzoPromoIvato: Centesimi, p: Parametri, punt
   };
 }
 
+/** Riga d'ordine già fotografata, quanto basta per il margine. */
+export type RigaPerMargine = {
+  tipoPrezzo: string;
+  quantita: number;
+  prezzoUnitarioIvato: Centesimi;
+  listinoUnitarioIvato: Centesimi;
+};
+
+/**
+ * Margine (solo informativo, docs/piano-compensi.md sezione 2): guadagno stimato se l'incaricata
+ * rivende a prezzo di listino i prodotti comprati con lo sconto del 40%. Solo righe a listino scontato;
+ * promozioni e start kit non hanno sconto e quindi non hanno margine.
+ */
+export function margineRighe(righe: RigaPerMargine[]): Centesimi {
+  return righe.reduce((totale, r) => {
+    if (r.tipoPrezzo !== "listino_scontato") return totale;
+    const unita = r.listinoUnitarioIvato - r.prezzoUnitarioIvato;
+    return unita > 0n ? totale + unita * BigInt(r.quantita) : totale;
+  }, 0n);
+}
+
 /** Lo start kit ha punti fissi, non calcolati con il coefficiente. */
 export function prezziStartKit(prezzoIvato: Centesimi, p: Parametri): Prezzo {
   return { ivaInclusa: prezzoIvato, ivaEsclusa: scorporaIva(prezzoIvato, p.aliquotaIva), punti: p.puntiStartKit };
