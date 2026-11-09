@@ -397,7 +397,7 @@ export async function quadroContabilita() {
       .select({
         distinta: distinteBonifici,
         daPagare: sql<number>`(select count(*) from app.righe_distinta r join app.richieste_pagamento q on q.id = r.richiesta_id
-          where r.distinta_id = ${distinteBonifici.id} and not r.annullata and q.stato = 'approvata')::int`,
+          where r.distinta_id = app.distinte_bonifici.id and not r.annullata and q.stato = 'approvata')::int`,
       })
       .from(distinteBonifici)
       .orderBy(desc(distinteBonifici.creataIl))
