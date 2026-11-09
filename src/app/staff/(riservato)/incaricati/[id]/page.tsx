@@ -35,6 +35,7 @@ async function Contenuto({ params }: Pick<PageProps<"/staff/incaricati/[id]">, "
     iban: i.iban,
     haPartitaIva: i.partitaIva ? "si" : "no",
     partitaIva: i.partitaIva ?? "",
+    regimePartitaIva: i.regimeFiscale === "piva_forfettaria" ? "forfettario" : "ordinario",
   };
 
   return (

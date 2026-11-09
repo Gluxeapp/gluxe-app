@@ -97,6 +97,121 @@ try {
   await deveFallire("punti negativi scritti a mano su un prodotto", (tx) => tx`update app.prodotti set punti_online_manuali = -1 where id = ${prodotto.id}`);
   await deveFallire("qualifica bloccata oltre il 20%", (tx) => tx`insert into app.qualifiche_bloccate (incaricato_id, percentuale, dal, motivo) values (${a.id}, 2500, current_date, 'x')`);
 
+  // 1c) Fase 6: chiusura, registro provvigioni, richieste, documenti, bonifici (tutto in transazioni annullate,
+  // con un mese finto del 1999 che non esiste davvero).
+  const mese = "1999-01";
+  const chiudi = (tx, m = mese) =>
+    tx`insert into app.mesi_chiusi (mese, parametri_versione_id, fotografia, punti_aziendali, incasso, totale_compensi)
+       values (${m}, ${parametri.id}, '{}'::jsonb, 0, 0, 0)`;
+  const richiesta = async (tx) => {
+    await chiudi(tx);
+    const [r] = await tx`insert into app.richieste_pagamento (incaricato_id, mese, lordo, data_pagamento)
+      values (${a.id}, ${mese}, 10000, '1999-02-22') returning id`;
+    return r;
+  };
+  const documento = (tx, r, numero = 1, totale = 8006) =>
+    tx`insert into app.documenti_provvigioni (richiesta_id, incaricato_id, anno, numero, tipo, data, imponibile, iva, aliquota_iva,
+         ritenuta, inps_base, inps_incaricata, inps_azienda, bollo, totale, incaricata, azienda, competenza, parametri_versione_id)
+       values (${r.id}, ${a.id}, 1999, ${numero}, 'ricevuta', '1999-02-22', 10000, 0, 2200, 1794, 0, 0, 0, 200, ${totale},
+         '{}'::jsonb, '{}'::jsonb, '01/1999', ${parametri.id})`;
+  await deveFallire("chiudere due volte lo stesso mese", async (tx) => {
+    await chiudi(tx);
+    await chiudi(tx);
+  });
+  await deveFallire("modificare un mese chiuso", async (tx) => {
+    await chiudi(tx);
+    await tx`update app.mesi_chiusi set totale_compensi = 1 where mese = ${mese}`;
+  });
+  await deveFallire("cancellare un mese chiuso", async (tx) => {
+    await chiudi(tx);
+    await tx`delete from app.mesi_chiusi where mese = ${mese}`;
+  });
+  await deveFallire("contare lo stesso ordine in due mesi chiusi", async (tx) => {
+    await chiudi(tx);
+    await chiudi(tx, "1999-02");
+    await tx`insert into app.ordini_chiusi (ordine_id, mese) values (${ordine.id}, ${mese})`;
+    await tx`insert into app.ordini_chiusi (ordine_id, mese) values (${ordine.id}, '1999-02')`;
+  });
+  await deveFallire("scrivere due volte la stessa voce nel registro provvigioni", async (tx) => {
+    await chiudi(tx);
+    await tx`insert into app.movimenti (incaricato_id, tipo, mese, tipo_voce, importo) values (${a.id}, 'voce', ${mese}, 'online', 100)`;
+    await tx`insert into app.movimenti (incaricato_id, tipo, mese, tipo_voce, importo) values (${a.id}, 'voce', ${mese}, 'online', 100)`;
+  });
+  await deveFallire("modificare una riga del registro provvigioni", async (tx) => {
+    await chiudi(tx);
+    await tx`insert into app.movimenti (incaricato_id, tipo, mese, tipo_voce, importo) values (${a.id}, 'voce', ${mese}, 'online', 100)`;
+    await tx`update app.movimenti set importo = 99999 where mese = ${mese}`;
+  });
+  await deveFallire("cancellare una riga del registro provvigioni", async (tx) => {
+    await chiudi(tx);
+    await tx`insert into app.movimenti (incaricato_id, tipo, mese, tipo_voce, importo) values (${a.id}, 'voce', ${mese}, 'online', 100)`;
+    await tx`delete from app.movimenti where mese = ${mese}`;
+  });
+  await deveFallire("voce negativa senza rettifica", async (tx) => {
+    await chiudi(tx);
+    await tx`insert into app.movimenti (incaricato_id, tipo, mese, tipo_voce, importo) values (${a.id}, 'voce', ${mese}, 'online', -100)`;
+  });
+  await deveFallire("due richieste di pagamento nello stesso mese", async (tx) => {
+    await richiesta(tx);
+    await tx`insert into app.richieste_pagamento (incaricato_id, mese, lordo, data_pagamento) values (${a.id}, ${mese}, 5000, '1999-02-22')`;
+  });
+  await deveFallire("addebitare due volte la stessa richiesta", async (tx) => {
+    const r = await richiesta(tx);
+    await tx`insert into app.movimenti (incaricato_id, tipo, mese, importo, richiesta_id) values (${a.id}, 'richiesta', ${mese}, -10000, ${r.id})`;
+    await tx`insert into app.movimenti (incaricato_id, tipo, mese, importo, richiesta_id) values (${a.id}, 'richiesta', ${mese}, -10000, ${r.id})`;
+  });
+  await deveFallire("cambiare l'importo di una richiesta di pagamento", async (tx) => {
+    const r = await richiesta(tx);
+    await tx`update app.richieste_pagamento set lordo = 99999 where id = ${r.id}`;
+  });
+  await deveFallire("riportare indietro lo stato di una richiesta (pagata → richiesta)", async (tx) => {
+    const r = await richiesta(tx);
+    await tx`update app.richieste_pagamento set stato = 'approvata', decisa_il = now() where id = ${r.id}`;
+    await tx`update app.richieste_pagamento set stato = 'pagata', pagata_il = now() where id = ${r.id}`;
+    await tx`update app.richieste_pagamento set stato = 'richiesta' where id = ${r.id}`;
+  });
+  await deveFallire("cancellare una richiesta di pagamento", async (tx) => {
+    const r = await richiesta(tx);
+    await tx`delete from app.richieste_pagamento where id = ${r.id}`;
+  });
+  await deveFallire("due documenti con lo stesso numero nello stesso anno", async (tx) => {
+    const r1 = await richiesta(tx);
+    await documento(tx, r1);
+    await tx`update app.richieste_pagamento set stato = 'rifiutata', decisa_il = now() where id = ${r1.id}`;
+    const [r2] = await tx`insert into app.richieste_pagamento (incaricato_id, mese, lordo, data_pagamento) values (${a.id}, ${mese}, 10000, '1999-02-22') returning id`;
+    await documento(tx, r2);
+  });
+  await deveFallire("documento con totale che non torna", async (tx) => documento(tx, await richiesta(tx), 1, 9999));
+  await deveFallire("modificare un documento già emesso", async (tx) => {
+    const r = await richiesta(tx);
+    await documento(tx, r);
+    await tx`update app.documenti_provvigioni set totale = 1 where richiesta_id = ${r.id}`;
+  });
+  await deveFallire("mettere la stessa richiesta in due file bonifici validi", async (tx) => {
+    const r = await richiesta(tx);
+    for (const n of [1, 2]) {
+      const [d] = await tx`insert into app.distinte_bonifici (data_pagamento, id_messaggio, numero_bonifici, totale, xml)
+        values ('1999-02-22', ${`PROVA-GARANZIE-${n}-${randomUUID()}`}, 1, 8006, '<x/>') returning id`;
+      await tx`insert into app.righe_distinta (distinta_id, richiesta_id) values (${d.id}, ${r.id})`;
+    }
+  });
+  await deveFallire("riattivare un file bonifici annullato", async (tx) => {
+    const [d] = await tx`insert into app.distinte_bonifici (data_pagamento, id_messaggio, numero_bonifici, totale, xml)
+      values ('1999-02-22', ${`PROVA-GARANZIE-${randomUUID()}`}, 1, 8006, '<x/>') returning id`;
+    await tx`update app.distinte_bonifici set annullata_il = now() where id = ${d.id}`;
+    await tx`update app.distinte_bonifici set annullata_il = null where id = ${d.id}`;
+  });
+  await deveFallire("stornare due volte lo stesso ordine reso", async (tx) => {
+    await chiudi(tx);
+    await tx`insert into app.ordini_chiusi (ordine_id, mese) values (${ordine.id}, ${mese})`;
+    for (let n = 0; n < 2; n++) {
+      const [r] = await tx`insert into app.rettifiche (mese, mese_origine) values (${mese}, ${mese}) returning id`;
+      await tx`insert into app.ordini_stornati (ordine_id, rettifica_id) values (${ordine.id}, ${r.id})`;
+    }
+  });
+  await deveFallire("regime con partita IVA senza numero di partita IVA", (tx) =>
+    tx`update app.incaricati set regime_fiscale = 'piva_ordinaria', partita_iva = null where id = ${a.id}`);
+
   // 2) Conferme di pagamento contemporanee: 10 copie di due eventi diversi per lo stesso ordine.
   if (!segreto) throw new Error("Manca STRIPE_WEBHOOK_SECRET");
   const sessione = `cs_test_prova_${randomUUID()}`;

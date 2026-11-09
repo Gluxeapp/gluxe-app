@@ -62,6 +62,9 @@ export const schemaParametri = z.object({
   inpsQuotaAzienda: puntiBase,
   inpsBaseImponibile: puntiBase,
   inpsSogliaEsenzione: centesimi,
+  /** Bollo sulle ricevute e fatture senza IVA (decisione 28): importo, tolto all'incaricata, oltre la soglia. */
+  bolloImporto: centesimi.default(200n),
+  bolloSoglia: centesimi.default(7747n),
   // Controlli prima della chiusura
   /** Compensi del mese (bonus auto escluso) al massimo questa percentuale dei punti aziendali. */
   limiteCompensiSuPunti: puntiBase,
@@ -116,6 +119,8 @@ export const PARAMETRI_INIZIALI: Parametri = {
   inpsQuotaAzienda: 0n,
   inpsBaseImponibile: 0n,
   inpsSogliaEsenzione: 0n,
+  bolloImporto: 200n,
+  bolloSoglia: 7747n,
   limiteCompensiSuPunti: 7000n,
 };
 

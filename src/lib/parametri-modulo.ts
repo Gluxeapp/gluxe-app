@@ -63,6 +63,8 @@ export const GRUPPI_PARAMETRI: { titolo: string; campi: CampoParametro[] }[] = [
       { chiave: "inpsQuotaAzienda", etichetta: "INPS: quota a carico dell'azienda (%)", tipo: "percentuale" },
       { chiave: "inpsBaseImponibile", etichetta: "INPS: base imponibile (% dei compensi)", tipo: "percentuale" },
       { chiave: "inpsSogliaEsenzione", etichetta: "INPS: soglia di esenzione annua (€)", tipo: "euro" },
+      { chiave: "bolloImporto", etichetta: "Bollo su ricevute e fatture senza IVA (€)", tipo: "euro" },
+      { chiave: "bolloSoglia", etichetta: "Bollo dovuto oltre (€)", tipo: "euro" },
       { chiave: "limiteCompensiSuPunti", etichetta: "Limite compensi del mese (% dei punti aziendali)", tipo: "percentuale" },
     ],
   },

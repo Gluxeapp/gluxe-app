@@ -8,7 +8,7 @@ import { TIPI_VOCE } from "@/lib/provvigioni/motore";
 export default function AnteprimaProvvigioni({ searchParams }: PageProps<"/staff/provvigioni">) {
   return (
     <>
-      <Titolo sottotitolo="Calcolo del Piano Compensi sugli ordini pagati del mese. È un'anteprima: si rifà ogni volta che apri la pagina e non scrive nulla. La chiusura del mese arriva con la Fase 6.">
+      <Titolo sottotitolo="Calcolo del Piano Compensi sugli ordini pagati del mese. Per un mese aperto è un'anteprima: si rifà ogni volta che apri la pagina e non scrive nulla. Un mese chiuso mostra i dati congelati alla chiusura.">
         Anteprima provvigioni
       </Titolo>
       <Suspense fallback={<Caricamento />}>
@@ -46,7 +46,7 @@ async function Contenuto({ searchParams }: Pick<PageProps<"/staff/provvigioni">,
         <button type="submit" className="rounded-lg border border-oro/60 px-4 py-2 text-oro-chiaro">
           Calcola
         </button>
-        <span className="text-testo-tenue">Parametri: versione n. {e.versioneParametri.toString()}</span>
+        <span className="text-testo-tenue">Parametri: versione n. {e.versioneParametri.toString()}{e.chiuso && " · mese chiuso, dati congelati"}</span>
       </form>
 
       {e.ok ? (

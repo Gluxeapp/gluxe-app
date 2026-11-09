@@ -1,7 +1,10 @@
 // Crea una piccola rete FINTA sotto GL000002, con ordini pagati nel mese in corso, per provare
 // Carriera, albero della rete e anteprima provvigioni. Solo database di PROVA. Si può rilanciare:
 // le persone già create non si duplicano, gli ordini sì (ogni lancio aggiunge un giro di ordini).
-// Uso: npm run db:seme-rete-prova
+// Uso: npm run db:seme-rete-prova            (ordini pagati oggi)
+//      npm run db:seme-rete-prova -- --mese-scorso  (ordini pagati nel mese scorso, per provare chiusura e pagamenti)
+// Imposta anche, per le prove della Fase 6: Alice con partita IVA ordinaria, Bruna forfettaria, e dati
+// d'azienda FINTI (solo se ancora vuoti).
 // Gli ordini sono inseriti direttamente come pagati (senza Stripe): vanno bene solo per le prove.
 import postgres from "postgres";
 
@@ -9,6 +12,7 @@ if (!process.env.DATABASE_URL || process.env.DATABASE_URL === process.env.DATABA
   console.error("Serve il database di prova in DATABASE_URL.");
   process.exit(1);
 }
+const meseScorso = process.argv.includes("--mese-scorso");
 const sql = postgres(process.env.DATABASE_URL, { prepare: false, max: 1, onnotice: () => {} });
 
 // sponsor: codice esistente oppure email di una persona finta creata prima nell'elenco.
@@ -22,6 +26,7 @@ const PERSONE = [
 // Ordini del mese: personali (Shampoo Botox con sconto 40%) e online (Kit Routine Botox a listino pieno).
 const ORDINI = [
   { chi: "GL000002", tipo: "personale", shampoo: 3 },
+  { chi: "GL000002", tipo: "online", kit: 2 },
   { chi: "alice.finta@gluxe.test", tipo: "online", kit: 8 },
   { chi: "alice.finta@gluxe.test", tipo: "personale", shampoo: 2 },
   { chi: "bruna.finta@gluxe.test", tipo: "online", kit: 1 },
@@ -69,7 +74,8 @@ try {
         insert into app.ordini (incaricato_id, tipo, stato, parametri_versione_id, merce_iva_inclusa, merce_iva_esclusa, punti,
           provvigione_acquisto, spese_spedizione, totale, destinatario, indirizzo, cap, citta, provincia, telefono, pagato_il)
         values (${id.get(o.chi)}, ${o.tipo}, 'pagato', ${parametri.id}, ${t.ivato}, ${t.iva}, ${t.punti}, 0, 690, ${t.ivato + 690},
-          'Cliente Finta', 'Via delle Prove 1', '20100', 'Milano', 'MI', '3330000000', now())
+          'Cliente Finta', 'Via delle Prove 1', '20100', 'Milano', 'MI', '3330000000',
+          ${meseScorso ? sql`date_trunc('month', now() at time zone 'Europe/Rome') at time zone 'Europe/Rome' - interval '10 days'` : sql`now()`})
         returning id, numero`;
       await tx`
         insert into app.righe_ordine (ordine_id, prodotto_id, codice, nome, tipo_prezzo, quantita, prezzo_unitario_ivato,
@@ -78,7 +84,17 @@ try {
           ${riga.q}, ${riga.ivato}, ${riga.iva}, ${riga.punti}, 0, ${t.ivato}, ${t.iva}, ${t.punti}, 0)`;
       await tx`insert into app.storico_stati_ordine (ordine_id, stato, nota) values (${ordine.id}, 'pagato', 'Ordine finto per le prove')`;
     }
-    console.log(`${ORDINI.length} ordini finti pagati oggi.`);
+    console.log(`${ORDINI.length} ordini finti pagati ${meseScorso ? "nel mese scorso" : "oggi"}.`);
+
+    // Fase 6: regimi fiscali diversi e dati d'azienda finti, per vedere ricevuta, fatture, F24 e file bonifici.
+    await tx`update app.incaricati set partita_iva = '12345678903', regime_fiscale = 'piva_ordinaria' where id = ${id.get("alice.finta@gluxe.test")}`;
+    await tx`update app.incaricati set partita_iva = '09876543217', regime_fiscale = 'piva_forfettaria' where id = ${id.get("bruna.finta@gluxe.test")}`;
+    await tx`update app.dati_azienda set ragione_sociale = 'G LUXE S.r.l. (DATI DI PROVA)', indirizzo = 'Via delle Prove 10', cap = '20100',
+      citta = 'Milano', provincia = 'MI', codice_fiscale = '12345678903', partita_iva = '12345678903',
+      iban = 'IT42X0306909606100000063127', cuc = 'PROVA001',
+      autorizzazione_bollo = 'Autorizzazione Agenzia delle Entrate (DI PROVA) n. 0 del 01/01/2026', modificato_il = now()
+      where id = 1 and ragione_sociale = ''`;
+    console.log("Alice: partita IVA ordinaria; Bruna: forfettaria; dati d'azienda di prova impostati (se vuoti).");
   });
 } finally {
   await sql.end();

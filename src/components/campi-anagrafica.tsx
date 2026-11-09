@@ -68,7 +68,31 @@ export function CampiAnagrafica({ esito }: { esito: EsitoModulo }) {
             ))}
           </div>
         </div>
-        {haPartitaIva && <Campo etichetta="Numero di partita IVA" name="partitaIva" esito={esito} inputMode="numeric" maxLength={11} />}
+        {haPartitaIva && (
+          <>
+            <Campo etichetta="Numero di partita IVA" name="partitaIva" esito={esito} inputMode="numeric" maxLength={11} />
+            <div>
+              <p className="text-sm text-testo-tenue">Regime della partita IVA</p>
+              <div className="mt-2 flex flex-wrap gap-6">
+                {[
+                  ["ordinario", "Ordinario (fattura con IVA)"],
+                  ["forfettario", "Forfettario (fattura senza IVA)"],
+                ].map(([valore, etichetta]) => (
+                  <label key={valore} className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="regimePartitaIva"
+                      value={valore}
+                      defaultChecked={(esito.valori?.regimePartitaIva ?? "ordinario") === valore}
+                      className="accent-oro"
+                    />
+                    {etichetta}
+                  </label>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
       </Sezione>
     </>
   );

@@ -43,6 +43,13 @@
       "when": 1793879569910,
       "tag": "0005_punti_manuali",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793980727218,
+      "tag": "0006_fase6_chiusura_pagamenti",
+      "breakpoints": true
     }
   ]
 }
