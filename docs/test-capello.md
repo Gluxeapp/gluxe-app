@@ -246,6 +246,8 @@ Pulsante **"Prenota la consulenza tricologica gratuita"** alla fine del test (e 
 
 **Perché queste cautele.** In una consulenza tricologica si parla spesso di cute, caduta e altri temi che sono **dati sulla salute** per il GDPR. Il modulo del sito non deve raccoglierli; li tratta la tricologa durante la consulenza, con un'informativa e un consenso appositi. Inoltre in Italia "tricologo" non è una professione sanitaria: la consulenza è cosmetica e non sostituisce il medico. Nei testi si scrive "consulenza", mai "visita" o "diagnosi".
 
+**La consulenza si fa al telefono (T10).** Il modulo chiede quindi il telefono come dato principale e la fascia oraria per la chiamata; nel testo: "La tricologa ti chiama al numero che indichi". L'informativa per i dati sulla salute si manda via email prima della chiamata, e il consenso si raccoglie con un clic nell'email (non a voce, così resta registrato con data e ora).
+
 **La tricologa è una dipendente G LUXE (T9).** Quindi:
 - **G LUXE è titolare** anche dei dati raccolti durante la consulenza; non serve un contratto con un'altra azienda per la privacy.
 - La tricologa riceve una **lettera di autorizzazione al trattamento** (cosa può vedere e fare con i dati) e una breve formazione privacy.
@@ -268,7 +270,7 @@ Pulsante **"Prenota la consulenza tricologica gratuita"** alla fine del test (e 
 | T7 | Quali idee del riferimento si adottano? | **Deciso (10/11/2026):** tutte (R1–R7). |
 | T8 | Link dell'incaricata: nome e iniziale del cognome, e numero WhatsApp del profilo modificabile? | |
 | T9 | Chi è la tricologa: dipendente G LUXE o collaboratrice esterna? (cambia chi è responsabile dei dati raccolti in consulenza) | **Deciso (10/11/2026):** dipendente G LUXE. Conseguenze nella sezione 10. |
-| T10 | Come si svolge la consulenza: telefono, videochiamata o di persona? Quanto dura? | |
+| T10 | Come si svolge la consulenza: telefono, videochiamata o di persona? Quanto dura? | **Deciso (10/11/2026):** al telefono. Durata da indicare (proposta: 15–20 minuti, da scrivere nel modulo). |
 | T11 | Come riceve le richieste la tricologa: accesso all'area sede dell'app o email? | |
 | T12 | Se la persona arriva dal link di un'incaricata, la richiesta di consulenza la lega a quell'incaricata (decisione 30) e l'incaricata viene avvisata? | |
 | T13 | Prenotazione: la tricologa richiama (proposta) o la persona sceglie giorno e ora da un calendario? | |
