@@ -4,6 +4,7 @@ Bozza del 10/11/2026, **da approvare dal fondatore** (decisione S9 di `docs/sito
 
 Rev. 2 del 10/11/2026: adottate le idee del riferimento indicato dal fondatore (sezione 8, decisione T7).
 Rev. 3 del 10/11/2026 (fondatore): **nessun risultato a schermo**; il risultato arriva solo via email insieme al protocollo (T6); pulsante per la consulenza tricologica gratuita.
+Rev. 4 del 10/11/2026 (fondatore): il risultato **cita e spiega la porosità** (testi del test Kisecret, app del fondatore); prodotti scelti da porosità e cute grassa (T4).
 
 Tutto ciò che è tra **[parentesi quadre]** va verificato o completato. In particolare: modo d'uso, tempi di posa e frequenze dei prodotti vanno presi dalle etichette e dalle schede tecniche G LUXE, non da questa bozza.
 
@@ -112,89 +113,139 @@ Si sceglie **una sola risposta** per domanda.
 
 Punteggio massimo per profilo, per controllo: AS 9, RI 7, PR 9, LE 7, EQ 9.
 
-## 4. I 6 profili
+## 4. Il risultato: porosità, cute e profilo
 
-Ogni profilo ha: **titolo**, **stato della foto**, **descrizione** (2 righe), **cosa significa** (1–2 frasi), **routine in breve**, **prodotto principale** (preselezionato in "Voglio acquistare") e le due routine usate nel protocollo (sezione 6): **completa** e **leggera**.
+Rev. 4 del 10/11/2026 (fondatore): il risultato **cita la porosità e la spiega**, con i testi del test Kisecret (app del fondatore, testi riutilizzabili). I **prodotti** si scelgono dalla porosità e dalla cute grassa (T4); il **profilo** (sezione 4c) resta per descrivere i capelli e dare i consigli pratici.
 
-### Capelli assetati (AS) · foto: "Chioma assetata"
-- **Descrizione:** i tuoi capelli chiedono nutrimento: al tatto sono ruvidi e la luce si spegne in fretta.
-- **Cosa significa:** l'acqua e la morbidezza escono dal capello più in fretta di quanto entrino. L'obiettivo è nutrire a ogni lavaggio e sigillare le lunghezze.
-- **Routine in breve:** Shampoo Botox → Maschera Botox → Spray Botox 10in1 sulle lunghezze.
-- **Completa:** Shampoo Botox; Maschera Botox su lunghezze e punte, posa **[tempo dall'etichetta]**; risciacquo tiepido; Spray Botox 10in1.
-- **Leggera:** Shampoo Botox; Spray Botox 10in1 sulle lunghezze.
-- **Prodotto principale:** Kit Routine Botox.
+### 4a. Le tre porosità
 
-### Capelli ribelli (RI) · foto: "Chioma ribelle"
-- **Descrizione:** i tuoi capelli hanno carattere: con l'umidità si gonfiano e fanno di testa loro.
-- **Cosa significa:** la superficie del capello è irregolare e cattura l'umidità dell'aria. L'obiettivo è disciplinare senza appesantire.
-- **Routine in breve:** Shampoo Botox → Maschera Botox → Spray Botox 10in1 ogni giorno.
-- **Completa:** Shampoo Botox; Maschera Botox, posa **[tempo]**; pettine a denti larghi da bagnati, dalle punte; Spray Botox 10in1.
-- **Leggera:** Shampoo Botox; Spray Botox 10in1 anche sui capelli asciutti per fermare il crespo.
-- **Prodotto principale:** Spray Botox 10in1.
+La porosità dice quanto le cuticole (le scaglie che rivestono il capello) restano aperte: decide se un prodotto entra, resta in superficie o se ne va con il lavaggio successivo.
 
-### Capelli provati (PR) · foto: "Chioma provata"
-- **Descrizione:** colore, schiariture e calore lasciano il segno: le punte si sfibrano e i capelli si spezzano più facilmente.
-- **Cosa significa:** le lunghezze hanno perso compattezza e trattengono poco. Serve una routine completa e costante, e meno calore.
-- **Routine in breve:** Shampoo Botox → Maschera Botox → Spray Botox 10in1 prima di phon e piastra.
-- **Completa:** Shampoo Botox; Maschera Botox, posa **[tempo più lungo consigliato]**; Spray Botox 10in1 prima di phon e piastra.
-- **Leggera:** Shampoo Botox; Spray Botox 10in1 prima del calore.
-- **Prodotto principale:** Kit Routine Botox.
+**Porosità bassa** · stato: "Chioma liscia e compatta"
+- *In breve:* le tue cuticole sono chiuse e sovrapposte. Il problema non è la mancanza di nutrimento: è l'accumulo.
+- *Cosa significa:*
+  - Le scaglie di cheratina che rivestono il capello sono strette e ben allineate. L'acqua fatica a entrare, e per lo stesso motivo fatica a uscire: ecco perché ci metti così tanto ad asciugarti.
+  - La conseguenza pratica è controintuitiva: più prodotto ricco applichi, peggio va. Non penetra, si deposita. Il capello diventa pesante, opaco e col tempo rigido.
+  - Il lavoro giusto è scegliere formule leggere, distanziare i trattamenti ricchi e aprire la cuticola con il calore quando ne usi uno.
+- *Cosa ti dirà che funziona:* i capelli si asciugano più in fretta di sette giorni fa; alla luce riflettono in modo uniforme, non a chiazze; dopo il giorno 6 sono morbidi ed elastici, non semplicemente lisci.
 
-### Radici che si appesantiscono (LE) · foto: "Chioma pesante"
-- **Descrizione:** le radici si appesantiscono in fretta, mentre le lunghezze stanno bene.
-- **Cosa significa:** i prodotti tendono a restare sul capello invece di entrare, e le radici si appesantiscono. Serve una detersione che dia leggerezza e prodotti solo sulle lunghezze.
-- **Routine in breve:** Shampoo Detox → Spray Botox 10in1 solo su lunghezze e punte.
-- **Completa:** Shampoo Detox, due passate se serve; Spray Botox 10in1 solo dalle lunghezze in giù.
-- **Leggera:** Shampoo Detox, una passata.
-- **Prodotto principale:** Shampoo Detox.
+**Porosità media** · stato: "Chioma in equilibrio"
+- *In breve:* le tue cuticole sono in equilibrio. Il capello assorbe quanto basta e trattiene bene.
+- *Cosa significa:*
+  - È la condizione più gestibile: il capello accetta i trattamenti senza appesantirsi e mantiene i risultati per giorni. Hai il margine di errore più ampio nella scelta dei prodotti.
+  - È anche la porosità più facile da perdere: colore, decolorazione e calore quotidiano la spostano verso l'alto, e una volta aperta la cuticola non torna indietro su quella lunghezza.
+  - L'obiettivo qui è la conservazione, non la riparazione: la maggior parte del beneficio arriva dalla protezione termica e dalla costanza.
+- *Cosa ti dirà che funziona:* il risultato del giorno 3 è ancora visibile il giorno 5; le punte non sono più opache della lunghezza centrale; con l'umidità i capelli si gonfiano ma non diventano crespi.
 
-### Capelli misti (MI) · foto: "Chioma mista"
-- **Descrizione:** radici che si appesantiscono e punte secche: due esigenze diverse sulla stessa testa.
-- **Cosa significa:** la cute lavora tanto mentre le lunghezze restano assetate. Il segreto è trattarle separatamente.
-- **Routine in breve:** Shampoo Detox sulle radici → Maschera Botox da metà lunghezza → Spray Botox 10in1 sulle punte.
-- **Completa:** Shampoo Detox sulle radici; Maschera Botox da metà lunghezza alle punte, posa **[tempo]**; Spray Botox 10in1 sulle punte.
-- **Leggera:** Shampoo Detox sulle radici; Spray Botox 10in1 sulle punte.
-- **Prodotto principale:** Shampoo Detox **[oppure un abbinamento Detox + Maschera come promozione, T4]**.
+**Porosità alta** · stato: "Chioma crespa e vaporosa"
+- *In breve:* le tue cuticole sono sollevate. Assorbi tutto in fretta e perdi tutto altrettanto in fretta.
+- *Cosa significa:*
+  - Le scaglie di cheratina non sono più ben allineate: tra una e l'altra ci sono spazi aperti. Il capello si bagna subito, si asciuga in fretta e nel giro di poche ore torna secco. Con l'umidità l'acqua entra tutta insieme: il risultato è il crespo immediato.
+  - La causa è quasi sempre accumulata: decolorazione, colore ripetuto, calore quotidiano.
+  - Riempire non basta: senza un passaggio che sigilli la cuticola, quello che entra esce con il lavaggio successivo.
+- *Cosa ti dirà che funziona:* il crespo con l'umidità arriva più tardi; i capelli restano morbidi almeno 48 ore dopo la maschera; districarli bagnati richiede meno fatica.
 
-### Capelli in equilibrio (EQ) · foto: "Chioma in equilibrio"
-- **Descrizione:** i tuoi capelli stanno bene: l'obiettivo è mantenerli così, morbidi e luminosi.
-- **Cosa significa:** è la condizione più facile da gestire e anche la più facile da perdere: colore e calore la spostano in fretta. Qui si conserva, non si ripara.
-- **Routine in breve:** Shampoo Botox → Spray Botox 10in1; Maschera Botox una volta a settimana.
-- **Completa:** Shampoo Botox; Maschera Botox, posa **[tempo]**; Spray Botox 10in1.
-- **Leggera:** Shampoo Botox; Spray Botox 10in1.
-- **Prodotto principale:** Shampoo Botox.
+### 4b. I prodotti consigliati (T4)
 
-## 5. Come si sceglie il profilo
+| Porosità | Cute normale | Cute grassa |
+| --- | --- | --- |
+| Bassa | Shampoo Botox + Spray Botox 10in1 | Shampoo Detox + Spray Botox 10in1 |
+| Media | Shampoo Botox + Maschera Botox + Spray Botox 10in1 | Shampoo Detox + Maschera Botox + Spray Botox 10in1 |
+| Alta | Shampoo Botox + Maschera Botox + Spray Botox 10in1 | Shampoo Detox + Maschera Botox + Spray Botox 10in1 |
 
-Il calcolo avviene sul server del sito (il browser mostra solo il risultato), in questo ordine:
+Media e alta usano gli stessi prodotti; cambia il modo (sezione 6): con la porosità alta la maschera va su tutta la lunghezza con la posa più lunga, e lo spray serve a sigillare.
 
-1. Si sommano i punti di ogni profilo (AS, RI, PR, LE, EQ).
-2. **Capelli misti:** se LE ha almeno 3 punti **e** AS o PR ha almeno 3 punti, il risultato è **MI**.
-3. Altrimenti vince il profilo con più punti.
-4. **Parità:** vince il primo in quest'ordine: PR, AS, RI, LE, EQ (prima le esigenze più forti).
-5. Se tutti hanno 0 punti, il risultato è EQ.
+Prodotto preselezionato in "Voglio acquistare": porosità media o alta con cute normale → Kit Routine Botox; negli altri casi → il primo prodotto della riga (lo shampoo).
 
-**Esempio 1.** Risposte: 1 "Già pesanti alla radice" (LE 2), 2 "Moltissimo" (LE 3), 3 "Quasi niente" (EQ 1), 4 "Ruvida" (AS 1, PR 1), 5 "Tanto" (PR 4), 6 "Ogni giorno" (LE 5), 7 "Aperte" (PR 6, AS 2), 8 "Leggerezza" (LE 7). Totali: LE 7, PR 6, AS 2, EQ 1. LE ≥ 3 e PR ≥ 3 → **Capelli misti**.
+### 4c. I 6 profili (descrizione e consigli)
 
-**Esempio 2.** Risposte: 1 "Crespi" (RI 2), 2 "Il giusto" (EQ 1), 3 "Esplodono" (RI 4), 4 "Un po' irregolare" (AS 1), 5 "Niente di particolare" (EQ 2), 6 "Meno spesso" (RI 5), 7 "Secche" (AS 3), 8 "Disciplina" (RI 7). Totali: RI 7, AS 3, EQ 2 → **Capelli ribelli**.
+Il profilo dà il nome ai capelli e i consigli pratici; i prodotti vengono dalla tabella 4b.
+
+| Profilo | Descrizione | Consigli pratici |
+| --- | --- | --- |
+| Capelli assetati (AS) | I tuoi capelli chiedono nutrimento: al tatto sono ruvidi e la luce si spegne in fretta. | Acqua tiepida per l'ultimo risciacquo; tampona con l'asciugamano invece di strofinare. |
+| Capelli ribelli (RI) | I tuoi capelli hanno carattere: con l'umidità si gonfiano e fanno di testa loro. | Pettinali da bagnati con un pettine a denti larghi, partendo dalle punte; non toccarli mentre si asciugano. |
+| Capelli provati (PR) | Colore, schiariture e calore lasciano il segno: le punte si sfibrano e si spezzano più facilmente. | Abbassa di un livello la temperatura di piastra e phon; spunta le punte ogni 2–3 mesi. |
+| Radici che si appesantiscono (LE) | Le radici si appesantiscono in fretta, mentre le lunghezze stanno bene. | Massaggia lo shampoo con i polpastrelli; tocca poco i capelli durante il giorno. |
+| Capelli misti (MI) | Radici che si appesantiscono e punte secche: due esigenze diverse sulla stessa testa. | Prodotti per le lunghezze mai vicino alla cute; asciuga prima le radici, poi le lunghezze. |
+| Capelli in equilibrio (EQ) | I tuoi capelli stanno bene: l'obiettivo è mantenerli così, morbidi e luminosi. | Proteggi i capelli dal sole e dal freddo; dormi su una federa liscia. |
+
+## 5. Come si calcola
+
+Il calcolo avviene sul server del sito (il browser mostra solo il risultato).
+
+### 5a. Porosità
+
+Come nel test Kisecret: ogni risposta delle 5 domande sul comportamento del capello vale da 1 (cuticola chiusa) a 3 (cuticola aperta); "Non saprei" vale 2.
+
+| Domanda | 1 | 2 | 3 |
+| --- | --- | --- | --- |
+| 2 Asciugatura | Moltissimo | Il giusto · Non saprei | Pochissimo |
+| 3 Umidità | Quasi niente | Si gonfiano un po' | Esplodono |
+| 4 Al tatto | Liscia | Un po' irregolare | Ruvida |
+| 5 Storico | Niente di particolare | Qualcosa ogni tanto · Colore regolare | Tanto |
+| 7 Punte | In ordine | Secche · Non saprei | Aperte |
+
+Totale da 5 a 15: **5–8 bassa, 9–11 media, 12–15 alta** (le stesse soglie in media per domanda del test Kisecret: 7–12, 13–15, 16–21 su 7 domande).
+
+### 5b. Cute grassa
+
+Cute grassa se alla domanda 1 la risposta è "Già pesanti alla radice" **oppure** alla domanda 6 è "Ogni giorno".
+
+### 5c. Profilo
+
+1. Si sommano i punti di ogni profilo (AS, RI, PR, LE, EQ) dalle tabelle della sezione 3.
+2. **Capelli misti:** se LE ha almeno 3 punti **e** AS o PR ha almeno 3 punti, il profilo è **MI**.
+3. Altrimenti vince il profilo con più punti; a parità vince il primo in quest'ordine: PR, AS, RI, LE, EQ. Tutti a 0 → EQ.
+
+### 5d. Esempi
+
+**Esempio 1.** Risposte: 1 "Già pesanti alla radice", 2 "Moltissimo", 3 "Quasi niente", 4 "Ruvida", 5 "Tanto", 6 "Ogni giorno", 7 "Aperte", 8 "Leggerezza".
+Porosità 1+1+3+3+3 = 11 → **media**. Cute grassa: sì. Profilo: LE 7, PR 6, AS 2, EQ 1 → **Capelli misti**. Prodotti: Shampoo Detox + Maschera Botox + Spray Botox 10in1.
+
+**Esempio 2.** Risposte: 1 "Crespi", 2 "Il giusto", 3 "Esplodono", 4 "Un po' irregolare", 5 "Niente di particolare", 6 "Meno spesso", 7 "Secche", 8 "Disciplina".
+Porosità 2+3+2+1+2 = 10 → **media**. Cute grassa: no. Profilo: RI 7, AS 3, EQ 2 → **Capelli ribelli**. Prodotti: Shampoo Botox + Maschera Botox + Spray Botox 10in1 (Kit Routine Botox).
+
+**Esempio 3.** Risposte: 1 "Secchi", 2 "Pochissimo", 3 "Esplodono", 4 "Ruvida", 5 "Tanto", 6 "Una o due volte a settimana", 7 "Aperte", 8 "Capelli più forti".
+Porosità 3+3+3+3+3 = 15 → **alta**. Cute grassa: no. Profilo: PR 9, AS 6, RI 2 → **Capelli provati**. Prodotti: Shampoo Botox + Maschera Botox + Spray Botox 10in1.
+
+**Esempio 4.** Risposte: 1 "In ordine", 2 "Moltissimo", 3 "Quasi niente", 4 "Liscia", 5 "Niente di particolare", 6 "Ogni giorno", 7 "In ordine", 8 "Leggerezza".
+Porosità 1+1+1+1+1 = 5 → **bassa**. Cute grassa: sì. Profilo: EQ 6, LE 5 → **Capelli in equilibrio**. Prodotti: Shampoo Detox + Spray Botox 10in1.
 
 ## 6. Il Protocollo G LUXE di 7 giorni
 
-Arriva **via email** insieme al risultato (titolo, descrizione, cosa significa, routine in breve del profilo), dopo la conferma dell'indirizzo. Stessa struttura per tutti i profili; cambiano le routine (completa e leggera, sezione 4) e il consiglio del giorno.
+Arriva **via email** insieme al risultato, dopo la conferma dell'indirizzo. Cambia con la **porosità**; con la **cute grassa** lo Shampoo Botox diventa Shampoo Detox, massaggiato solo sulla cute, e la maschera non va mai vicino alle radici. Quantità, tempi di posa e modo d'uso vengono dalle **schede tecniche** dei prodotti (T3): nella bozza sono tra [parentesi quadre].
 
-| Giorno | Nome | Cosa si fa |
-| --- | --- | --- |
-| 1 | Partenza | Routine **completa**. Poi, a capelli asciutti, una foto delle lunghezze alla luce naturale, sempre nello stesso punto della casa. |
-| 2 | Senza lavaggio | Nessun lavaggio. Pettina con calma e senti la differenza al tatto. Profili RI, PR, MI: 1–2 spruzzi di Spray Botox 10in1 sulle punte. |
-| 3 | Mantenimento | Routine **leggera**. |
-| 4 | Senza lavaggio | Il consiglio pratico del profilo (es. RI: non toccarli mentre si asciugano; PR: niente piastra oggi). |
-| 5 | Trattamento | Routine **completa**, con la posa della maschera più lunga consigliata **[dall'etichetta]**. |
-| 6 | Senza lavaggio | Spray Botox 10in1 dove serve (PR: prima del calore; LE: nessun prodotto). |
-| 7 | Confronto | Nuova foto nello stesso punto e confronto con quella del giorno 1. "Raccontaci com'è andata": risposta all'email o messaggio all'incaricata. |
+"Shampoo" qui sotto = Shampoo Botox, oppure Shampoo Detox con la cute grassa.
 
-**Chi lava i capelli ogni giorno (LE, MI):** nei giorni "senza lavaggio" usa la routine leggera con il solo shampoo, senza maschera né spray sulle radici.
+**Porosità bassa: protocollo che alleggerisce**
+1. *Ripartenza.* Shampoo con acqua tiepida: toglie l'accumulo di prodotto rimasto in superficie. Tampona con l'asciugamano; se le punte sono ancora secche, 1–2 spruzzi di Spray Botox 10in1 solo sulle punte. Poi una foto delle lunghezze alla luce naturale, sempre nello stesso punto.
+2. *Osservazione.* Nessun prodotto. Pettina e senti consistenza e profumo.
+3. *Continua.* Shampoo, poi [1–2] spruzzi di Spray Botox 10in1 solo sulle punte.
+4. *Riposo.* Nessun prodotto: serve a distinguere l'effetto reale dall'accumulo.
+5. *Lavaggio tiepido.* Shampoo con acqua tiepida, che apre leggermente le cuticole; Spray Botox 10in1 solo sulle punte.
+6. *Verifica.* Nessun prodotto. Guarda i capelli asciutti alla luce naturale e passa le dita lungo una ciocca.
+7. *Confronto.* Nuova foto nello stesso punto, confronto con il giorno 1 e i segnali di "Cosa ti dirà che funziona".
 
-L'email del protocollo contiene anche: titolo e descrizione del profilo, le foto dei prodotti, i pulsanti "Scopri il prezzo" e "Voglio acquistare", il link all'articolo del blog sul profilo, il nome dell'incaricata se il test è partito dal suo link, la frase "orientamento cosmetico, non una valutazione medica" e il link per non ricevere più email.
+**Porosità media: protocollo che conserva**
+1. *Ripartenza.* Shampoo; Maschera Botox su lunghezze e punte, posa [dalla scheda tecnica]; risciacquo tiepido; Spray Botox 10in1. Poi la foto delle lunghezze.
+2. *Osservazione.* Nessun prodotto.
+3. *Mantenimento.* Shampoo; Spray Botox 10in1 sulle punte.
+4. *Riposo.* Nessun prodotto.
+5. *Trattamento completo.* Shampoo con acqua tiepida; Maschera Botox, posa [la più lunga indicata]; Spray Botox 10in1 prima di phon o piastra.
+6. *Verifica.* Nessun prodotto.
+7. *Confronto.* Foto e segnali.
+
+**Porosità alta: protocollo che riempie e sigilla**
+1. *Riempimento.* Shampoo con acqua tiepida; Maschera Botox dalle lunghezze alle punte, posa [la più lunga indicata] [con cuffia e asciugamano caldo, se la scheda lo prevede]; risciacquo tiepido; Spray Botox 10in1 per sigillare, poi pettina. Poi la foto delle lunghezze.
+2. *Osservazione.* Nessun prodotto.
+3. *Mantenimento.* Shampoo; Spray Botox 10in1 su lunghezze e punte.
+4. *Riposo.* Nessun prodotto e niente piastra.
+5. *Trattamento completo.* Come il giorno 1.
+6. *Verifica.* Nessun prodotto.
+7. *Confronto.* Foto e segnali.
+
+L'email contiene anche: profilo (titolo, descrizione, consigli pratici), porosità (in breve, cosa significa, cosa ti dirà che funziona), prodotti consigliati con foto, "Scopri il prezzo" e "Voglio acquistare", "Prenota la consulenza tricologica gratuita", "Scrivi a [incaricata] su WhatsApp" se il test è partito dal suo link, la frase "orientamento cosmetico, non una valutazione medica" e il link per non ricevere più email.
 
 ## 7. Dopo l'ultima domanda
 
@@ -213,7 +264,7 @@ L'email del protocollo contiene anche: titolo e descrizione del profilo, le foto
 
 ## 8. Riferimento indicato dal fondatore: test Kisecret
 
-Il fondatore ha indicato come riferimento `kisecretprestige.netlify.app` (visto il 10/11/2026): test di 7 domande sulla porosità del capello, con protocollo di 7 giorni e link personale per le incaricate di un'altra azienda. Se ne riprendono le **idee**, non testi, foto o nomi. **Adottate tutte il 10/11/2026 (T7).**
+Il fondatore ha indicato come riferimento `kisecretprestige.netlify.app` (visto il 10/11/2026): test di 7 domande sulla porosità del capello, con protocollo di 7 giorni e link personale per le incaricate di un'altra azienda. L'app Kisecret è del fondatore: se ne possono riusare anche i testi (10/11/2026), adattati ai prodotti G LUXE. **Adottate tutte il 10/11/2026 (T7).**
 
 | # | Idea | Dove è in questo documento |
 | --- | --- | --- |
@@ -269,14 +320,14 @@ Pulsante **"Prenota la consulenza tricologica gratuita"** alla fine del test (e 
 
 | # | Domanda | Risposta del fondatore |
 | --- | --- | --- |
-| T1 | Domande e risposte vanno bene così? | |
-| T2 | Nomi e testi dei 6 profili vanno bene? | |
-| T3 | Modo d'uso, tempi di posa e frequenza dei prodotti (dalle schede tecniche)? | |
-| T4 | Per i capelli misti: si crea un abbinamento Detox + Maschera come promozione, o resta lo Shampoo Detox? | |
+| T1 | Domande e risposte vanno bene così? | **Deciso (10/11/2026):** sì. |
+| T2 | Nomi e testi dei 6 profili vanno bene? | **Deciso (10/11/2026):** sì; il risultato cita e spiega anche la porosità (sezione 4a). |
+| T3 | Modo d'uso, tempi di posa e frequenza dei prodotti (dalle schede tecniche)? | **Deciso (10/11/2026):** dalle schede tecniche dei prodotti. **Serve il file delle schede** (non trovato nel progetto né nella cartella G Luxe). |
+| T4 | Quali prodotti si consigliano? | **Deciso (10/11/2026):** in base a porosità e cute grassa (tabella 4b). |
 | T5 | Le frasi sui risultati sono confermate da chi produce la linea? | |
 | T6 | Il risultato si vede subito o arriva via email? | **Deciso (10/11/2026, rev. 3):** nessun risultato a schermo; risultato e protocollo arrivano via email. |
 | T7 | Quali idee del riferimento si adottano? | **Deciso (10/11/2026):** tutte (R1–R7). |
-| T8 | Link dell'incaricata: nome e iniziale del cognome, e numero WhatsApp del profilo modificabile? | |
+| T8 | Link dell'incaricata: nome e iniziale del cognome, e numero WhatsApp del profilo modificabile? | **Deciso (10/11/2026):** sì. |
 | T9 | Chi è la tricologa: dipendente G LUXE o collaboratrice esterna? (cambia chi è responsabile dei dati raccolti in consulenza) | **Deciso (10/11/2026):** dipendente G LUXE, e anche incaricata. Conseguenze nella sezione 10. |
 | T10 | Come si svolge la consulenza: telefono, videochiamata o di persona? Quanto dura? | **Deciso (10/11/2026):** al telefono, 15 minuti. |
 | T11 | Come riceve le richieste la tricologa? | **Deciso (10/11/2026):** arrivano alla sede, che le smista alle varie tricologhe. |
