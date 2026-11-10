@@ -246,18 +246,24 @@ Pulsante **"Prenota la consulenza tricologica gratuita"** alla fine del test (e 
 
 **Perché queste cautele.** In una consulenza tricologica si parla spesso di cute, caduta e altri temi che sono **dati sulla salute** per il GDPR. Il modulo del sito non deve raccoglierli; li tratta la tricologa durante la consulenza, con un'informativa e un consenso appositi. Inoltre in Italia "tricologo" non è una professione sanitaria: la consulenza è cosmetica e non sostituisce il medico. Nei testi si scrive "consulenza", mai "visita" o "diagnosi".
 
-**La consulenza si fa al telefono e dura 15 minuti (T10).** Il modulo chiede quindi il telefono come dato principale e la fascia oraria per la chiamata; nel testo: "Una nostra tricologa ti chiama al numero che indichi, nella fascia oraria che scegli. La consulenza dura 15 minuti." **La tricologa richiama lei (T13)**: nessun calendario di prenotazione.
+**Telefono, 15 minuti, richiama la tricologa (T10, T13).** Il modulo chiede il telefono come dato principale e la fascia oraria per la chiamata; nel testo: "Una nostra tricologa ti chiama al numero che indichi, nella fascia oraria che scegli. La consulenza dura 15 minuti." Nessun calendario di prenotazione. L'informativa per i dati sulla salute si manda via email prima della chiamata, e il consenso si raccoglie con un clic nell'email (non a voce, così resta registrato con data e ora).
 
-**Smistamento (T11).** Le richieste arrivano alla **sede**, nella lista "Consulenze richieste" (nuove in alto, con fascia oraria e, se c'è, il profilo del test). La sede **assegna** ogni richiesta a una delle tricologhe; l'assegnazione va nel registro modifiche. Stati: da assegnare → assegnata → richiamata / non risponde (dopo [2] tentativi) → svolta. Se nessuno la prende in carico entro [2 giorni lavorativi], la sede riceve un promemoria. L'informativa per i dati sulla salute si manda via email prima della chiamata, e il consenso si raccoglie con un clic nell'email (non a voce, così resta registrato con data e ora).
+**Smistamento (T11).** Le richieste arrivano alla **sede**, nella lista "Consulenze richieste" (nuove in alto, con fascia oraria, il profilo del test se c'è e l'incaricata a cui la persona è legata). La sede **assegna** ogni richiesta a una delle tricologhe; l'assegnazione va nel registro modifiche. Stati: da assegnare → assegnata → richiamata / non risponde (dopo [2] tentativi) → svolta. Se una richiesta resta da assegnare per [2 giorni lavorativi], la sede riceve un promemoria.
 
-**La tricologa è una dipendente G LUXE (T9).** Quindi:
-- **G LUXE è titolare** anche dei dati raccolti durante la consulenza; non serve un contratto con un'altra azienda per la privacy.
-- La tricologa riceve una **lettera di autorizzazione al trattamento** (cosa può vedere e fare con i dati) e una breve formazione privacy.
+**Le tricologhe sono incaricate abilitate dalla sede (T11 bis).**
+- Nella scheda dell'incaricata, la sede (amministrazione) ha l'interruttore **"Tricologa"**: acceso o spento, con data e motivo nel registro modifiche.
+- Con l'interruttore acceso, nell'area incaricata dell'app compare la pagina **"Consulenze"** con **solo le richieste che la sede le ha assegnato**: nome, telefono, fascia oraria, profilo e risposte del test, stato del consenso per i dati sulla salute. Lì segna lo stato dopo ogni chiamata e scrive le note della consulenza.
+- Con l'interruttore spento la pagina sparisce subito, anche per le richieste già assegnate (che tornano alla sede).
+- Proposta: dopo [30 giorni] dallo stato "svolta" la richiesta sparisce dalla pagina della tricologa e resta solo alla sede.
+
+**La tricologa è dipendente G LUXE e anche incaricata (T9).** Quando fa le consulenze lavora **per la sede**, non come incaricata. Quindi:
+- **G LUXE è titolare** dei dati raccolti in consulenza; la tricologa riceve una **lettera di autorizzazione al trattamento** e una breve formazione privacy.
 - Prima della consulenza la persona riceve un'**informativa apposita** e dà un **consenso esplicito** per i dati sulla salute (art. 9 GDPR), separato da quello del sito.
-- Note e schede delle consulenze restano **solo alla tricologa e alla sede**: mai all'incaricata, che può sapere al massimo che la consulenza c'è stata (se la persona è legata a lei).
-- Nell'app servirebbe un **quarto ruolo staff "tricologa"**, con accesso solo alle richieste assegnate a lei (proposta per T11 bis).
+- **Proposta (T16): le persone della consulenza non diventano sue clienti.** Restano legate all'incaricata del link (T12) o vanno alla sede da assegnare (decisione 30). La tricologa vede a chi è legata la persona e, per gli acquisti, la indirizza a quell'incaricata. Non può usare i loro contatti per vendere.
+- È un'**eccezione alla regola** per cui un'incaricata non vede mai i dati dei clienti altrui (regole 15 e 16 di `CLAUDE.md`): vale solo per le richieste assegnate, solo nella pagina "Consulenze", e va aggiunta a quelle regole quando si scrive il codice.
+- Note e schede delle consulenze restano **solo alla tricologa assegnata e alla sede**: mai all'incaricata legata, che vede al massimo "consulenza svolta".
 
-**Dove la vede la tricologa:** proposta un accesso "tricologa" nell'app, dove trova solo le richieste che la sede le ha assegnato e segna lo stato dopo la chiamata (T11 bis).
+**Legame (T12, decisione 30 di `docs/piano-compensi.md`).** Se la persona arriva dal link di un'incaricata, la richiesta di consulenza la lega a quell'incaricata, come gli altri contatti dal sito. Senza link resta "da assegnare" e la sede la assegna a mano.
 
 ## 11. Da decidere
 
@@ -271,9 +277,12 @@ Pulsante **"Prenota la consulenza tricologica gratuita"** alla fine del test (e 
 | T6 | Il risultato si vede subito o arriva via email? | **Deciso (10/11/2026, rev. 3):** nessun risultato a schermo; risultato e protocollo arrivano via email. |
 | T7 | Quali idee del riferimento si adottano? | **Deciso (10/11/2026):** tutte (R1–R7). |
 | T8 | Link dell'incaricata: nome e iniziale del cognome, e numero WhatsApp del profilo modificabile? | |
-| T9 | Chi è la tricologa: dipendente G LUXE o collaboratrice esterna? (cambia chi è responsabile dei dati raccolti in consulenza) | **Deciso (10/11/2026):** dipendente G LUXE. Conseguenze nella sezione 10. |
+| T9 | Chi è la tricologa: dipendente G LUXE o collaboratrice esterna? (cambia chi è responsabile dei dati raccolti in consulenza) | **Deciso (10/11/2026):** dipendente G LUXE, e anche incaricata. Conseguenze nella sezione 10. |
 | T10 | Come si svolge la consulenza: telefono, videochiamata o di persona? Quanto dura? | **Deciso (10/11/2026):** al telefono, 15 minuti. |
 | T11 | Come riceve le richieste la tricologa? | **Deciso (10/11/2026):** arrivano alla sede, che le smista alle varie tricologhe. |
-| T11 bis | Come vede la tricologa le richieste assegnate a lei: accesso "tricologa" nell'app con le sole sue richieste (proposta), o email dalla sede? | |
-| T12 | Se la persona arriva dal link di un'incaricata, la richiesta di consulenza la lega a quell'incaricata (decisione 30) e l'incaricata viene avvisata? | |
+| T11 bis | Come vede la tricologa le richieste assegnate a lei? | **Deciso (10/11/2026):** le tricologhe sono incaricate; la sede le abilita con l'interruttore "Tricologa" e loro vedono in app le sole richieste assegnate. |
+| T12 | Se la persona arriva dal link di un'incaricata, la richiesta di consulenza la lega a quell'incaricata? | **Deciso (10/11/2026):** sì, resta legata a quell'incaricata (decisione 30). |
+| T14 | L'incaricata legata riceve un avviso quando una sua cliente chiede una consulenza (solo "ha chiesto una consulenza", senza dettagli)? | |
+| T16 | La tricologa può vendere alle persone che ha seguito in consulenza, se sono legate a un'altra incaricata? (proposta: no, le indirizza all'incaricata legata) | |
+| T15 | Dopo quanti giorni dallo stato "svolta" la richiesta sparisce dalla pagina della tricologa? (proposta 30) | |
 | T13 | Prenotazione: la tricologa richiama o la persona sceglie giorno e ora da un calendario? | **Deciso (10/11/2026):** la tricologa richiama nella fascia oraria indicata. |
