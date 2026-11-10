@@ -32,6 +32,33 @@ Perché separati:
 - **Era già previsto:** la Fase 8 del piano di sviluppo ("API e webhook per siti esterni") nasce per questo. Il sito vetrina è il primo "sito esterno" che la usa.
 - **Stessa tecnologia:** Next.js su Vercel, regione UE. Nessuno strumento nuovo da imparare o da pagare a parte.
 
+## 2a. Stile grafico (riferimento: Mary Kay)
+
+Il fondatore ha indicato come riferimento il sito di Mary Kay (`marykay.com`, visto il 10/11/2026). Se ne riprendono **l'impostazione e il modo di organizzare le pagine**, non logo, foto, testi, colori o slogan, che sono di Mary Kay. Il risultato deve sembrare G LUXE, non una copia.
+
+**Cosa si riprende**
+
+| Elemento di Mary Kay | Versione G LUXE |
+| --- | --- |
+| Striscia sottile in alto con "Find a Consultant" | Striscia nera sottile con **"Trova la tua incaricata"** (porta al modulo "Voglio acquistare") |
+| Logo a sinistra, menu orizzontale di categorie, a destra "Be a Beauty Consultant" | Logo G LUXE a sinistra; menu: Prodotti, Linee, Test del capello, Blog; a destra, ben visibile, **"Diventa incaricata"** |
+| Apertura divisa in due: grande foto di una persona a sinistra, titolo molto grande e **un solo pulsante** a destra | Stessa divisione: foto del prodotto o di una modella con capelli curati, titolo grande con grazie, un solo pulsante dorato |
+| Fondo bianco, molto spazio vuoto, un solo colore forte per i pulsanti | Fondo bianco o avorio, testo nero, **oro** come unico colore dei pulsanti e dei dettagli |
+| Fila di 4 prodotti ("Trending Now"): foto su fondo pulito, nome, prezzo, link sottolineato | Fila "I più amati": foto, nome, link "Scopri"; il prezzo resta dietro "Scopri il prezzo" (decisione S2) |
+| Sezione "Discover": riquadri fotografici di ispirazione (look, tendenze) | Riquadri "Routine": capelli secchi, crespi, colorati, sfibrati, ognuno verso un articolo del blog |
+| Strumenti interattivi ("Foundation Finder", prova virtuale) | **Test del capello** messo in evidenza come strumento, non solo come modulo |
+| Fascia "Be a Beauty Consultant" ripetuta più in basso | Fascia nera con oro "Diventa incaricata", ripetuta a metà e in fondo alla home |
+| Chiusura con frase breve e hashtag social | Frase del marchio + hashtag e link Instagram/Facebook G LUXE |
+
+**Cosa si cambia rispetto a Mary Kay**
+- **Colori:** al posto del fucsia, nero e oro del logo G LUXE (`assets/brand/logo-g-luxe.png`). Il nero si usa per fasce intere (carriera, piè di pagina) per dare un tono più lussuoso; il resto della pagina resta chiaro e arioso come in Mary Kay.
+- **Caratteri:** titoli con grazie eleganti, come il logo (Mary Kay usa caratteri senza grazie); testi lunghi in un carattere semplice e leggibile.
+- **Promozioni:** niente titoloni di promozioni sull'apertura; la home parla del marchio e dei risultati sui capelli.
+- **Carriera:** nessuna cifra di guadagno nelle fasce "Diventa incaricata" (legge 173/2005).
+- **Telefono prima di tutto:** la maggior parte delle visite arriverà dai social sul telefono; ogni sezione si progetta prima per il telefono (apertura con foto sopra e titolo sotto, prodotti scorrevoli di lato).
+
+**Foto:** lo stile Mary Kay si regge su foto professionali di persone vere su fondo pulito. Per G LUXE servono un servizio fotografico (prodotti su fondo bianco e nero, modelle con capelli curati, mani che applicano i prodotti) prima dell'apertura del sito. È nella lista della sezione 7.
+
 ## 3. Le pagine
 
 ### Home
@@ -149,7 +176,7 @@ Ogni passo finisce con qualcosa da provare su un'anteprima, come per le fasi del
 ## 7. Cose da fare comunque
 
 - **Dominio aziendale `gluxegroup.it`:** da confermare e acquistare. Serve sia al sito sia per far partire le email alle incaricate (oggi bloccate).
-- **Foto vere dei prodotti:** il catalogo dell'app oggi non ne ha.
+- **Foto vere dei prodotti e servizio fotografico:** il catalogo dell'app oggi non ne ha; lo stile scelto (sezione 2a) richiede anche foto di persone e d'ambiente.
 - **Privacy:** aggiornare l'informativa con le nuove raccolte di dati (finalità, conservazione, consensi separati, risposte al test del capello).
 - **Pixel e statistiche (S7):** si useranno i pixel di Meta (Facebook/Instagram) e gli strumenti di Google (statistiche e pubblicità). Quindi:
   - banner dei cookie con scelta vera: i pixel partono **solo dopo il consenso**, e "Rifiuta" è comodo quanto "Accetta";
