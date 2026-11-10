@@ -261,7 +261,7 @@ Pulsante **"Prenota la consulenza tricologica gratuita"** alla fine del test (e 
 - Prima della consulenza la persona riceve un'**informativa apposita** e dà un **consenso esplicito** per i dati sulla salute (art. 9 GDPR), separato da quello del sito.
 - **Le persone della consulenza non diventano sue clienti (T16, deciso).** Restano legate all'incaricata del link (T12) o vanno alla sede da assegnare (decisione 30). La tricologa vede a chi è legata la persona e, per gli acquisti, la indirizza a quell'incaricata. Non può usare i loro contatti per vendere.
 - È un'**eccezione alla regola** per cui un'incaricata non vede mai i dati dei clienti altrui (regole 15 e 16 di `CLAUDE.md`): vale solo per le richieste assegnate, solo nella pagina "Consulenze", e va aggiunta a quelle regole quando si scrive il codice.
-- Note e schede delle consulenze restano **solo alla tricologa assegnata e alla sede**: mai all'incaricata legata, che vede al massimo "consulenza svolta".
+- Note e schede delle consulenze restano **solo alla tricologa assegnata e alla sede**: mai all'incaricata legata, che non riceve avvisi e non vede le consulenze delle sue clienti (T14).
 
 **Legame (T12, decisione 30 di `docs/piano-compensi.md`).** Se la persona arriva dal link di un'incaricata, la richiesta di consulenza la lega a quell'incaricata, come gli altri contatti dal sito. Senza link resta "da assegnare" e la sede la assegna a mano.
 
@@ -282,7 +282,7 @@ Pulsante **"Prenota la consulenza tricologica gratuita"** alla fine del test (e 
 | T11 | Come riceve le richieste la tricologa? | **Deciso (10/11/2026):** arrivano alla sede, che le smista alle varie tricologhe. |
 | T11 bis | Come vede la tricologa le richieste assegnate a lei? | **Deciso (10/11/2026):** le tricologhe sono incaricate; la sede le abilita con l'interruttore "Tricologa" e loro vedono in app le sole richieste assegnate. |
 | T12 | Se la persona arriva dal link di un'incaricata, la richiesta di consulenza la lega a quell'incaricata? | **Deciso (10/11/2026):** sì, resta legata a quell'incaricata (decisione 30). |
-| T14 | L'incaricata legata riceve un avviso quando una sua cliente chiede una consulenza (solo "ha chiesto una consulenza", senza dettagli)? | |
+| T14 | L'incaricata legata riceve un avviso quando una sua cliente chiede una consulenza (solo "ha chiesto una consulenza", senza dettagli)? | **Deciso (10/11/2026):** no, nessun avviso. |
 | T16 | La tricologa può vendere alle persone che ha seguito in consulenza, se sono legate a un'altra incaricata? (proposta: no, le indirizza all'incaricata legata) | **Deciso (10/11/2026):** no, le indirizza all’incaricata a cui sono legate. |
 | T15 | Dopo quanti giorni dallo stato "svolta" la richiesta sparisce dalla pagina della tricologa? (proposta 30) | |
 | T13 | Prenotazione: la tricologa richiama o la persona sceglie giorno e ora da un calendario? | **Deciso (10/11/2026):** la tricologa richiama nella fascia oraria indicata. |
