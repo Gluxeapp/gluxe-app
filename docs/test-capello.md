@@ -254,7 +254,7 @@ Pulsante **"Prenota la consulenza tricologica gratuita"** alla fine del test (e 
 - Nella scheda dell'incaricata, la sede (amministrazione) ha l'interruttore **"Tricologa"**: acceso o spento, con data e motivo nel registro modifiche.
 - Con l'interruttore acceso, nell'area incaricata dell'app compare la pagina **"Consulenze"** con **solo le richieste che la sede le ha assegnato**: nome, telefono, fascia oraria, profilo e risposte del test, stato del consenso per i dati sulla salute. Lì segna lo stato dopo ogni chiamata e scrive le note della consulenza.
 - Con l'interruttore spento la pagina sparisce subito, anche per le richieste già assegnate (che tornano alla sede).
-- Proposta: dopo [30 giorni] dallo stato "svolta" la richiesta sparisce dalla pagina della tricologa e resta solo alla sede.
+- **Chiusura (T15):** quando ha finito, la tricologa **chiude** la richiesta (esito "svolta" oppure "non risponde"). Da quel momento la richiesta, con le sue note, **sparisce dalla sua pagina** e resta solo alla sede. Una richiesta chiusa per errore la può riaprire solo la sede, nel registro modifiche.
 
 **La tricologa è dipendente G LUXE e anche incaricata (T9).** Quando fa le consulenze lavora **per la sede**, non come incaricata. Quindi:
 - **G LUXE è titolare** dei dati raccolti in consulenza; la tricologa riceve una **lettera di autorizzazione al trattamento** e una breve formazione privacy.
@@ -284,5 +284,5 @@ Pulsante **"Prenota la consulenza tricologica gratuita"** alla fine del test (e 
 | T12 | Se la persona arriva dal link di un'incaricata, la richiesta di consulenza la lega a quell'incaricata? | **Deciso (10/11/2026):** sì, resta legata a quell'incaricata (decisione 30). |
 | T14 | L'incaricata legata riceve un avviso quando una sua cliente chiede una consulenza (solo "ha chiesto una consulenza", senza dettagli)? | **Deciso (10/11/2026):** no, nessun avviso. |
 | T16 | La tricologa può vendere alle persone che ha seguito in consulenza, se sono legate a un'altra incaricata? (proposta: no, le indirizza all'incaricata legata) | **Deciso (10/11/2026):** no, le indirizza all’incaricata a cui sono legate. |
-| T15 | Dopo quanti giorni dallo stato "svolta" la richiesta sparisce dalla pagina della tricologa? (proposta 30) | |
+| T15 | Dopo quanti giorni dallo stato "svolta" la richiesta sparisce dalla pagina della tricologa? (proposta 30) | **Deciso (10/11/2026):** sparisce appena la tricologa la chiude. |
 | T13 | Prenotazione: la tricologa richiama o la persona sceglie giorno e ora da un calendario? | **Deciso (10/11/2026):** la tricologa richiama nella fascia oraria indicata. |
