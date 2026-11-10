@@ -246,6 +246,13 @@ Pulsante **"Prenota la consulenza tricologica gratuita"** alla fine del test (e 
 
 **Perché queste cautele.** In una consulenza tricologica si parla spesso di cute, caduta e altri temi che sono **dati sulla salute** per il GDPR. Il modulo del sito non deve raccoglierli; li tratta la tricologa durante la consulenza, con un'informativa e un consenso appositi. Inoltre in Italia "tricologo" non è una professione sanitaria: la consulenza è cosmetica e non sostituisce il medico. Nei testi si scrive "consulenza", mai "visita" o "diagnosi".
 
+**La tricologa è una dipendente G LUXE (T9).** Quindi:
+- **G LUXE è titolare** anche dei dati raccolti durante la consulenza; non serve un contratto con un'altra azienda per la privacy.
+- La tricologa riceve una **lettera di autorizzazione al trattamento** (cosa può vedere e fare con i dati) e una breve formazione privacy.
+- Prima della consulenza la persona riceve un'**informativa apposita** e dà un **consenso esplicito** per i dati sulla salute (art. 9 GDPR), separato da quello del sito.
+- Note e schede delle consulenze restano **solo alla tricologa e alla sede**: mai all'incaricata, che può sapere al massimo che la consulenza c'è stata (se la persona è legata a lei).
+- Nell'app servirebbe un **quarto ruolo staff "tricologa"**, con accesso solo alla lista delle consulenze (proposta per T11).
+
 **Dove arriva la richiesta:** nell'app, area sede, nuova lista "Consulenze richieste", visibile alla sede e alla tricologa (nuovo accesso staff o email, da decidere, T11). Stati: da richiamare, richiamata, svolta, non risponde.
 
 ## 11. Da decidere
@@ -260,7 +267,7 @@ Pulsante **"Prenota la consulenza tricologica gratuita"** alla fine del test (e 
 | T6 | Il risultato si vede subito o arriva via email? | **Deciso (10/11/2026, rev. 3):** nessun risultato a schermo; risultato e protocollo arrivano via email. |
 | T7 | Quali idee del riferimento si adottano? | **Deciso (10/11/2026):** tutte (R1–R7). |
 | T8 | Link dell'incaricata: nome e iniziale del cognome, e numero WhatsApp del profilo modificabile? | |
-| T9 | Chi è la tricologa: dipendente G LUXE o collaboratrice esterna? (cambia chi è responsabile dei dati raccolti in consulenza) | |
+| T9 | Chi è la tricologa: dipendente G LUXE o collaboratrice esterna? (cambia chi è responsabile dei dati raccolti in consulenza) | **Deciso (10/11/2026):** dipendente G LUXE. Conseguenze nella sezione 10. |
 | T10 | Come si svolge la consulenza: telefono, videochiamata o di persona? Quanto dura? | |
 | T11 | Come riceve le richieste la tricologa: accesso all'area sede dell'app o email? | |
 | T12 | Se la persona arriva dal link di un'incaricata, la richiesta di consulenza la lega a quell'incaricata (decisione 30) e l'incaricata viene avvisata? | |
