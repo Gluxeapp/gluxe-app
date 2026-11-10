@@ -322,9 +322,9 @@ Pulsante **"Prenota la consulenza tricologica gratuita"** alla fine del test (e 
 | --- | --- | --- |
 | T1 | Domande e risposte vanno bene così? | **Deciso (10/11/2026):** sì. |
 | T2 | Nomi e testi dei 6 profili vanno bene? | **Deciso (10/11/2026):** sì; il risultato cita e spiega anche la porosità (sezione 4a). |
-| T3 | Modo d'uso, tempi di posa e frequenza dei prodotti (dalle schede tecniche)? | **Deciso (10/11/2026):** dalle schede tecniche dei prodotti. **Serve il file delle schede** (non trovato nel progetto né nella cartella G Luxe). |
+| T3 | Modo d'uso, tempi di posa e frequenza dei prodotti (dalle schede tecniche)? | **Deciso (10/11/2026):** dalle schede tecniche dei prodotti. Le schede non sono ancora pronte (10/11/2026): si aggiungono in seguito; fino ad allora i valori restano tra [parentesi quadre] e il test **non va online**. |
 | T4 | Quali prodotti si consigliano? | **Deciso (10/11/2026):** in base a porosità e cute grassa (tabella 4b). |
-| T5 | Le frasi sui risultati sono confermate da chi produce la linea? | |
+| T5 | Le frasi sui risultati sono confermate da chi produce la linea? | **Da confermare** con chi produce la linea (10/11/2026). Senza conferma il test non va online. |
 | T6 | Il risultato si vede subito o arriva via email? | **Deciso (10/11/2026, rev. 3):** nessun risultato a schermo; risultato e protocollo arrivano via email. |
 | T7 | Quali idee del riferimento si adottano? | **Deciso (10/11/2026):** tutte (R1–R7). |
 | T8 | Link dell'incaricata: nome e iniziale del cognome, e numero WhatsApp del profilo modificabile? | **Deciso (10/11/2026):** sì. |
