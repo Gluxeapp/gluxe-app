@@ -98,7 +98,7 @@ Privacy, cookie (con banner del consenso: si accettano solo i cookie tecnici fin
 Una pagina dedicata per ogni risorsa (utile anche per le pubblicità), con modulo e pagina di "grazie".
 
 **Prima risorsa (S6): questionario "Test del capello".**
-- Poche domande (tipo di capello, problemi, abitudini). Domande e risposte sono da scrivere con il fondatore.
+- 8 domande (tipo di capello, trattamenti, abitudini, desideri) e 6 profili di risultato: bozza completa in [docs/test-capello.md](test-capello.md), provabile nella bozza della home (10/11/2026).
 - Alla fine si chiede l'email per ricevere il risultato: un profilo del capello con la routine G LUXE consigliata.
 - Il risultato arriva via email e appare anche a schermo. Il consiglio di prodotto porta ai pulsanti "Scopri il prezzo" e "Voglio acquistare".
 - Le risposte al questionario si salvano insieme al contatto (servono per consigliare l'incaricata e per la newsletter). Nell'informativa privacy va scritto che si raccolgono.
@@ -200,4 +200,4 @@ Ogni passo finisce con qualcosa da provare su un'anteprima, come per le fasi del
 | S6 | Prima risorsa gratuita | **Deciso (9/11/2026):** questionario "Test del capello" (sezione 3). |
 | S7 | Statistiche e pubblicità | **Deciso (9/11/2026):** pixel di Meta e strumenti Google, solo dopo il consenso ai cookie (sezione 7). |
 | S8 | Legame dei contatti, conseguenze (sezione 4): (a) se la persona compra dal negozio di un'altra incaricata, ordine e punti ON vanno all'incaricata assegnata? (b) se l'email era già legata a un'altra incaricata, vince il legame precedente? (c) vale anche per i contatti arrivati dal link personale? | **Deciso (9/11/2026):** sì a tutte e tre. Decisione 30 di `docs/piano-compensi.md`. |
-| S9 | Test del capello: chi scrive domande e profili dei risultati? (proposta: bozza di Claude, approvazione del fondatore) | |
+| S9 | Test del capello: chi scrive domande e profili dei risultati? | **Deciso (10/11/2026):** bozza di Claude con 8 domande, da approvare (`docs/test-capello.md`, domande T1–T5). |
