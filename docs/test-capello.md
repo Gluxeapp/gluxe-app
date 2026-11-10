@@ -171,6 +171,20 @@ Il calcolo avviene sul server del sito (il browser mostra solo il risultato), in
 
 Dopo questa email, chi ha dato il consenso alla newsletter entra nella sequenza di benvenuto (da scrivere a parte).
 
+## 6a. Riferimento indicato dal fondatore: test Kisecret
+
+Il fondatore ha indicato come riferimento `kisecretprestige.netlify.app` (visto il 10/11/2026): test di 7 domande sulla porosità del capello, con protocollo di 7 giorni e link personale per le incaricate di un'altra azienda. Se ne riprendono le **idee**, non testi, foto o nomi.
+
+| # | Idea | Proposta per G LUXE |
+| --- | --- | --- |
+| R1 | Domande sul **comportamento osservabile** del capello (quanto ci mette ad asciugarsi, cosa succede con l'umidità, com'è al tatto dalla punta alla radice, come reagisce a una maschera) invece di "come sono i tuoi capelli". Danno risposte più sincere e un risultato più credibile. | Sostituire 3 domande deboli (2 "di natura", 3 "spessore", 7 "ogni quanto lavi") con domande su asciugatura, umidità e tatto, con nuovi punteggi. |
+| R2 | Sotto ogni domanda, una **riga che spiega perché conta**, e una piccola etichetta del tema (es. "Umidità", "Storico"). | Sì, per tutte le 8 domande. |
+| R3 | Accanto alle domande, una **foto che cambia stato** mentre si risponde (es. "In ascolto" → "Chioma in equilibrio"). | Sì, con le foto del servizio fotografico G LUXE; nella bozza, un'immagine segnaposto. |
+| R4 | Risultato con **"Cosa significa"** e un **protocollo giorno per giorno** (7 giorni) con i prodotti nell'ordine d'uso. È il contenuto che fa tornare la cliente e la porta al prodotto. | Sì: per ogni profilo un "Protocollo G LUXE di 7 giorni", inviato via email (vedi R6). Modo d'uso dalle schede tecniche. |
+| R5 | **Link personale dell'incaricata**: chi fa il test dal suo link vede il nome dell'incaricata e le scrive su WhatsApp con il risultato già pronto; il link ha anche un codice QR. | Sì, ma il link si crea **dall'area incaricata dell'app** (codice GL verificato, non scritto a mano), con nome e numero WhatsApp scelti dall'incaricata. È la cliente a scrivere: nessun dato della cliente passa finché non lo decide lei. |
+| R6 | Risultato **senza registrazione**, che resta solo sul telefono. | Da decidere (T6): risultato breve subito senza email, **protocollo completo di 7 giorni via email**. Così il test resta facile e la raccolta dei contatti continua. |
+| R7 | Frase finale "strumento di orientamento cosmetico, non una valutazione medica". | Sì, sempre sotto il risultato. Evitare invece le parole "diagnosi" e "salute dei capelli": sono termini medici. |
+
 ## 7. Da decidere
 
 | # | Domanda | Risposta del fondatore |
@@ -180,3 +194,5 @@ Dopo questa email, chi ha dato il consenso alla newsletter entra nella sequenza 
 | T3 | Modo d'uso e frequenza della Maschera Botox (dalla scheda tecnica)? | |
 | T4 | Per i capelli misti: si crea un abbinamento Detox + Maschera come promozione, o resta lo Shampoo Detox? | |
 | T5 | Le frasi sui risultati sono confermate da chi produce la linea? | |
+| T6 | Risultato breve subito senza email, e protocollo di 7 giorni solo via email (R6)? | |
+| T7 | Quali idee del riferimento Kisecret (R1–R5, R7) si adottano? | |
