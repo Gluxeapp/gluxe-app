@@ -52,7 +52,8 @@ Il fondatore ha indicato come riferimento il sito di Mary Kay (`marykay.com`, vi
 
 **Cosa si cambia rispetto a Mary Kay**
 - **Colori:** al posto del fucsia, nero e oro del logo G LUXE (`assets/brand/logo-g-luxe.png`). Il nero si usa per fasce intere (carriera, piè di pagina) per dare un tono più lussuoso; il resto della pagina resta chiaro e arioso come in Mary Kay.
-- **Caratteri:** titoli con grazie eleganti, come il logo (Mary Kay usa caratteri senza grazie); testi lunghi in un carattere semplice e leggibile.
+- **Caratteri:** titoli con grazie eleganti, come il logo (Mary Kay usa caratteri senza grazie); testi lunghi in un carattere semplice e leggibile. Nella bozza: Cormorant Garamond per i titoli e Montserrat per i testi (gli stessi dell'app); **nomi dei prodotti in Playfair Display**, perché in Cormorant i numeri (es. "10in1") non si leggono bene (fondatore, 10/11/2026).
+- **Bozza grafica della home:** pagina privata https://claude.ai/artifact/S8DVkKc7MW1FftY64KfMu6 (10/11/2026).
 - **Promozioni:** niente titoloni di promozioni sull'apertura; la home parla del marchio e dei risultati sui capelli.
 - **Carriera:** nessuna cifra di guadagno nelle fasce "Diventa incaricata" (legge 173/2005).
 - **Telefono prima di tutto:** la maggior parte delle visite arriverà dai social sul telefono; ogni sezione si progetta prima per il telefono (apertura con foto sopra e titolo sotto, prodotti scorrevoli di lato).
