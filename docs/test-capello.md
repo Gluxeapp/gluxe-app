@@ -1,8 +1,9 @@
 # Test del capello G LUXE · bozza
 
-Bozza del 10/11/2026, **da approvare dal fondatore** (decisione S9 di `docs/sito-vetrina.md`). È la prima risorsa gratuita del sito vetrina: 8 domande, un risultato breve subito e il **Protocollo G LUXE di 7 giorni** via email.
+Bozza del 10/11/2026, **da approvare dal fondatore** (decisione S9 di `docs/sito-vetrina.md`). È la prima risorsa gratuita del sito vetrina: 8 domande, poi l'email per ricevere **il risultato e il Protocollo G LUXE di 7 giorni**. Alla fine c'è anche la richiesta di una **consulenza tricologica gratuita** (sezione 10).
 
-Rev. 2 del 10/11/2026: adottate tutte le idee del riferimento indicato dal fondatore (sezione 8, decisioni T6 e T7).
+Rev. 2 del 10/11/2026: adottate le idee del riferimento indicato dal fondatore (sezione 8, decisione T7).
+Rev. 3 del 10/11/2026 (fondatore): **nessun risultato a schermo**; il risultato arriva solo via email insieme al protocollo (T6); pulsante per la consulenza tricologica gratuita.
 
 Tutto ciò che è tra **[parentesi quadre]** va verificato o completato. In particolare: modo d'uso, tempi di posa e frequenze dei prodotti vanno presi dalle etichette e dalle schede tecniche G LUXE, non da questa bozza.
 
@@ -19,9 +20,9 @@ Tutto ciò che è tra **[parentesi quadre]** va verificato o completato. In part
 ## 2. Come si presenta
 
 - Una domanda alla volta, con: **tema** (piccola etichetta, es. "Umidità"), **domanda**, **una riga che spiega perché conta**, le risposte.
-- Accanto (sotto, sul telefono) una **foto della chioma che cambia stato** mentre si risponde: all'inizio "In ascolto", poi il nome del profilo che sta prevalendo (es. "Chioma ribelle"). Foto dal servizio fotografico G LUXE: una per profilo più quella iniziale.
+- Accanto (sotto, sul telefono) una **foto della chioma che accompagna le domande**: la didascalia segue il tema della domanda ("In ascolto · Umidità"). **Non** anticipa il profilo, perché il risultato si scopre solo via email. Foto dal servizio fotografico G LUXE.
 - Barra di avanzamento "Domanda 3 di 8" e pulsante "Indietro".
-- Nessuna registrazione per vedere il risultato.
+- Il test si fa senza registrazione; l'email serve solo alla fine, per ricevere il risultato.
 
 ## 3. Le 8 domande
 
@@ -173,15 +174,13 @@ Il calcolo avviene sul server del sito (il browser mostra solo il risultato), in
 4. **Parità:** vince il primo in quest'ordine: PR, AS, RI, LE, EQ (prima le esigenze più forti).
 5. Se tutti hanno 0 punti, il risultato è EQ.
 
-**Foto che cambia stato:** dopo ogni risposta si applica la stessa regola ai punti fin lì; finché sono tutti a 0 la foto dice "In ascolto".
-
 **Esempio 1.** Risposte: 1 "Già pesanti alla radice" (LE 2), 2 "Moltissimo" (LE 3), 3 "Quasi niente" (EQ 1), 4 "Ruvida" (AS 1, PR 1), 5 "Tanto" (PR 4), 6 "Ogni giorno" (LE 5), 7 "Aperte" (PR 6, AS 2), 8 "Leggerezza" (LE 7). Totali: LE 7, PR 6, AS 2, EQ 1. LE ≥ 3 e PR ≥ 3 → **Capelli misti**.
 
 **Esempio 2.** Risposte: 1 "Crespi" (RI 2), 2 "Il giusto" (EQ 1), 3 "Esplodono" (RI 4), 4 "Un po' irregolare" (AS 1), 5 "Niente di particolare" (EQ 2), 6 "Meno spesso" (RI 5), 7 "Secche" (AS 3), 8 "Disciplina" (RI 7). Totali: RI 7, AS 3, EQ 2 → **Capelli ribelli**.
 
 ## 6. Il Protocollo G LUXE di 7 giorni
 
-Arriva **via email**, dopo la conferma dell'indirizzo. Stessa struttura per tutti i profili; cambiano le routine (completa e leggera, sezione 4) e il consiglio del giorno.
+Arriva **via email** insieme al risultato (titolo, descrizione, cosa significa, routine in breve del profilo), dopo la conferma dell'indirizzo. Stessa struttura per tutti i profili; cambiano le routine (completa e leggera, sezione 4) e il consiglio del giorno.
 
 | Giorno | Nome | Cosa si fa |
 | --- | --- | --- |
@@ -199,14 +198,16 @@ L'email del protocollo contiene anche: titolo e descrizione del profilo, le foto
 
 ## 7. Dopo l'ultima domanda
 
-1. **Risultato breve subito, senza email:** titolo, foto, descrizione, cosa significa, routine in breve, "Voglio acquistare", "Rifai il test", la frase sull'orientamento cosmetico.
-2. Sotto, il riquadro **"Ricevi il tuo Protocollo G LUXE di 7 giorni"**: email (obbligatoria), nome (facoltativo) e spunte:
-   - obbligatoria: "Ho letto l'informativa privacy" (serve a mandare il protocollo);
-   - facoltativa e separata: "Voglio ricevere consigli e novità G LUXE via email";
+1. **Nessun risultato a schermo.** Appare il riquadro **"Il tuo risultato è pronto"**: "Ti mandiamo via email il profilo dei tuoi capelli e il tuo Protocollo G LUXE di 7 giorni." Campi: email (obbligatoria), nome (facoltativo). Spunte:
+   - obbligatoria: "Ho letto l'informativa privacy" (serve a mandare risultato e protocollo);
+   - facoltativa e separata: "Voglio ricevere consigli e novità G LUXE via email" (il consenso alla newsletter non può essere obbligatorio per ricevere il risultato);
    - facoltativa: "Voglio essere contattata da un'incaricata G LUXE".
-3. **Se il test è partito dal link di un'incaricata** (sezione 9): in alto "Il test ti è stato consigliato da Maria R." e, nel risultato, il pulsante **"Scrivi a Maria su WhatsApp"** con il messaggio già pronto: "Ciao Maria, ho fatto il test del capello G LUXE: il mio profilo è Capelli ribelli. Mi consigli?".
+   Pulsante: **"Inviami il risultato"**.
+2. Sotto, il riquadro **"Consulenza tricologica gratuita"** con il pulsante "Prenota la consulenza" (sezione 10).
+3. Dopo l'invio: "Controlla la tua email". Arriva prima l'email di **conferma dell'indirizzo**; premendo "Conferma", arriva l'email con risultato e protocollo (sezione 6). Così un indirizzo sbagliato o di un'altra persona non riceve niente e la lista resta pulita.
+4. **Se il test è partito dal link di un'incaricata** (sezione 9): in alto "Il test ti è stato consigliato da Maria R."; nell'email del risultato, il pulsante **"Scrivi a Maria su WhatsApp"** con il messaggio già pronto: "Ciao Maria, ho fatto il test del capello G LUXE: il mio profilo è Capelli ribelli. Mi consigli?".
 
-**Cosa si salva** (nel database dell'app, come gli altri contatti dal sito), **solo se la persona lascia l'email**: email, nome, le 8 risposte, il profilo, i consensi con data, ora e testo dell'informativa, il codice dell'incaricata del link se c'era. Chi vede solo il risultato breve non lascia nessun dato personale: si conta solo, in forma anonima, quanti test sono stati completati e con quale profilo.
+**Cosa si salva** (nel database dell'app, come gli altri contatti dal sito), quando la persona lascia l'email: email, nome, le 8 risposte, il profilo, i consensi con data, ora e testo dell'informativa, il codice dell'incaricata del link se c'era. Chi chiude la pagina senza lasciare l'email non lascia nessun dato personale: si conta solo, in forma anonima, quanti test sono stati completati.
 
 **Legame con l'incaricata (decisione 30):** nasce quando la persona lascia l'email partendo dal link dell'incaricata (o quando la sede assegna a mano un contatto arrivato senza link). Il messaggio WhatsApp lo manda la cliente dal suo telefono: l'app non ne sa niente e non crea legami.
 
@@ -218,10 +219,10 @@ Il fondatore ha indicato come riferimento `kisecretprestige.netlify.app` (visto 
 | --- | --- | --- |
 | R1 | Domande sul comportamento osservabile del capello | Domande 2, 3, 4 (asciugatura, umidità, tatto) e 5 (storico dell'ultimo anno) |
 | R2 | Tema e riga "perché conta" sotto ogni domanda | Sezione 3 |
-| R3 | Foto che cambia stato mentre si risponde | Sezioni 2 e 5 |
+| R3 | Foto che cambia stato mentre si risponde | Sezione 2 (rev. 3: segue il tema della domanda, senza anticipare il profilo) |
 | R4 | "Cosa significa" e protocollo di 7 giorni | Sezioni 4 e 6 |
 | R5 | Link personale dell'incaricata con WhatsApp e codice QR | Sezione 9 |
-| R6 | Risultato senza registrazione | Sezione 7: risultato breve libero, protocollo via email (T6) |
+| R6 | Risultato senza registrazione | **Non adottata** (rev. 3): il risultato arriva solo via email (T6) |
 | R7 | Frase "orientamento cosmetico, non valutazione medica"; niente parole mediche | Sezione 1 |
 
 ## 9. Link personale dell'incaricata per il test
@@ -232,7 +233,22 @@ Il fondatore ha indicato come riferimento `kisecretprestige.netlify.app` (visto 
 - Il link funziona solo se l'incaricata è attiva e ha pagato lo start kit (come il negozio, decisione 29); altrimenti il test si apre senza il suo nome.
 - Lo stesso `ref` vale anche per il resto del sito vetrina (sezione 4 di `docs/sito-vetrina.md`).
 
-## 10. Da decidere
+## 10. Consulenza tricologica gratuita
+
+Pulsante **"Prenota la consulenza tricologica gratuita"** alla fine del test (e nell'email del risultato), per parlare con una tricologa G LUXE.
+
+**Modulo proposto** (si apre sopra la pagina):
+- nome, cognome, telefono, email;
+- quando preferisci essere richiamata: mattina, pomeriggio, sera;
+- spunta obbligatoria "Ho letto l'informativa privacy";
+- **nessun campo di testo libero** e la frase: "Non scrivere qui informazioni sulla salute: ne parlerai direttamente con la tricologa."
+- se la persona ha appena fatto il test, il profilo e le risposte si allegano alla richiesta, così la tricologa parte già informata.
+
+**Perché queste cautele.** In una consulenza tricologica si parla spesso di cute, caduta e altri temi che sono **dati sulla salute** per il GDPR. Il modulo del sito non deve raccoglierli; li tratta la tricologa durante la consulenza, con un'informativa e un consenso appositi. Inoltre in Italia "tricologo" non è una professione sanitaria: la consulenza è cosmetica e non sostituisce il medico. Nei testi si scrive "consulenza", mai "visita" o "diagnosi".
+
+**Dove arriva la richiesta:** nell'app, area sede, nuova lista "Consulenze richieste", visibile alla sede e alla tricologa (nuovo accesso staff o email, da decidere, T11). Stati: da richiamare, richiamata, svolta, non risponde.
+
+## 11. Da decidere
 
 | # | Domanda | Risposta del fondatore |
 | --- | --- | --- |
@@ -241,6 +257,11 @@ Il fondatore ha indicato come riferimento `kisecretprestige.netlify.app` (visto 
 | T3 | Modo d'uso, tempi di posa e frequenza dei prodotti (dalle schede tecniche)? | |
 | T4 | Per i capelli misti: si crea un abbinamento Detox + Maschera come promozione, o resta lo Shampoo Detox? | |
 | T5 | Le frasi sui risultati sono confermate da chi produce la linea? | |
-| T6 | Risultato breve subito senza email, protocollo di 7 giorni via email? | **Deciso (10/11/2026):** sì. |
+| T6 | Il risultato si vede subito o arriva via email? | **Deciso (10/11/2026, rev. 3):** nessun risultato a schermo; risultato e protocollo arrivano via email. |
 | T7 | Quali idee del riferimento si adottano? | **Deciso (10/11/2026):** tutte (R1–R7). |
 | T8 | Link dell'incaricata: nome e iniziale del cognome, e numero WhatsApp del profilo modificabile? | |
+| T9 | Chi è la tricologa: dipendente G LUXE o collaboratrice esterna? (cambia chi è responsabile dei dati raccolti in consulenza) | |
+| T10 | Come si svolge la consulenza: telefono, videochiamata o di persona? Quanto dura? | |
+| T11 | Come riceve le richieste la tricologa: accesso all'area sede dell'app o email? | |
+| T12 | Se la persona arriva dal link di un'incaricata, la richiesta di consulenza la lega a quell'incaricata (decisione 30) e l'incaricata viene avvisata? | |
+| T13 | Prenotazione: la tricologa richiama (proposta) o la persona sceglie giorno e ora da un calendario? | |
