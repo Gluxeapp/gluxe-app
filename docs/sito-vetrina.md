@@ -54,6 +54,7 @@ Il fondatore ha indicato come riferimento il sito di Mary Kay (`marykay.com`, vi
 - **Colori:** al posto del fucsia, nero e oro del logo G LUXE (`assets/brand/logo-g-luxe.png`). Il nero si usa per fasce intere (carriera, piè di pagina) per dare un tono più lussuoso; il resto della pagina resta chiaro e arioso come in Mary Kay.
 - **Caratteri:** titoli con grazie eleganti, come il logo (Mary Kay usa caratteri senza grazie); testi lunghi in un carattere semplice e leggibile. Nella bozza: Cormorant Garamond per i titoli e Montserrat per i testi (gli stessi dell'app); **nomi dei prodotti in Playfair Display**, perché in Cormorant i numeri (es. "10in1") non si leggono bene (fondatore, 10/11/2026).
 - **Bozza grafica della home:** pagina privata https://claude.ai/artifact/S8DVkKc7MW1FftY64KfMu6 (10/11/2026).
+- **Bozza della scheda prodotto** (esempio: Maschera Botox): pagina privata https://claude.ai/artifact/BTSM5zNzkzzhME9x7cFnzt (11/11/2026).
 - **Promozioni:** niente titoloni di promozioni sull'apertura; la home parla del marchio e dei risultati sui capelli.
 - **Carriera:** nessuna cifra di guadagno nelle fasce "Diventa incaricata" (legge 173/2005).
 - **Telefono prima di tutto:** la maggior parte delle visite arriverà dai social sul telefono; ogni sezione si progetta prima per il telefono (apertura con foto sopra e titolo sotto, prodotti scorrevoli di lato).
@@ -77,6 +78,25 @@ Il fondatore ha indicato come riferimento il sito di Mary Kay (`marykay.com`, vi
 - Nella scheda, al posto del carrello, **due pulsanti** (S2, S2 bis):
   - **"Scopri il prezzo"**: mostra il prezzo di listino nella stessa pagina;
   - **"Voglio acquistare"**: apre il modulo "Voglio acquistare" (sezione 4).
+
+### Scheda di un prodotto (bozza dell'11/11/2026)
+
+Dall'alto in basso:
+1. **Percorso** (Home / Prodotti / Linea / Prodotto).
+2. **Galleria** a sinistra (foto principale e 3–4 miniature: confezione, texture, prodotto in uso, kit), **acquisto** a destra:
+   - linea, nome (carattere dei nomi dei prodotti), sottotitolo, formato;
+   - breve descrizione;
+   - **"Per quale porosità"**: le tre porosità con quelle adatte segnate, dalla tabella dei prodotti del test (`docs/test-capello.md`, 4b), e il link al test;
+   - **"Scopri il prezzo"** e **"Voglio acquistare"** (S2), con la nota "si acquista tramite un'incaricata" e la spedizione 6,90 €;
+   - tre vantaggi in breve;
+   - a fisarmonica: **Come si usa** (passi, e tabella per porosità), **Cosa fa**, **Ingredienti** (INCI), **Domande frequenti**.
+3. **La routine in tre passaggi** su fascia nera (Shampoo → Maschera → Spray), con il prodotto della pagina segnato e il riquadro del **Kit Routine Botox**.
+4. Due inviti affiancati: **Test del capello** e **Consulenza tricologica gratuita**.
+5. **Potrebbero servirti anche**: gli altri prodotti della routine.
+
+**Da dove arrivano i dati.** Nome, prezzo, foto e promozioni dall'app (come oggi). Per la scheda servono nuovi campi del prodotto, compilati dalla sede nel catalogo dell'app: sottotitolo, formato, descrizione lunga, modo d'uso, ingredienti (INCI), domande frequenti, porosità adatte. Modo d'uso, quantità, tempi di posa e INCI vengono dalle **schede tecniche** (ancora da preparare); le frasi sui risultati vanno confermate da chi produce la linea (T5 del test). Finché mancano, la scheda non va online.
+
+**Niente recensioni inventate.** La sezione delle recensioni si aggiunge solo quando ci saranno recensioni vere di clienti, raccolte con il loro consenso.
 
 ### Carriera in G LUXE
 - Perché diventare incaricata, come funziona in 4 passi, storie vere, domande frequenti.
