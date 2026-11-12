@@ -37,6 +37,7 @@ async function Elenco() {
               <p className="font-semibold">
                 Ordine {numeroOrdine(o.numero)}
                 {o.tipo === "start_kit" && <span className="font-normal text-testo-tenue"> · start kit</span>}
+                {o.tipo === "licenza" && <span className="font-normal text-testo-tenue"> · rinnovo licenza</span>}
               </p>
               <p className="text-xs text-testo-tenue">
                 {dataItaliana(o.creatoIl)} · {formatta(o.punti)} punti

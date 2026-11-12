@@ -3,6 +3,7 @@ import { desc, eq, sql, type SQL } from "drizzle-orm";
 import { db } from "@/db";
 import { mesiChiusi, parametriVersioni } from "@/db/schema";
 import { datiDaFotografia } from "./congelamento";
+import { fermeDelMese } from "../licenze";
 import { schemaParametri, type Parametri } from "../parametri";
 import { meseDecadenzaFondatore, puntiRequisitoFondatore, type OrdinePagato } from "./fondatori";
 import { calcolaMese, type DatiMese, type EsitoMese, type IncaricataRete } from "./motore";
@@ -52,6 +53,7 @@ async function ordiniPagati(dal: string | null, al: SQL, soloNonChiusi = false):
                 where r.ordine_id = o.id and r.tipo_prezzo = 'promozione' and o.tipo = 'personale'), 0)::text as punti_promo
     from app.ordini o
     where o.pagato_il is not null
+      and o.tipo::text <> 'licenza' -- il rinnovo della licenza non dà punti né entra nell'incasso (decisione 31)
       and o.stato not in ('annullato', 'reso')
       and (o.pagato_il at time zone 'Europe/Rome')::date <= ${al}
       and (${dal}::date is null or (o.pagato_il at time zone 'Europe/Rome')::date >= ${dal}::date)
@@ -188,7 +190,14 @@ export async function datiDelMese(mese: string): Promise<DatiDelMese> {
       where dal <= ${fine} and (al is null or al >= ${inizio}::date)`),
   ]);
 
-  const rete = incaricate.map((i) => ({ id: i.id, sponsorId: i.sponsor_id, sospesa: i.stato !== "attivo" }));
+  // Mesi fermi per licenza scaduta all'ultimo giorno del mese (sezione 3a): non maturano nulla.
+  const ferme = await fermeDelMese(mese, parametri);
+  const rete = incaricate.map((i) => ({
+    id: i.id,
+    sponsorId: i.sponsor_id,
+    sospesa: i.stato !== "attivo",
+    ...(ferme.has(i.id) && { ferma: true }),
+  }));
   const requisiti = await requisitiFondatori(
     fondatori.rows.filter((f) => f.decade_dal === null).map((f) => ({ incaricataId: f.incaricato_id, ingresso: f.ingresso })),
     rete,

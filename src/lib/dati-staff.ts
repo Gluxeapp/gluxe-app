@@ -140,6 +140,8 @@ export const NOMI_AZIONI: Record<string, string> = {
   "incaricato.dati_modificati": "Dati modificati",
   "incaricato.sponsor_cambiato": "Sponsor cambiato",
   "incaricato.stato_cambiato": "Stato cambiato",
+  "incaricato.licenza_decaduta": "Licenza non rinnovata: tornata cliente",
+  "cliente.spostato": "Cliente spostato",
   "incaricato.link_password_inviato": "Link password inviato",
   "password.reimpostata": "Password reimpostata",
   "staff.accesso": "Accesso staff",

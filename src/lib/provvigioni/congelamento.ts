@@ -14,7 +14,7 @@ const intero = z.coerce.bigint();
 const schemaFotografia = z.object({
   mese: z.string().regex(/^\d{4}-\d{2}$/),
   parametri: z.unknown(),
-  incaricate: z.array(z.object({ id: z.string(), sponsorId: z.string().nullable(), sospesa: z.boolean().optional() })),
+  incaricate: z.array(z.object({ id: z.string(), sponsorId: z.string().nullable(), sospesa: z.boolean().optional(), ferma: z.boolean().optional() })),
   ordini: z.array(
     z.object({
       id: z.string(),

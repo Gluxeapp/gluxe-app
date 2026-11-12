@@ -5,6 +5,7 @@ import { inviaNuovoLinkPassword } from "@/app/azioni/staff";
 import { Caricamento, Scheda, Titolo } from "@/components/ui";
 import { dataItaliana } from "@/lib/dati-incaricato";
 import { dataOra, NOMI_AZIONI, schedaIncaricato } from "@/lib/dati-staff";
+import { situazioneLicenza } from "@/lib/licenze";
 import { ModuloAnagrafica, ModuloSponsor, ModuloStato } from "./moduli";
 
 export default function SchedaIncaricato({ params }: PageProps<"/staff/incaricati/[id]">) {
@@ -20,6 +21,7 @@ async function Contenuto({ params }: Pick<PageProps<"/staff/incaricati/[id]">, "
   const s = await schedaIncaricato(id);
   if (!s) notFound();
   const i = s.incaricato;
+  const licenza = await situazioneLicenza(i.id);
 
   const valori: Record<string, string> = {
     nome: i.nome,
@@ -76,6 +78,29 @@ async function Contenuto({ params }: Pick<PageProps<"/staff/incaricati/[id]">, "
           <Scheda>
             <h2 className="font-titoli text-xl text-oro-chiaro">Stato</h2>
             <ModuloStato id={i.id} stato={i.stato} />
+          </Scheda>
+
+          <Scheda>
+            <h2 className="font-titoli text-xl text-oro-chiaro">Licenza</h2>
+            <p className="mt-2 text-sm">
+              {licenza.stato === "senza_scadenza"
+                ? licenza.esente
+                  ? "Esente: non scade."
+                  : "Senza scadenza finché non è decisa la data di lancio del piano."
+                : `${{ valida: "Valida", in_scadenza: "In scadenza", scaduta: "Scaduta", decaduta: "Decaduta" }[licenza.stato]} · fino al ${dataItaliana(licenza.validaFino)}`}
+            </p>
+            {licenza.stato === "scaduta" && (
+              <p className="mt-1 text-xs text-errore">Rinnovo possibile fino al {dataItaliana(licenza.rinnovabileFino)}.</p>
+            )}
+            {licenza.periodi.length > 0 && (
+              <ul className="mt-2 space-y-1 text-xs text-testo-tenue">
+                {licenza.periodi.map((x) => (
+                  <li key={x.ordineId}>
+                    Pagata il {dataItaliana(x.pagatoIl)}: {dataItaliana(x.dal)} → {dataItaliana(x.validaFino)}
+                  </li>
+                ))}
+              </ul>
+            )}
           </Scheda>
 
           <Scheda>

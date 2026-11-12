@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { FoglioDocumento } from "@/components/documento-provvigioni";
 import { PulsanteStampa } from "@/components/pulsante-stampa";
 import { Caricamento } from "@/components/ui";
-import { richiediIncaricataOperativa } from "@/lib/accesso";
+import { richiediAccessoProvvigioni } from "@/lib/accesso";
 import { leggiDocumento, percentualiDelDocumento } from "@/lib/provvigioni/conti";
 
 export default function DocumentoIncaricata({ params }: PageProps<"/area/provvigioni/documento/[id]">) {
@@ -16,7 +16,7 @@ export default function DocumentoIncaricata({ params }: PageProps<"/area/provvig
 }
 
 async function Contenuto({ params }: Pick<PageProps<"/area/provvigioni/documento/[id]">, "params">) {
-  const { incaricato } = await richiediIncaricataOperativa();
+  const { incaricato } = await richiediAccessoProvvigioni();
   const { id } = await params;
   // Solo i propri documenti (CLAUDE.md, regola 15): un documento altrui risponde "non trovato".
   const d = /^[0-9a-f-]{36}$/i.test(id) ? await leggiDocumento(id) : undefined;

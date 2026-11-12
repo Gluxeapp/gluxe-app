@@ -6,6 +6,7 @@ import { richiediIncaricataOperativa } from "@/lib/accesso";
 import { formatta, formattaEuro } from "@/lib/denaro";
 import { dataItaliana } from "@/lib/dati-incaricato";
 import { indirizzoApp } from "@/lib/indirizzo-app";
+import { licenzaScaduta } from "@/lib/licenze";
 import { clientiDellIncaricata, ordiniDelNegozio, statoNegozio } from "@/lib/negozio";
 import { dataOra, ETICHETTE_STATO, numeroOrdine } from "@/lib/ordini";
 import { CondividiLink } from "./condividi";
@@ -25,7 +26,7 @@ export default function PaginaNegozio() {
 
 async function Contenuto() {
   const { incaricato } = await richiediIncaricataOperativa();
-  const stato = statoNegozio(incaricato);
+  const stato = statoNegozio({ ...incaricato, licenzaScaduta: await licenzaScaduta(incaricato.id) });
   const link = `${indirizzoApp()}/negozio/${incaricato.codice}`;
   const [clienti, ordini] = await Promise.all([clientiDellIncaricata(incaricato.id), ordiniDelNegozio(incaricato.id)]);
 

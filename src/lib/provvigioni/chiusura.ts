@@ -2,6 +2,7 @@ import "server-only";
 import { and, eq, inArray, isNull, lt, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { mesiChiusi, movimenti, ordini, ordiniChiusi, ordiniStornati, rettifiche } from "@/db/schema";
+import { applicaDecadenze } from "../licenze";
 import { registra } from "../registro";
 import { datiDaFotografia, fotografaMese, stornoIncrementale } from "./congelamento";
 import { datiDelMese, meseCorrente, meseDopo, ultimoMeseChiuso } from "./dati";
@@ -19,7 +20,9 @@ async function primoMeseConOrdini(): Promise<string | null> {
   const {
     rows: [r],
   } = await db().execute<{ mese: string | null }>(
-    sql`select to_char(min(pagato_il) at time zone 'Europe/Rome', 'YYYY-MM') as mese from app.ordini where pagato_il is not null`,
+    // Come nel calcolo del mese: contano solo gli ordini pagati e non annullati né resi, rinnovi della licenza esclusi.
+    sql`select to_char(min(pagato_il) at time zone 'Europe/Rome', 'YYYY-MM') as mese from app.ordini
+        where pagato_il is not null and stato not in ('annullato', 'reso') and tipo::text <> 'licenza'`,
   );
   return r?.mese ?? null;
 }
@@ -101,6 +104,10 @@ export async function chiudiMese(mese: string, utenteId: string) {
       ordiniResi.push(...nuovi);
     }
 
+    // Licenze non rinnovate entro la fine di questo mese (il mese dopo la scadenza): dirette e clienti passano alla
+    // sponsor, l'incaricata torna cliente (sezione 3a). Dopo la fotografia: il mese chiuso resta come era.
+    const decadute = await applicaDecadenze(tx, mese, dati.parametri, utenteId);
+
     await registra(tx, {
       utenteId,
       azione: "provvigioni.mese_chiuso",
@@ -113,8 +120,9 @@ export async function chiudiMese(mese: string, utenteId: string) {
         versioneParametri: versioneParametri.toString(),
         ordiniStornati: ordiniResi.length,
         totaleStorni: totaleStorni.toString(),
+        licenzeDecadute: decadute,
       },
     });
-    return { voci: esito.voci.length, totaleCompensi: esito.totaleCompensi, ordiniStornati: ordiniResi.length, totaleStorni };
+    return { voci: esito.voci.length, totaleCompensi: esito.totaleCompensi, ordiniStornati: ordiniResi.length, totaleStorni, licenzeDecadute: decadute };
   });
 }

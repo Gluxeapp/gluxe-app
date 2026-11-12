@@ -13,6 +13,7 @@
     "db:aggiorna": "node --env-file=.env.local scripts/aggiorna-database.mjs",
     "crea-staff": "node --env-file=.env.local scripts/crea-staff.mjs",
     "db:aggiorna:produzione": "node --env-file=.env.local scripts/aggiorna-database.mjs --produzione",
+    "db:riapplica": "node --env-file=.env.local scripts/riapplica-migrazione.mjs",
     "db:annulla": "node --env-file=.env.local scripts/annulla-migrazione.mjs",
     "db:seme-catalogo": "node --env-file=.env.local scripts/seme-catalogo.ts",
     "stripe:inoltra": "node --env-file=.env.local scripts/inoltra-stripe.mjs",
@@ -21,7 +22,9 @@
     "controlla:segreti": "node scripts/controlla-segreti.mjs",
     "prebuild": "node scripts/controlla-segreti.mjs",
     "prepare": "node -e \"if(require('fs').existsSync('.git'))require('child_process').execSync('git config core.hooksPath .githooks')\"",
+    "db:seme-licenza-prova": "node --env-file=.env.local scripts/seme-licenza-prova.mjs",
     "db:seme-rete-prova": "node --env-file=.env.local scripts/seme-rete-prova.mjs",
+    "prova:licenza": "node --env-file=.env.local node_modules/vitest/vitest.mjs run --config prove/licenza/vitest.config.mts",
     "prova:fase7": "node --env-file=.env.local node_modules/vitest/vitest.mjs run --config prove/fase7/vitest.config.mts",
     "prova:fase6": "bash prove/fase6/azzera.sh && node --env-file=.env.local node_modules/vitest/vitest.mjs run --config prove/fase6/vitest.config.mts && bash prove/fase6/azzera.sh"
   },

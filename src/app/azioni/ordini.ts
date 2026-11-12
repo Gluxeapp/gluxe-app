@@ -15,6 +15,8 @@ import { creaOrdinePersonale, ETICHETTE_STATO, leggiOrdine, numeroOrdine, ordine
 import { apriPagamento, chiudiPagamento } from "@/lib/pagamenti";
 import { registra } from "@/lib/registro";
 import { schemaSpedizione } from "@/lib/spedizione";
+import { licenzaScaduta, MESSAGGIO_LICENZA_SCADUTA, ordineLicenza } from "@/lib/licenze";
+import { pagamentiAttivi } from "@/lib/stripe";
 
 
 /** Errori di Stripe o di rete: messaggio semplice per l'incaricata, dettagli solo nel log del server. */
@@ -33,6 +35,7 @@ export async function nuovoOrdine(_: EsitoModulo, formData: FormData): Promise<E
   const { incaricato } = await verificaIncaricataOperativa();
   const valori = valoriDa(formData);
   if (incaricato.stato === "sospeso") return { messaggio: "Il tuo account è sospeso: contatta l'azienda.", valori };
+  if (await licenzaScaduta(incaricato.id)) return { messaggio: MESSAGGIO_LICENZA_SCADUTA, valori };
 
   const richiesti: { prodottoId: string; quantita: number }[] = [];
   for (const [chiave, valore] of formData) {
@@ -73,6 +76,9 @@ export async function pagaOrdine(_: EsitoModulo, formData: FormData): Promise<Es
   const id = z.uuid().safeParse(formData.get("id"));
   if (!id.success) return { messaggio: "Ordine non valido." };
   if (incaricato.stato === "sospeso") return { messaggio: "Il tuo account è sospeso: contatta l'azienda." };
+  // Con la licenza scaduta si paga solo il rinnovo (decisione 31).
+  const letto = await leggiOrdine(id.data, incaricato.id);
+  if (letto && letto.ordine.tipo !== "licenza" && (await licenzaScaduta(incaricato.id))) return { messaggio: MESSAGGIO_LICENZA_SCADUTA };
   let url: string;
   try {
     url = await apriPagamento(id.data, incaricato.id, await emailIncaricata(sessione.utenteId));
@@ -152,6 +158,7 @@ export async function cambiaStatoOrdine(_: EsitoModulo, formData: FormData): Pro
   const esito = await db().transaction(async (tx) => {
     const [ordine] = await tx.select().from(ordini).where(eq(ordini.id, id)).for("update");
     if (!ordine) return { messaggio: "Ordine non trovato." };
+    if (ordine.tipo === "licenza") return { messaggio: "Il rinnovo della licenza non si prepara né si spedisce." };
     if (!PASSAGGI[ordine.stato]?.includes(stato)) {
       return { messaggio: `Da "${ETICHETTE_STATO[ordine.stato]}" non si può passare a "${ETICHETTE_STATO[stato]}".` };
     }
@@ -199,4 +206,19 @@ export async function cambiaStatoOrdine(_: EsitoModulo, formData: FormData): Pro
   revalidatePath("/staff/ordini");
   revalidatePath(`/staff/ordini/${id}`);
   return { ok: esito.ok, messaggio: esito.messaggio };
+}
+
+/** Rinnovo della licenza annuale (decisione 31): crea (o riprende) l'ordine e porta subito al pagamento Stripe. */
+export async function rinnovaLicenza(): Promise<EsitoModulo> {
+  const { incaricato, sessione } = await verificaIncaricataOperativa();
+  if (!pagamentiAttivi()) return { messaggio: "Il pagamento online sarà attivo a breve." };
+  let url: string;
+  try {
+    const id = await ordineLicenza(incaricato.id);
+    url = await apriPagamento(id, incaricato.id, await emailIncaricata(sessione.utenteId));
+  } catch (e) {
+    if (e instanceof ErroreOrdine) return { messaggio: e.message };
+    return erroreDiPagamento(e);
+  }
+  redirect(url);
 }

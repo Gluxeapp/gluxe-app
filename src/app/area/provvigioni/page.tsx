@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { Caricamento, Scheda, Titolo } from "@/components/ui";
-import { richiediIncaricataOperativa } from "@/lib/accesso";
+import { richiediAccessoProvvigioni } from "@/lib/accesso";
 import { formatta, formattaEuro } from "@/lib/denaro";
 import { dataItaliana } from "@/lib/dati-incaricato";
 import { contoIncaricata, statoRichiesta } from "@/lib/provvigioni/conti";
@@ -28,7 +28,7 @@ const pct = (pb: bigint) => `${formatta(pb)}%`.replace(",00%", "%");
 const NOMI_MESI = ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"];
 
 async function Contenuto() {
-  const { incaricato } = await richiediIncaricataOperativa();
+  const { incaricato } = await richiediAccessoProvvigioni();
   const mese = await meseCorrente();
   const e = await calcoloDelMese(mese);
   const p = e.parametri;

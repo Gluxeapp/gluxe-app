@@ -91,6 +91,18 @@ describe("calcolaOrdine", () => {
     expect(() => calcolaOrdine([{ prodotto: startKit, quantita: 1 }], "online", p)).toThrow(/non si può ordinare/);
   });
 
+  test("rinnovo della licenza: 29,90 € senza punti, senza provvigioni e senza spedizione", () => {
+    const licenza = { id: "lic", codice: "LICENZA", nome: "Licenza annuale", tipo: "licenza" as const, prezzoListino: 2990n };
+    const o = calcolaOrdine([{ prodotto: licenza, quantita: 1 }], "licenza", p);
+    expect(o.righe[0]).toMatchObject({ tipoPrezzo: "licenza", prezzoUnitarioIvato: 2990n, prezzoUnitarioIvaEsclusa: 2451n, puntiUnitari: 0n, provvigioneUnitaria: 0n });
+    expect(o.punti).toBe(0n);
+    expect(o.speseSpedizione).toBe(0n);
+    expect(o.totale).toBe(2990n);
+    expect(() => calcolaOrdine([{ prodotto: licenza, quantita: 2 }], "licenza", p)).toThrow(/una sola/);
+    expect(() => calcolaOrdine([{ prodotto: shampoo, quantita: 1 }], "licenza", p)).toThrow(/non si può ordinare/);
+    expect(() => calcolaOrdine([{ prodotto: licenza, quantita: 1 }], "personale", p)).toThrow(/non si può ordinare/);
+  });
+
   test("T8: start kit con 33 punti fissi e spedizione", () => {
     const o = calcolaOrdine([{ prodotto: startKit, quantita: 1 }], "start_kit", p);
     expect(o.righe[0]).toMatchObject({ tipoPrezzo: "start_kit", prezzoUnitarioIvato: 5990n, prezzoUnitarioIvaEsclusa: 4910n, puntiUnitari: 3300n });

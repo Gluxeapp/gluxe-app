@@ -155,6 +155,22 @@ describe("Piano Compensi G LUXE rev. 6 — casi di test", () => {
     expect(voci(e, "v")).toBe(c(1084.8));
   });
 
+  test("T27 Mese fermo per licenza scaduta: niente provvigione online, i punti contano per chi sta sopra", () => {
+    const e = calcolaMese(dati({
+      incaricate: [{ id: "v", sponsorId: null }, { id: "x", sponsorId: "v", ferma: true }],
+      ordini: [online("x", 150), online("v", 1700)],
+    }));
+    expect(situazione(e, "x").attiva).toBe(false);
+    expect(situazione(e, "x").percentualeApplicata).toBe(400n);
+    expect(voci(e, "x")).toBe(0n);
+    expect(voci(e, "v", "online")).toBe(c(850));
+    expect(voci(e, "v", "qualifica")).toBe(c(136));
+    expect(voci(e, "v", "differenza")).toBe(c(6));
+    expect(voci(e, "v")).toBe(c(992));
+    // I punti di X restano nei punti aziendali.
+    expect(e.puntiAziendali).toBe(c(1850));
+  });
+
   test("T8 Start kit: la sponsor riceve il 50% dei punti più la differenza", () => {
     const e = calcolaMese(dati({
       incaricate: rete(["bea", null], ["mara", "bea"]),

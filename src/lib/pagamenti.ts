@@ -7,6 +7,7 @@ import { ErroreOrdine } from "./calcolo-ordine";
 import { formatta, formattaEuro } from "./denaro";
 import { inviaEmail } from "./email";
 import { indirizzoApp } from "./indirizzo-app";
+import { registraPeriodoLicenza } from "./licenze";
 import { leggiOrdine, numeroOrdine, ORE_PER_PAGARE, registraStato } from "./ordini";
 import { configurazionePagamenti, stripe } from "./stripe";
 
@@ -147,6 +148,8 @@ export async function gestisciEventoStripe(evento: Stripe.Event): Promise<void> 
         if (ordine.tipo === "start_kit") {
           await tx.update(incaricati).set({ startKitPagato: true }).where(eq(incaricati.id, ordine.incaricatoId));
         }
+        // Start kit e rinnovi: periodo di licenza di 12 mesi (decisione 31). Un pagamento arrivato dopo l'annullamento vale lo stesso.
+        await registraPeriodoLicenza(tx, ordine, pagatoIl);
         email.push(...(await emailPagato(tx, ordine.id, ordine.incaricatoId)));
         return;
       }
@@ -250,6 +253,7 @@ async function emailPagato(tx: Esecutore, ordineId: string, incaricatoId: string
       `Ciao ${persona.nome},\n\nabbiamo ricevuto il pagamento del tuo ordine ${numeroOrdine(ordine.numero)}.\n\n${elenco}\n` +
       `- Spedizione: ${formattaEuro(ordine.speseSpedizione)}\nTotale: ${formattaEuro(ordine.totale)}\n\n` +
       (ordine.tipo === "start_kit" ? "Il tuo account è attivo: da ora puoi ordinare con lo sconto del 40%.\n\n" : "") +
+      (ordine.tipo === "licenza" ? "La tua licenza è rinnovata: trovi la nuova scadenza nell'app, alla pagina Licenza.\n\n" : "") +
       `Segui l'ordine nell'app: ${indirizzoApp()}/area/ordini/${ordine.id}\n\nG LUXE`,
   }];
 }

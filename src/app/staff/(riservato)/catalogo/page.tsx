@@ -85,7 +85,7 @@ async function Elenco() {
                 </>
               ) : (
                 <td colSpan={3} className="px-3 py-2 text-right text-testo-tenue">
-                  Start kit: {kit ? formatta(kit.punti) : ""} punti fissi
+                  {p.tipo === "licenza" ? "Rinnovo licenza: nessun punto" : `Start kit: ${kit ? formatta(kit.punti) : ""} punti fissi`}
                 </td>
               )}
               <td className="px-3 py-2">{p.attivo ? "Attivo" : "Disattivato"}</td>

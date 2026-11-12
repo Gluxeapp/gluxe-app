@@ -5,6 +5,7 @@ import { richiediIncaricataOperativa } from "@/lib/accesso";
 import { catalogoIncaricata } from "@/lib/catalogo";
 import { formattaEuro, formatta } from "@/lib/denaro";
 import { indirizzoDelProfilo, serveConfermaRiordino } from "@/lib/ordini";
+import { licenzaScaduta, MESSAGGIO_LICENZA_SCADUTA } from "@/lib/licenze";
 import { pagamentiAttivi } from "@/lib/stripe";
 import { ModuloNuovoOrdine } from "./modulo-nuovo-ordine";
 
@@ -26,6 +27,9 @@ export default function NuovoOrdine() {
 
 async function Contenuto() {
   const { incaricato } = await richiediIncaricataOperativa();
+  if (await licenzaScaduta(incaricato.id)) {
+    return <Avviso tipo="errore">{MESSAGGIO_LICENZA_SCADUTA}</Avviso>;
+  }
   if (!pagamentiAttivi()) {
     return <Avviso>Il pagamento online sarà attivo a breve. Ti avviseremo quando potrai ordinare.</Avviso>;
   }

@@ -265,6 +265,29 @@ try {
     esito(e.message === "ANNULLA", "accettato: spostamento di un cliente come intervento tracciato della sede");
   }
 
+  // 1e) Licenza annuale (migrazione 0009), in transazioni annullate.
+  const rinnovo = (tx, punti, spedizione) => tx`
+    insert into app.ordini (incaricato_id, tipo, parametri_versione_id, merce_iva_inclusa, merce_iva_esclusa, punti,
+      provvigione_acquisto, spese_spedizione, totale, destinatario, indirizzo, cap, citta, provincia, telefono)
+    values (${a.id}, 'licenza', ${parametri.id}, 2990, 2451, ${punti}, 0, ${spedizione}, ${2990 + spedizione}, 'Prova', 'Via Prova 3', '20100', 'Milano', 'MI', '3330000000')
+    returning id`;
+  await deveFallire("rinnovo della licenza con punti", (tx) => rinnovo(tx, 100, 0));
+  await deveFallire("rinnovo della licenza con spedizione", (tx) => rinnovo(tx, 0, 690));
+  await deveFallire("due periodi di licenza per lo stesso pagamento", async (tx) => {
+    const [o] = await rinnovo(tx, 0, 0);
+    await tx`insert into app.licenze (incaricato_id, ordine_id, pagato_il, dal, valida_fino) values (${a.id}, ${o.id}, current_date, current_date, current_date + 364)`;
+    await tx`insert into app.licenze (incaricato_id, ordine_id, pagato_il, dal, valida_fino) values (${a.id}, ${o.id}, current_date, current_date, current_date + 364)`;
+  });
+  await deveFallire("allungare a mano un periodo di licenza", async (tx) => {
+    const [o] = await rinnovo(tx, 0, 0);
+    await tx`insert into app.licenze (incaricato_id, ordine_id, pagato_il, dal, valida_fino) values (${a.id}, ${o.id}, current_date, current_date, current_date + 364)`;
+    await tx`update app.licenze set valida_fino = valida_fino + 365 where ordine_id = ${o.id}`;
+  });
+  await deveFallire("periodo di licenza che finisce prima di iniziare", async (tx) => {
+    const [o] = await rinnovo(tx, 0, 0);
+    await tx`insert into app.licenze (incaricato_id, ordine_id, pagato_il, dal, valida_fino) values (${a.id}, ${o.id}, current_date, current_date, current_date - 1)`;
+  });
+
   // 2) Conferme di pagamento contemporanee: 10 copie di due eventi diversi per lo stesso ordine.
   if (!segreto) throw new Error("Manca STRIPE_WEBHOOK_SECRET");
   const sessione = `cs_test_prova_${randomUUID()}`;

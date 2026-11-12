@@ -2,20 +2,21 @@
  * Calcolo di un ordine: righe con prezzi e punti "fotografati" e totali. Modulo puro (niente database),
  * usato dal server quando l'incaricata crea l'ordine. Regole in docs/piano-compensi.md, sezione 2.
  */
-import type { Centesimi } from "./denaro";
+import { scorporaIva, type Centesimi } from "./denaro";
 import type { Parametri } from "./parametri";
 import { prezziProdotto, prezziPromozione, prezziStartKit } from "./prezzi";
 
 export const QUANTITA_MASSIMA = 99;
 
-export type TipoOrdineCalcolabile = "start_kit" | "personale" | "online";
+/** "licenza": rinnovo annuale della licenza dell'app (sezione 3a), senza punti né spedizione. */
+export type TipoOrdineCalcolabile = "start_kit" | "personale" | "online" | "licenza";
 
 export type Articolo = {
   prodotto: {
     id: string;
     codice: string;
     nome: string;
-    tipo: "prodotto" | "start_kit";
+    tipo: "prodotto" | "start_kit" | "licenza";
     prezzoListino: Centesimi;
     /** Punti per pezzo scritti a mano dalla sede (vuoti = automatici). */
     puntiPersonaleManuali?: Centesimi | null;
@@ -30,7 +31,7 @@ export type RigaCalcolata = {
   prodottoId: string;
   codice: string;
   nome: string;
-  tipoPrezzo: "listino_scontato" | "promozione" | "start_kit" | "listino_pieno";
+  tipoPrezzo: "listino_scontato" | "promozione" | "start_kit" | "listino_pieno" | "licenza";
   promozioneId: string | null;
   quantita: number;
   prezzoUnitarioIvato: Centesimi;
@@ -56,6 +57,10 @@ function riga(a: Articolo, tipo: TipoOrdineCalcolabile, p: Parametri): RigaCalco
   if (prodotto.tipo === "start_kit") {
     tipoPrezzo = "start_kit";
     unita = prezziStartKit(prodotto.prezzoListino, p);
+  } else if (prodotto.tipo === "licenza") {
+    // Nessun punto a nessuno: l'importo va tutto all'azienda (decisione 31).
+    tipoPrezzo = "licenza";
+    unita = { ivaInclusa: prodotto.prezzoListino, ivaEsclusa: scorporaIva(prodotto.prezzoListino, p.aliquotaIva), punti: 0n };
   } else if (tipo === "online") {
     // Negozio online: il cliente paga il listino pieno o il prezzo in promozione; provvigione = 50% dei punti online.
     const prezzi = promozione
@@ -104,13 +109,18 @@ export function calcolaOrdine(articoli: Articolo[], tipo: TipoOrdineCalcolabile,
     if (!Number.isInteger(a.quantita) || a.quantita < 1 || a.quantita > QUANTITA_MASSIMA) {
       throw new ErroreOrdine(`Quantità non valida per ${a.prodotto.nome}: da 1 a ${QUANTITA_MASSIMA}.`);
     }
-    if ((tipo === "start_kit") !== (a.prodotto.tipo === "start_kit")) {
+    const tipoProdotto = tipo === "start_kit" || tipo === "licenza" ? tipo : "prodotto";
+    if (a.prodotto.tipo !== tipoProdotto) {
       throw new ErroreOrdine(`${a.prodotto.nome} non si può ordinare qui.`);
     }
   }
   if (tipo === "start_kit" && (articoli.length !== 1 || articoli[0].quantita !== 1)) {
     throw new ErroreOrdine("Lo start kit si ordina da solo, in una sola unità.");
   }
+  if (tipo === "licenza" && (articoli.length !== 1 || articoli[0].quantita !== 1)) {
+    throw new ErroreOrdine("La licenza si rinnova da sola, una sola alla volta.");
+  }
+  const spedizione = tipo === "licenza" ? 0n : p.speseSpedizione;
 
   const righe = articoli.map((a) => riga(a, tipo, p));
   const merceIvaInclusa = somma(righe, "totaleIvato");
@@ -120,7 +130,7 @@ export function calcolaOrdine(articoli: Articolo[], tipo: TipoOrdineCalcolabile,
     merceIvaEsclusa: somma(righe, "totaleIvaEsclusa"),
     punti: somma(righe, "totalePunti"),
     provvigioneAcquisto: somma(righe, "totaleProvvigione"),
-    speseSpedizione: p.speseSpedizione,
-    totale: merceIvaInclusa + p.speseSpedizione,
+    speseSpedizione: spedizione,
+    totale: merceIvaInclusa + spedizione,
   };
 }

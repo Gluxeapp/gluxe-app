@@ -20,7 +20,7 @@ export const sessioneCorrente = cache(leggiSessione);
 export type RuoloStaff = "amministrazione" | "contabilita" | "ordini";
 
 /** Incaricato collegato, altrimenti rimanda alla schermata di accesso. */
-export async function verificaIncaricato(sessione?: Awaited<ReturnType<typeof leggiSessione>>) {
+export async function verificaIncaricato(sessione?: Awaited<ReturnType<typeof leggiSessione>>, opzioni: { ancheTornataCliente?: boolean } = {}) {
   sessione ??= await leggiSessione();
   if (!sessione || sessione.ruolo !== "incaricato") redirect("/");
   const [incaricato] = await db()
@@ -36,9 +36,19 @@ export async function verificaIncaricato(sessione?: Awaited<ReturnType<typeof le
     .from(incaricati)
     .where(eq(incaricati.utenteId, sessione.utenteId))
     .limit(1);
-  if (!incaricato || incaricato.stato === "cessato" || incaricato.stato === "cliente") redirect("/");
+  if (!incaricato || incaricato.stato === "cessato") redirect("/");
+  // Chi è tornata cliente (per esempio licenza decaduta) entra solo per chiedere il saldo provvigioni residuo.
+  if (incaricato.stato === "cliente" && !opzioni.ancheTornataCliente) redirect("/area/provvigioni");
   return { sessione, incaricato };
 }
+
+/** Pagine e azioni del saldo provvigioni: aperte anche a chi è tornata cliente (saldo residuo, sezione 3a). */
+export async function verificaAccessoProvvigioni(sessione?: Awaited<ReturnType<typeof leggiSessione>>) {
+  const accesso = await verificaIncaricato(sessione, { ancheTornataCliente: true });
+  if (!accesso.incaricato.startKitPagato) redirect("/area/start-kit");
+  return accesso;
+}
+export const richiediAccessoProvvigioni = cache(async () => verificaAccessoProvvigioni(await sessioneCorrente()));
 
 /**
  * Incaricata che può usare l'app: start kit pagato (altrimenti la manda a pagarlo).

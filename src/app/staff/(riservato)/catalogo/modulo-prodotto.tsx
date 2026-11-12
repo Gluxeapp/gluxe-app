@@ -5,7 +5,7 @@ import { salvaProdotto } from "@/app/azioni/catalogo";
 import { Sezione } from "@/components/campi-anagrafica";
 import { Avviso, Campo, Pulsante, type EsitoModulo } from "@/components/ui";
 
-export function ModuloProdotto({ id, valori, startKit }: { id?: string; valori?: Record<string, string>; startKit?: boolean }) {
+export function ModuloProdotto({ id, valori, startKit, licenza }: { id?: string; valori?: Record<string, string>; startKit?: boolean; licenza?: boolean }) {
   const [esito, azione, inCorso] = useActionState<EsitoModulo, FormData>(salvaProdotto, { valori });
   return (
     <form action={azione} className="space-y-6" noValidate>
@@ -41,7 +41,7 @@ export function ModuloProdotto({ id, valori, startKit }: { id?: string; valori?:
             esito={esito}
             inputMode="decimal"
             placeholder="32,90"
-            aiuto={startKit ? "Lo start kit vale sempre i punti fissi dei parametri." : "Prezzo incaricata e punti li calcola l'app."}
+            aiuto={licenza ? "Prezzo del rinnovo annuale della licenza, IVA inclusa: nessun punto." : startKit ? "Lo start kit vale sempre i punti fissi dei parametri." : "Prezzo incaricata e punti li calcola l'app."}
             required
           />
           <Campo etichetta="Ordine nell'elenco" name="ordine" esito={esito} inputMode="numeric" placeholder="10" />
