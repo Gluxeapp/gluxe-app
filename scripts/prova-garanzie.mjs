@@ -265,6 +265,44 @@ try {
     esito(e.message === "ANNULLA", "accettato: spostamento di un cliente come intervento tracciato della sede");
   }
 
+  // 1d-bis) Profilo cliente (migrazione 0010, decisione 32), in transazioni annullate.
+  const senzaConsulente = async (tx) => {
+    const [c] = await tx`insert into app.clienti (email, nome, cognome, telefono, privacy_accettata_il)
+      values (${`garanzie-${randomUUID()}@gluxe.test`}, 'Prova', 'Senza', '3470000000', now()) returning id`;
+    return c.id;
+  };
+  await deveFallire("riportare senza consulente un cliente già legato", async (tx) => {
+    const c = await cliente(tx);
+    await tx`update app.clienti set incaricato_id = null where id = ${c}`;
+  });
+  await deveFallire("spostare senza traccia un cliente dopo il suo primo legame", async (tx) => {
+    const c = await senzaConsulente(tx);
+    await tx`update app.clienti set incaricato_id = ${a.id} where id = ${c}`;
+    await tx`update app.clienti set incaricato_id = ${b.id} where id = ${c}`;
+  });
+  await deveFallire("scambiare il profilo di un cliente", async (tx) => {
+    const c = await senzaConsulente(tx);
+    const [u1] = await tx`insert into app.utenti (ruolo, email, nome) values ('cliente', ${`p1-${randomUUID()}@gluxe.test`}, 'P1') returning id`;
+    const [u2] = await tx`insert into app.utenti (ruolo, email, nome) values ('cliente', ${`p2-${randomUUID()}@gluxe.test`}, 'P2') returning id`;
+    await tx`update app.clienti set utente_id = ${u1.id} where id = ${c}`;
+    await tx`update app.clienti set utente_id = ${u2.id} where id = ${c}`;
+  });
+  await deveFallire("due profili cliente con la stessa email", async (tx) => {
+    await tx`insert into app.utenti (ruolo, email, nome) values ('cliente', 'doppio-profilo@gluxe.test', 'A')`;
+    await tx`insert into app.utenti (ruolo, email, nome) values ('cliente', 'DOPPIO-profilo@gluxe.test', 'B')`;
+  });
+  await deveFallire("richiesta di un cliente senza il cliente", (tx) =>
+    tx`insert into app.richieste_contatto (nome, cognome, telefono, email, citta, tipo) values ('A', 'B', '3330000000', 'a@gluxe.test', 'Milano', 'cliente')`);
+  try {
+    await sql.begin(async (tx) => {
+      const c = await senzaConsulente(tx);
+      await tx`update app.clienti set incaricato_id = ${a.id} where id = ${c}`;
+      throw new Error("ANNULLA");
+    });
+  } catch (e) {
+    esito(e.message === "ANNULLA", "accettato: primo legame di un cliente registrato senza consulente");
+  }
+
   // 1e) Licenza annuale (migrazione 0009), in transazioni annullate.
   const rinnovo = (tx, punti, spedizione) => tx`
     insert into app.ordini (incaricato_id, tipo, parametri_versione_id, merce_iva_inclusa, merce_iva_esclusa, punti,

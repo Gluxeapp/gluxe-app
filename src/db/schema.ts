@@ -24,7 +24,7 @@ import {
 
 export const app = pgSchema("app");
 
-export const ruolo = app.enum("ruolo", ["incaricato", "amministrazione", "contabilita", "ordini"]);
+export const ruolo = app.enum("ruolo", ["incaricato", "amministrazione", "contabilita", "ordini", "cliente"]);
 export const statoIncaricato = app.enum("stato_incaricato", ["attivo", "sospeso", "cessato", "cliente"]);
 export const scopoCodice = app.enum("scopo_codice", ["accesso_staff", "recupero_password"]);
 export const statoRichiesta = app.enum("stato_richiesta", ["nuova", "gestita"]);
@@ -50,9 +50,10 @@ export const utenti = app.table(
     creatoIl: creatoIl(),
   },
   (t) => [
-    // La stessa persona può essere sia incaricata sia staff, ma non due incaricati con la stessa email.
-    uniqueIndex("utenti_email_staff").on(sql`lower(${t.email})`).where(sql`${t.ruolo} <> 'incaricato'`),
+    // La stessa persona può essere incaricata, staff e cliente, ma non due account dello stesso tipo con la stessa email.
+    uniqueIndex("utenti_email_staff").on(sql`lower(${t.email})`).where(sql`${t.ruolo} in ('amministrazione', 'contabilita', 'ordini')`),
     uniqueIndex("utenti_email_incaricati").on(sql`lower(${t.email})`).where(sql`${t.ruolo} = 'incaricato'`),
+    uniqueIndex("utenti_email_clienti").on(sql`lower(${t.email})`).where(sql`${t.ruolo} not in ('incaricato', 'amministrazione', 'contabilita', 'ordini')`),
   ],
 );
 
@@ -86,6 +87,8 @@ export const incaricati = app.table(
     esclusaBonusAuto: boolean("esclusa_bonus_auto").notNull().default(false),
     /** Esente dalla licenza annuale (solo Giovanna Di Lillo, decisione 31): la licenza non scade. */
     licenzaEsente: boolean("licenza_esente").notNull().default(false),
+    /** Mostra telefono ed email ai propri clienti nel loro profilo (decisione 32). */
+    mostraContattiClienti: boolean("mostra_contatti_clienti").notNull().default(false),
     privacyAccettataIl: timestamp("privacy_accettata_il", { withTimezone: true }).notNull(),
     creatoIl: creatoIl(),
   },
@@ -119,6 +122,9 @@ export const richiesteContatto = app.table("richieste_contatto", {
   note: text("note"),
   gestitaDa: uuid("gestita_da").references(() => utenti.id),
   gestitaIl: timestamp("gestita_il", { withTimezone: true }),
+  /** "incaricata": chi vuole diventare incaricata e non ha uno sponsor; "cliente": cliente registrato senza consulente (decisione 32). */
+  tipo: text("tipo").notNull().default("incaricata"),
+  clienteId: uuid("cliente_id").references((): AnyPgColumn => clienti.id),
   creatoIl: creatoIl(),
 });
 
@@ -279,17 +285,26 @@ export const clienti = app.table(
   "clienti",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    incaricatoId: uuid("incaricato_id")
-      .notNull()
-      .references(() => incaricati.id),
+    /** Incaricata a cui è legato; vuota per chi si è registrato senza link e non ha ancora una consulente (decisione 32). */
+    incaricatoId: uuid("incaricato_id").references(() => incaricati.id),
+    /** Profilo con email e password (decisione 32); vuoto per chi compra solo come ospite. */
+    utenteId: uuid("utente_id")
+      .unique()
+      .references(() => utenti.id),
     /** Sempre in minuscolo. */
     email: text("email").notNull(),
     nome: text("nome").notNull(),
     cognome: text("cognome").notNull(),
     telefono: text("telefono").notNull(),
+    /** Indirizzo di spedizione salvato nel profilo (proposto negli ordini). */
+    indirizzo: text("indirizzo"),
+    cap: text("cap"),
+    citta: text("citta"),
+    provincia: text("provincia"),
     /** Consenso a far vedere email e telefono alla sua incaricata; vuoto = nessun consenso (o revocato). */
     consensoContattiIl: timestamp("consenso_contatti_il", { withTimezone: true }),
-    privacyAccettataIl: timestamp("privacy_accettata_il", { withTimezone: true }).notNull(),
+    /** Vuota finché il cliente di un "ordine per un cliente" non accetta l'informativa sulla pagina di pagamento. */
+    privacyAccettataIl: timestamp("privacy_accettata_il", { withTimezone: true }),
     creatoIl: creatoIl(),
   },
   (t) => [uniqueIndex("clienti_email").on(t.email), index("clienti_incaricato").on(t.incaricatoId)],

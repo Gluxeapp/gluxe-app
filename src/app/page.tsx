@@ -37,7 +37,7 @@ export default function Accesso() {
         <SuggerimentoInstallazione />
 
         <p className="mt-10 text-center text-xs text-testo-tenue">
-          <Link href="/staff/accesso">Accesso amministrazione</Link>
+          <Link href="/cliente/accesso">Area clienti</Link> · <Link href="/staff/accesso">Accesso amministrazione</Link>
         </p>
       </div>
     </main>

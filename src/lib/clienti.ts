@@ -31,7 +31,9 @@ async function improntePerOrdini(per: "cliente" | "incaricata", ids: string[]) {
 }
 
 /** Segnalazioni di un gruppo di clienti, confrontati con l'incaricata a cui sono legati. */
-async function segnalazioni(elenco: { id: string; email: string; telefono: string; incaricatoId: string }[]) {
+async function segnalazioni(tutti: { id: string; email: string; telefono: string; incaricatoId: string | null }[]) {
+  // I clienti senza consulente non hanno nessuno con cui confrontarli.
+  const elenco = tutti.filter((c): c is typeof c & { incaricatoId: string } => c.incaricatoId !== null);
   const esito = new Map<string, Motivo[]>();
   if (elenco.length === 0) return esito;
   const idIncaricate = [...new Set(elenco.map((c) => c.incaricatoId))];
@@ -77,13 +79,14 @@ export async function elencoClienti() {
       telefono: clienti.telefono,
       incaricatoId: clienti.incaricatoId,
       codice: incaricati.codice,
-      incaricata: sql<string>`${incaricati.nome} || ' ' || ${incaricati.cognome}`,
+      incaricata: sql<string | null>`${incaricati.nome} || ' ' || ${incaricati.cognome}`,
+      profilo: sql<boolean>`${clienti.utenteId} is not null`,
       ordini: sql<number>`(select count(*)::int from app.ordini o where o.cliente_id = ${clienti.id} and o.pagato_il is not null)`,
       totale: sql<string>`(select coalesce(sum(o.totale), 0)::text from app.ordini o where o.cliente_id = ${clienti.id} and o.pagato_il is not null and o.stato not in ('annullato', 'reso'))`,
       creatoIl: clienti.creatoIl,
     })
     .from(clienti)
-    .innerJoin(incaricati, eq(incaricati.id, clienti.incaricatoId))
+    .leftJoin(incaricati, eq(incaricati.id, clienti.incaricatoId))
     .orderBy(desc(clienti.creatoIl))
     .limit(500);
   const motivi = await segnalazioni(righe);
@@ -97,10 +100,10 @@ export async function schedaCliente(id: string) {
     .select({
       cliente: clienti,
       codice: incaricati.codice,
-      incaricata: sql<string>`${incaricati.nome} || ' ' || ${incaricati.cognome}`,
+      incaricata: sql<string | null>`${incaricati.nome} || ' ' || ${incaricati.cognome}`,
     })
     .from(clienti)
-    .innerJoin(incaricati, eq(incaricati.id, clienti.incaricatoId))
+    .leftJoin(incaricati, eq(incaricati.id, clienti.incaricatoId))
     .where(eq(clienti.id, id));
   if (!c) return undefined;
   const [elencoOrdini, legami, motivi] = await Promise.all([
@@ -148,6 +151,6 @@ export async function spostaCliente(dati: { clienteId: string; incaricatoId: str
       prima: { incaricatoId: prima.incaricatoId },
       dopo: { incaricatoId: dati.incaricatoId, motivo: dati.motivo },
     });
-    return "ok" as const;
+    return prima.incaricatoId ? ("ok" as const) : ("assegnato" as const);
   });
 }

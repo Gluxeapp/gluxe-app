@@ -6,8 +6,8 @@ import { dataOra, elencoRichieste } from "@/lib/dati-staff";
 export default function Richieste() {
   return (
     <>
-      <Titolo sottotitolo="Persone che vogliono diventare incaricate e non hanno un codice sponsor. Contattale e comunica loro un codice sponsor.">
-        Richieste sponsor
+      <Titolo sottotitolo="Persone che vogliono diventare incaricate senza un codice sponsor, e clienti registrati che chiedono una consulente. Contattale e comunica il codice (o assegna il cliente dalla sua scheda).">
+        Richieste di contatto
       </Titolo>
       <Suspense fallback={<Caricamento />}>
         <Elenco />
@@ -26,7 +26,10 @@ async function Elenco() {
           <div className="flex flex-wrap items-start justify-between gap-2">
             <div>
               <p className="font-semibold">
-                {r.nome} {r.cognome} <span className="font-normal text-testo-tenue">· {r.citta}</span>
+                {r.nome} {r.cognome} <span className="font-normal text-testo-tenue">· {r.citta}</span>{" "}
+                <span className="rounded-full border border-oro/50 px-2 py-0.5 text-[11px] font-normal text-oro-chiaro">
+                  {r.tipo === "cliente" ? "cliente: chiede una consulente" : "vuole diventare incaricata"}
+                </span>
               </p>
               <p className="mt-1 text-sm">
                 <a href={`tel:${r.telefono.replace(/\s/g, "")}`} className="text-oro-chiaro">
@@ -38,7 +41,14 @@ async function Elenco() {
                 </a>
               </p>
             </div>
-            <p className="text-xs text-testo-tenue">{dataOra(r.creatoIl)}</p>
+            <p className="text-xs text-testo-tenue">
+              {dataOra(r.creatoIl)}
+              {r.clienteId && (
+                <a href={`/staff/clienti/${r.clienteId}`} className="mt-1 block text-oro-chiaro underline">
+                  Scheda del cliente (assegna)
+                </a>
+              )}
+            </p>
           </div>
           {r.stato === "gestita" ? (
             <p className="mt-3 text-sm text-testo-tenue">

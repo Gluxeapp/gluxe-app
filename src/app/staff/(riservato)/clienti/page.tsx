@@ -25,16 +25,20 @@ async function Contenuto({ searchParams }: Pick<PageProps<"/staff/clienti">, "se
   const { filtro } = await searchParams;
   const tutti = await elencoClienti();
   const segnalati = tutti.filter((c) => c.motivi.length > 0);
-  const elenco = filtro === "segnalati" ? segnalati : tutti;
+  const daAssegnare = tutti.filter((c) => !c.codice);
+  const elenco = filtro === "segnalati" ? segnalati : filtro === "da-assegnare" ? daAssegnare : tutti;
 
   return (
     <>
       <nav className="mb-4 flex gap-4 text-sm">
-        <Link href="/staff/clienti" className={filtro !== "segnalati" ? "text-oro-chiaro" : "text-testo-tenue"}>
+        <Link href="/staff/clienti" className={!filtro ? "text-oro-chiaro" : "text-testo-tenue"}>
           Tutti ({tutti.length})
         </Link>
         <Link href="/staff/clienti?filtro=segnalati" className={filtro === "segnalati" ? "text-oro-chiaro" : "text-testo-tenue"}>
           Da controllare ({segnalati.length})
+        </Link>
+        <Link href="/staff/clienti?filtro=da-assegnare" className={filtro === "da-assegnare" ? "text-oro-chiaro" : "text-testo-tenue"}>
+          Da assegnare ({daAssegnare.length})
         </Link>
       </nav>
       <Scheda className="overflow-x-auto p-0">
@@ -58,7 +62,14 @@ async function Contenuto({ searchParams }: Pick<PageProps<"/staff/clienti">, "se
                   <span className="block text-xs text-testo-tenue">{c.email}</span>
                 </td>
                 <td className="p-3">
-                  {c.incaricata} <span className="text-xs text-testo-tenue">{c.codice}</span>
+                  {c.codice ? (
+                    <>
+                      {c.incaricata} <span className="text-xs text-testo-tenue">{c.codice}</span>
+                    </>
+                  ) : (
+                    <span className="text-errore">Da assegnare</span>
+                  )}
+                  {c.profilo && <span className="block text-xs text-testo-tenue">con profilo</span>}
                 </td>
                 <td className="p-3 text-right">{c.ordini}</td>
                 <td className="p-3 text-right whitespace-nowrap">{formattaEuro(c.totale)}</td>

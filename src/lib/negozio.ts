@@ -1,8 +1,9 @@
 import "server-only";
-import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
-import { db } from "@/db";
+import { and, asc, desc, eq, inArray, isNull, sql } from "drizzle-orm";
+import { db, type Esecutore } from "@/db";
 import { clienti, incaricati, ordini, prodotti, righeOrdine, storicoLegamiClienti, storicoStatiOrdine } from "@/db/schema";
 import { ErroreOrdine, type Articolo } from "./calcolo-ordine";
+import { formattaEuro } from "./denaro";
 import { parametriCorrenti, promozioniDiOggi } from "./catalogo";
 import { licenzaScaduta } from "./licenze";
 import { inserisciOrdine, ORE_PER_PAGARE, type Spedizione } from "./ordini";
@@ -86,30 +87,12 @@ export async function creaOrdineOnline(dati: {
 }): Promise<{ id: string; codice: string }> {
   const negozio = await negozioDi(dati.codiceNegozio);
   if (!negozio || !negozio.stato.aperto) throw new ErroreOrdine("Questo negozio non è disponibile.");
-  if (dati.richiesti.length === 0) throw new ErroreOrdine("Scegli almeno un prodotto.");
-
-  const ids = dati.richiesti.map((r) => r.prodottoId);
-  const [trovati, promo] = await Promise.all([
-    db()
-      .select()
-      .from(prodotti)
-      .where(and(inArray(prodotti.id, ids), eq(prodotti.attivo, true), eq(prodotti.tipo, "prodotto"))),
-    promozioniDiOggi(),
-  ]);
-  const articoli: Articolo[] = dati.richiesti.map((r) => {
-    const prodotto = trovati.find((p) => p.id === r.prodottoId);
-    if (!prodotto) throw new ErroreOrdine("Un prodotto scelto non è più disponibile: ricarica la pagina.");
-    const promozione = promo.get(prodotto.id);
-    return { prodotto, quantita: r.quantita, promozione: promozione && { id: promozione.id, prezzoPromo: promozione.prezzoPromo, puntiManuali: promozione.puntiManuali } };
-  });
+  const articoli = await articoliDalCatalogo(dati.richiesti);
 
   const email = dati.cliente.email.trim().toLowerCase();
   const codice = generaToken();
   const id = await db().transaction(async (tx) => {
-    // Un ordine alla volta per la stessa email: due ordini contemporanei non creano due clienti né due legami.
-    await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended(${`cliente:${email}`}, 0))`);
-    const [esistente] = await tx.select().from(clienti).where(eq(clienti.email, email)).for("update");
-    let cliente = esistente;
+    let cliente = await clientePerEmail(tx, email);
     const ora = new Date();
     if (!cliente) {
       [cliente] = await tx
@@ -126,13 +109,7 @@ export async function creaOrdineOnline(dati: {
         .returning();
       await tx.insert(storicoLegamiClienti).values({ clienteId: cliente.id, incaricatoId: negozio.id, motivo: `Primo ordine dal negozio ${negozio.codice}` });
     } else {
-      const [aperti] = await tx
-        .select({ n: sql<number>`count(*)::int` })
-        .from(ordini)
-        .where(and(eq(ordini.clienteId, cliente.id), eq(ordini.stato, "inserito"), sql`${ordini.creatoIl} > now() - make_interval(hours => ${ORE_PER_PAGARE})`));
-      if (aperti.n >= MASSIMO_ORDINI_APERTI) {
-        throw new ErroreOrdine("Hai già diversi ordini in attesa di pagamento: completa o annulla quelli prima di crearne altri.");
-      }
+      await controllaOrdiniAperti(tx, cliente.id);
       // Nome e telefono si aggiornano con l'ultimo ordine; il consenso segue l'ultima scelta (si può revocare).
       [cliente] = await tx
         .update(clienti)
@@ -141,12 +118,149 @@ export async function creaOrdineOnline(dati: {
           cognome: dati.cliente.cognome,
           telefono: dati.cliente.telefono,
           consensoContattiIl: dati.consensoContatti ? (cliente.consensoContattiIl ?? ora) : null,
+          privacyAccettataIl: cliente.privacyAccettataIl ?? ora,
         })
         .where(eq(clienti.id, cliente.id))
         .returning();
+      // Cliente registrato senza consulente: il primo ordine dal link lo lega a questa incaricata (decisione 32).
+      if (!cliente.incaricatoId) cliente = await primoLegame(tx, cliente.id, negozio.id, `Primo ordine dal negozio ${negozio.codice}`);
     }
     return inserisciOrdine(tx, {
-      incaricatoId: cliente.incaricatoId,
+      incaricatoId: cliente.incaricatoId!,
+      tipo: "online",
+      articoli,
+      spedizione: dati.spedizione,
+      riordinoConfermato: false,
+      clienteId: cliente.id,
+      accessoClienteImpronta: impronta(codice),
+    });
+  });
+  return { id, codice };
+}
+
+/** Prodotti scelti, con prezzi e promozioni di oggi letti dal database (mai dal browser). */
+async function articoliDalCatalogo(richiesti: { prodottoId: string; quantita: number }[]): Promise<Articolo[]> {
+  if (richiesti.length === 0) throw new ErroreOrdine("Scegli almeno un prodotto.");
+  const ids = richiesti.map((r) => r.prodottoId);
+  const [trovati, promo] = await Promise.all([
+    db()
+      .select()
+      .from(prodotti)
+      .where(and(inArray(prodotti.id, ids), eq(prodotti.attivo, true), eq(prodotti.tipo, "prodotto"))),
+    promozioniDiOggi(),
+  ]);
+  return richiesti.map((r) => {
+    const prodotto = trovati.find((p) => p.id === r.prodottoId);
+    if (!prodotto) throw new ErroreOrdine("Un prodotto scelto non è più disponibile: ricarica la pagina.");
+    const promozione = promo.get(prodotto.id);
+    return { prodotto, quantita: r.quantita, promozione: promozione && { id: promozione.id, prezzoPromo: promozione.prezzoPromo, puntiManuali: promozione.puntiManuali } };
+  });
+}
+
+/** Cliente con questa email, bloccato fino alla fine della transazione: due ordini contemporanei non creano due clienti né due legami. */
+async function clientePerEmail(tx: Esecutore, email: string) {
+  await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended(${`cliente:${email}`}, 0))`);
+  const [esistente] = await tx.select().from(clienti).where(eq(clienti.email, email)).for("update");
+  return esistente;
+}
+
+async function controllaOrdiniAperti(tx: Esecutore, clienteId: string) {
+  const [aperti] = await tx
+    .select({ n: sql<number>`count(*)::int` })
+    .from(ordini)
+    .where(and(eq(ordini.clienteId, clienteId), eq(ordini.stato, "inserito"), sql`${ordini.creatoIl} > now() - make_interval(hours => ${ORE_PER_PAGARE})`));
+  if (aperti.n >= MASSIMO_ORDINI_APERTI) {
+    throw new ErroreOrdine("Ci sono già diversi ordini in attesa di pagamento per questo cliente: vanno completati o annullati prima di crearne altri.");
+  }
+}
+
+/** Primo legame di un cliente ancora senza consulente (il database lo permette solo se il legame è vuoto). */
+async function primoLegame(tx: Esecutore, clienteId: string, incaricatoId: string, motivo: string) {
+  const [legato] = await tx.update(clienti).set({ incaricatoId }).where(and(eq(clienti.id, clienteId), isNull(clienti.incaricatoId))).returning();
+  if (!legato) throw new ErroreOrdine("Il cliente è stato appena assegnato a una consulente: riprova.");
+  await tx.insert(storicoLegamiClienti).values({ clienteId, incaricatoId, motivo });
+  return legato;
+}
+
+export const MESSAGGIO_CLIENTE_ALTRUI = "Questo cliente è già seguito da un'altra consulente: non puoi preparare ordini per lui.";
+
+/**
+ * "Ordine per un cliente" (decisione 32): lo prepara l'incaricata, il cliente lo paga dal link che riceve.
+ * Cliente nuovo o senza consulente: si lega a lei. Cliente di un'altra incaricata: bloccato.
+ * I dati scritti dall'incaricata non sostituiscono quelli di un cliente che esiste già; l'informativa la accetta il cliente.
+ */
+export async function creaOrdinePerCliente(dati: {
+  incaricatoId: string;
+  codiceIncaricata: string;
+  richiesti: { prodottoId: string; quantita: number }[];
+  cliente: DatiCliente;
+  spedizione: Spedizione;
+}): Promise<{ id: string; codice: string; email: string; nome: string }> {
+  const negozio = await negozioDi(dati.codiceIncaricata);
+  if (!negozio || negozio.id !== dati.incaricatoId || !negozio.stato.aperto) {
+    throw new ErroreOrdine("Il tuo negozio non è attivo: non puoi preparare ordini per i clienti.");
+  }
+  const articoli = await articoliDalCatalogo(dati.richiesti);
+  const email = dati.cliente.email.trim().toLowerCase();
+  const codice = generaToken();
+  const id = await db().transaction(async (tx) => {
+    let cliente = await clientePerEmail(tx, email);
+    if (cliente?.incaricatoId && cliente.incaricatoId !== dati.incaricatoId) throw new ErroreOrdine(MESSAGGIO_CLIENTE_ALTRUI);
+    const motivo = `Ordine preparato dalla consulente ${negozio.codice}`;
+    if (!cliente) {
+      [cliente] = await tx
+        .insert(clienti)
+        .values({ incaricatoId: dati.incaricatoId, email, nome: dati.cliente.nome, cognome: dati.cliente.cognome, telefono: dati.cliente.telefono })
+        .returning();
+      await tx.insert(storicoLegamiClienti).values({ clienteId: cliente.id, incaricatoId: dati.incaricatoId, motivo });
+    } else {
+      await controllaOrdiniAperti(tx, cliente.id);
+      if (!cliente.incaricatoId) cliente = await primoLegame(tx, cliente.id, dati.incaricatoId, motivo);
+    }
+    return inserisciOrdine(tx, {
+      incaricatoId: dati.incaricatoId,
+      tipo: "online",
+      articoli,
+      spedizione: dati.spedizione,
+      riordinoConfermato: false,
+      clienteId: cliente.id,
+      accessoClienteImpronta: impronta(codice),
+    });
+  });
+  return { id, codice, email, nome: dati.cliente.nome };
+}
+
+/**
+ * Ordine dal profilo del cliente (decisione 32). Se non ha ancora una consulente serve il codice di un'incaricata
+ * (che il cliente riceve dalla sede): il primo ordine lo lega a lei. Restituisce anche il codice del link dell'ordine.
+ */
+export async function creaOrdineDaProfilo(dati: {
+  clienteId: string;
+  richiesti: { prodottoId: string; quantita: number }[];
+  spedizione: Spedizione;
+  codiceConsulente?: string;
+}): Promise<{ id: string; codice: string }> {
+  const articoli = await articoliDalCatalogo(dati.richiesti);
+  const [attuale] = await db().select({ email: clienti.email, incaricatoId: clienti.incaricatoId }).from(clienti).where(eq(clienti.id, dati.clienteId));
+  if (!attuale) throw new ErroreOrdine("Profilo non trovato.");
+  let consulente: { id: string; codice: string } | undefined;
+  if (!attuale.incaricatoId) {
+    const negozio = dati.codiceConsulente ? await negozioDi(dati.codiceConsulente) : undefined;
+    if (!negozio || !negozio.stato.aperto) {
+      throw new ErroreOrdine("Per il primo acquisto serve il codice della tua consulente: controlla il codice o chiedilo all'azienda.");
+    }
+    consulente = negozio;
+  }
+  const codice = generaToken();
+  const id = await db().transaction(async (tx) => {
+    let cliente = await clientePerEmail(tx, attuale.email);
+    await controllaOrdiniAperti(tx, cliente.id);
+    if (!cliente.incaricatoId) {
+      if (!consulente) throw new ErroreOrdine("Per il primo acquisto serve il codice della tua consulente.");
+      cliente = await primoLegame(tx, cliente.id, consulente.id, `Primo ordine dal profilo, codice ${consulente.codice}`);
+    }
+    return inserisciOrdine(tx, {
+      incaricatoId: cliente.incaricatoId!,
       tipo: "online",
       articoli,
       spedizione: dati.spedizione,
@@ -165,7 +279,10 @@ export async function ordineDelCliente(id: string, codice: string) {
   if (!ordine?.accessoClienteImpronta || !improntaUguale(ordine.accessoClienteImpronta, impronta(codice))) return undefined;
   const [righe, [cliente], [incaricata], storico] = await Promise.all([
     db().select().from(righeOrdine).where(eq(righeOrdine.ordineId, id)).orderBy(asc(righeOrdine.id)),
-    db().select({ email: clienti.email, nome: clienti.nome }).from(clienti).where(eq(clienti.id, ordine.clienteId!)),
+    db()
+      .select({ id: clienti.id, email: clienti.email, nome: clienti.nome, privacyAccettataIl: clienti.privacyAccettataIl, consensoContattiIl: clienti.consensoContattiIl })
+      .from(clienti)
+      .where(eq(clienti.id, ordine.clienteId!)),
     db().select({ nome: incaricati.nome, cognome: incaricati.cognome, codice: incaricati.codice }).from(incaricati).where(eq(incaricati.id, ordine.incaricatoId)),
     db()
       .select({ stato: storicoStatiOrdine.stato, creatoIl: storicoStatiOrdine.creatoIl })
@@ -257,3 +374,21 @@ export async function ordineDelNegozio(id: string, incaricatoId: string) {
   return { ordine: riga, righe, storico };
 }
 
+
+/** Vetrina al pubblico già pronta da mostrare: prezzi pieni o in promozione e spedizione, come testi. */
+export async function vetrinaProdotti() {
+  const catalogo = await catalogoNegozio();
+  return {
+    spedizione: formattaEuro(catalogo.speseSpedizione),
+    prodotti: catalogo.prodotti.map((p) => ({
+      id: p.id,
+      nome: p.nome,
+      dettaglio: [p.linea, p.formato].filter(Boolean).join(" · "),
+      descrizione: p.descrizione,
+      immagineId: p.immagineId,
+      prezzo: formattaEuro(p.prezzo),
+      barrato: p.promozione && p.listino > p.prezzo ? formattaEuro(p.listino) : undefined,
+      promozione: p.promozione ?? undefined,
+    })),
+  };
+}
