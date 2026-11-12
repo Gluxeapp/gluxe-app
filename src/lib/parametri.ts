@@ -65,6 +65,13 @@ export const schemaParametri = z.object({
   /** Bollo sulle ricevute e fatture senza IVA (decisione 28): importo, tolto all'incaricata, oltre la soglia. */
   bolloImporto: centesimi.default(200n),
   bolloSoglia: centesimi.default(7747n),
+  // Licenza annuale dell'app (decisione 31). Il prezzo è quello del prodotto "Licenza annuale" nel catalogo.
+  licenzaMesi: z.number().int().min(1).max(60).default(12),
+  /** Da quanti giorni prima della scadenza si può rinnovare. */
+  licenzaAnticipoGiorni: z.number().int().min(0).max(120).default(30),
+  /** Giorni prima della scadenza in cui arrivano i due avvisi (email e app). */
+  licenzaPrimoAvvisoGiorni: z.number().int().min(1).max(120).default(30),
+  licenzaSecondoAvvisoGiorni: z.number().int().min(1).max(120).default(7),
   // Controlli prima della chiusura
   /** Compensi del mese (bonus auto escluso) al massimo questa percentuale dei punti aziendali. */
   limiteCompensiSuPunti: puntiBase,
@@ -121,6 +128,10 @@ export const PARAMETRI_INIZIALI: Parametri = {
   inpsSogliaEsenzione: 0n,
   bolloImporto: 200n,
   bolloSoglia: 7747n,
+  licenzaMesi: 12,
+  licenzaAnticipoGiorni: 30,
+  licenzaPrimoAvvisoGiorni: 30,
+  licenzaSecondoAvvisoGiorni: 7,
   limiteCompensiSuPunti: 7000n,
 };
 

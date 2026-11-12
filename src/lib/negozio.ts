@@ -1,9 +1,10 @@
 import "server-only";
-import { and, asc, desc, eq, inArray, ne, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { clienti, incaricati, ordini, prodotti, righeOrdine, storicoLegamiClienti, storicoStatiOrdine } from "@/db/schema";
 import { ErroreOrdine, type Articolo } from "./calcolo-ordine";
 import { parametriCorrenti, promozioniDiOggi } from "./catalogo";
+import { licenzaScaduta } from "./licenze";
 import { inserisciOrdine, ORE_PER_PAGARE, type Spedizione } from "./ordini";
 import { prezziProdotto, prezziPromozione } from "./prezzi";
 import { generaToken, impronta, improntaUguale } from "./sicurezza";
@@ -19,9 +20,11 @@ const MASSIMO_ORDINI_APERTI = 5;
 export type StatoNegozio = { aperto: true } | { aperto: false; motivo: string };
 
 /** Il negozio è chiuso se l'incaricata è sospesa, cessata, tornata cliente o non ha pagato lo start kit. */
-export function statoNegozio(i: { stato: string; startKitPagato: boolean }): StatoNegozio {
+/** Chiuso anche con la licenza scaduta (decisione 31). */
+export function statoNegozio(i: { stato: string; startKitPagato: boolean; licenzaScaduta?: boolean }): StatoNegozio {
   if (i.stato !== "attivo") return { aperto: false, motivo: "account non attivo" };
   if (!i.startKitPagato) return { aperto: false, motivo: "start kit non ancora pagato" };
+  if (i.licenzaScaduta) return { aperto: false, motivo: "licenza scaduta" };
   return { aperto: true };
 }
 
@@ -33,7 +36,8 @@ export async function negozioDi(codice: string) {
     .from(incaricati)
     .where(eq(incaricati.codice, codice));
   if (!i) return undefined;
-  return { id: i.id, codice: i.codice, nome: `${i.nome} ${i.cognome.slice(0, 1)}.`, stato: statoNegozio(i) };
+  const scaduta = i.stato === "attivo" && i.startKitPagato ? await licenzaScaduta(i.id) : false;
+  return { id: i.id, codice: i.codice, nome: `${i.nome} ${i.cognome.slice(0, 1)}.`, stato: statoNegozio({ ...i, licenzaScaduta: scaduta }) };
 }
 
 /** Catalogo al pubblico: prezzi di listino o in promozione, IVA inclusa. Niente punti né provvigioni. */
@@ -43,7 +47,7 @@ export async function catalogoNegozio() {
     db()
       .select()
       .from(prodotti)
-      .where(and(eq(prodotti.attivo, true), ne(prodotti.tipo, "start_kit")))
+      .where(and(eq(prodotti.attivo, true), eq(prodotti.tipo, "prodotto")))
       .orderBy(asc(prodotti.ordine), asc(prodotti.nome)),
     promozioniDiOggi(),
   ]);

@@ -77,7 +77,7 @@ export async function accediIncaricato(_: EsitoModulo, formData: FormData): Prom
 
   const errore = await controllaPassword(utente, password);
   if (errore) return { messaggio: errore.replace("Credenziali", "Codice incaricato o password"), valori };
-  if (utente.stato === "cessato" || utente.stato === "cliente") {
+  if (utente.stato === "cessato") {
     return { messaggio: "Il tuo account incaricato non è più attivo. Contatta l'azienda.", valori };
   }
 

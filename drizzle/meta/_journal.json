@@ -64,6 +64,13 @@
       "when": 1794239763111,
       "tag": "0008_fase7_negozio",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1794477231328,
+      "tag": "0009_licenza_annuale",
+      "breakpoints": true
     }
   ]
 }

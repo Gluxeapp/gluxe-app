@@ -84,6 +84,8 @@ export const incaricati = app.table(
     /** Figure speciali (Giovanna Di Lillo): esclusa dal pool e dal bonus auto. */
     esclusaPool: boolean("esclusa_pool").notNull().default(false),
     esclusaBonusAuto: boolean("esclusa_bonus_auto").notNull().default(false),
+    /** Esente dalla licenza annuale (solo Giovanna Di Lillo, decisione 31): la licenza non scade. */
+    licenzaEsente: boolean("licenza_esente").notNull().default(false),
     privacyAccettataIl: timestamp("privacy_accettata_il", { withTimezone: true }).notNull(),
     creatoIl: creatoIl(),
   },
@@ -195,7 +197,7 @@ export const parametriVersioni = app.table(
   (t) => [index("parametri_versioni_dal").on(t.validoDal)],
 );
 
-export const tipoProdotto = app.enum("tipo_prodotto", ["prodotto", "start_kit"]);
+export const tipoProdotto = app.enum("tipo_prodotto", ["prodotto", "start_kit", "licenza"]);
 
 /** Foto dei prodotti, salvate nel database (pochi prodotti, immagini piccole): niente servizi esterni. */
 export const immagini = app.table("immagini", {
@@ -251,7 +253,7 @@ export const promozioni = app.table(
 
 // ── Fase 3: ordini e pagamenti Stripe ────────────────────────────────────────
 
-export const tipoOrdine = app.enum("tipo_ordine", ["start_kit", "personale", "online"]);
+export const tipoOrdine = app.enum("tipo_ordine", ["start_kit", "personale", "online", "licenza"]);
 export const statoOrdine = app.enum("stato_ordine", [
   "inserito",
   "pagato",
@@ -262,7 +264,7 @@ export const statoOrdine = app.enum("stato_ordine", [
   "reso",
 ]);
 /** Come è stato calcolato il prezzo di una riga: serve al motore provvigioni (Fase 4). */
-export const tipoPrezzoRiga = app.enum("tipo_prezzo_riga", ["listino_scontato", "promozione", "start_kit", "listino_pieno"]);
+export const tipoPrezzoRiga = app.enum("tipo_prezzo_riga", ["listino_scontato", "promozione", "start_kit", "listino_pieno", "licenza"]);
 
 /** Numeri d'ordine progressivi e leggibili (n. 1, 2, 3…), mai riutilizzati. */
 export const sequenzaNumeroOrdine = app.sequence("sequenza_numero_ordine", { startWith: 1 });
@@ -708,3 +710,45 @@ export const datiAzienda = app.table("dati_azienda", {
   autorizzazioneBollo: text("autorizzazione_bollo").notNull().default(""),
   modificatoIl: timestamp("modificato_il", { withTimezone: true }).notNull().defaultNow(),
 });
+
+// ── Licenza annuale dell'app (decisione 31) ─────────────────────────────────
+
+/**
+ * Periodi di licenza: uno per lo start kit pagato e uno per ogni rinnovo, solo in aggiunta.
+ * La licenza è valida fino all'ultima data "valida_fino" fra i periodi pagati fino a quel giorno.
+ */
+export const licenze = app.table(
+  "licenze",
+  {
+    id: bigserial("id", { mode: "bigint" }).primaryKey(),
+    incaricatoId: uuid("incaricato_id")
+      .notNull()
+      .references(() => incaricati.id),
+    /** Ordine pagato (start kit o rinnovo): un ordine vale un solo periodo. */
+    ordineId: uuid("ordine_id")
+      .notNull()
+      .unique()
+      .references(() => ordini.id),
+    /** Giorno del pagamento (ora italiana). */
+    pagatoIl: date("pagato_il").notNull(),
+    dal: date("dal").notNull(),
+    validaFino: date("valida_fino").notNull(),
+    creatoIl: creatoIl(),
+  },
+  (t) => [index("licenze_incaricato").on(t.incaricatoId, t.pagatoIl)],
+);
+
+/** Avvisi di scadenza già mandati: lo stesso avviso non parte due volte. */
+export const avvisiLicenza = app.table(
+  "avvisi_licenza",
+  {
+    id: bigserial("id", { mode: "bigint" }).primaryKey(),
+    incaricatoId: uuid("incaricato_id")
+      .notNull()
+      .references(() => incaricati.id),
+    validaFino: date("valida_fino").notNull(),
+    giorni: integer("giorni").notNull(),
+    creatoIl: creatoIl(),
+  },
+  (t) => [uniqueIndex("avvisi_licenza_unico").on(t.incaricatoId, t.validaFino, t.giorni)],
+);

@@ -26,7 +26,7 @@ async function Contenuto() {
   const [promozioni, catalogo, parametri, { ruolo }] = await Promise.all([elencoPromozioni(), catalogoStaff(), parametriCorrenti(), richiediStaff()]);
   const amministrazione = ruolo === "amministrazione";
   const scelte = catalogo
-    .filter((c) => c.prodotto.tipo !== "start_kit" && c.prodotto.attivo)
+    .filter((c) => c.prodotto.tipo === "prodotto" && c.prodotto.attivo)
     .map((c) => ({ id: c.prodotto.id, nome: `${c.prodotto.nome} (listino ${formattaEuro(c.prodotto.prezzoListino)})` }));
 
   return (

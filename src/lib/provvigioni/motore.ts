@@ -55,7 +55,8 @@ export type OrdineMese = {
   imponibile: Centesimi;
 };
 
-export type IncaricataRete = { id: string; sponsorId: string | null; sospesa?: boolean };
+/** sospesa: inattiva (solo provvigione online). ferma: mese fermo per licenza scaduta, non matura nulla (sezione 3a). */
+export type IncaricataRete = { id: string; sponsorId: string | null; sospesa?: boolean; ferma?: boolean };
 
 export type QuotaSpeciale = {
   incaricataId: string;
@@ -245,7 +246,8 @@ function calcola(d: DatiMese, fisso?: Map<string, StatoFisso>): EsitoMese {
       x.ap += o.punti - o.puntiPromo;
     }
   }
-  const sospese = new Set(incaricate.filter((i) => i.sospesa).map((i) => i.id));
+  // Le incaricate ferme per licenza scaduta (sezione 3a) sono inattive e non maturano nulla.
+  const sospese = new Set(incaricate.filter((i) => i.sospesa || i.ferma).map((i) => i.id));
   for (const x of s.values()) {
     x.pp = x.ap + x.pr + x.on + x.kit;
     x.ppq = x.on + minimo(x.ap + x.pr, p.tettoAcquistiQualifica) + x.kit;
@@ -318,8 +320,10 @@ function calcola(d: DatiMese, fisso?: Map<string, StatoFisso>): EsitoMese {
   const titoloDi = (id: string) => p.titoli.find((t) => t.nome === s.get(id)!.titolo);
 
   const voci: Voce[] = [];
+  const ferme = new Set(incaricate.filter((i) => i.ferma).map((i) => i.id));
   const aggiungi = (beneficiariaId: string, tipo: TipoVoce, base: Centesimi, perc: PuntiBase | null, importo: Centesimi, origine: string | null = null) => {
-    if (importo !== 0n) voci.push({ beneficiariaId, tipo, base, percentuale: perc, importo, origine });
+    // Mese fermo per licenza scaduta: nessuna voce, nemmeno la provvigione online (la quota resta all'azienda).
+    if (importo !== 0n && !ferme.has(beneficiariaId)) voci.push({ beneficiariaId, tipo, base, percentuale: perc, importo, origine });
   };
 
   // 6. Provvigioni personali e qualifica.

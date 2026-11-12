@@ -55,8 +55,9 @@ test("Fase 6 dall'inizio alla fine sul database di prova", async () => {
   expect(doc.tipo).toBe("fattura_ordinaria");
   expect(BigInt(doc.totale)).toBe(atteso.totale);
 
-  // Bruna sotto il minimo: richiesta rifiutata dall'app.
-  await expect(creaRichiesta(bruna.id, admin.id)).rejects.toThrow(/minimo/);
+  // Sotto il minimo: richiesta rifiutata dall'app (Bruna, se i dati di prova la lasciano sotto i 50 €).
+  if (saldi.bruna < P.pagamentoMinimo) await expect(creaRichiesta(bruna.id, admin.id)).rejects.toThrow(/minimo/);
+  else console.log("Bruna supera il minimo con questi dati di prova: controllo del minimo saltato (coperto dal test T9).");
   // Carla: rifiutata dalla contabilità, l'importo torna nel saldo; poi richiesta di nuovo e approvata (ricevuta con bollo).
   const rc = await creaRichiesta(carla.id, admin.id);
   await rifiutaRichiesta(rc.id, "Prova di rifiuto", admin.id);

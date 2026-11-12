@@ -6,7 +6,7 @@ import { z } from "zod";
 import { db } from "@/db";
 import { datiAzienda } from "@/db/schema";
 import { erroriPerCampo, valoriDa, type EsitoModulo } from "@/components/ui";
-import { richiediStaff, verificaIncaricataOperativa } from "@/lib/accesso";
+import { richiediStaff, verificaAccessoProvvigioni } from "@/lib/accesso";
 import { formattaEuro } from "@/lib/denaro";
 import { registra } from "@/lib/registro";
 import { chiudiMese, ErroreChiusura } from "@/lib/provvigioni/chiusura";
@@ -66,7 +66,7 @@ export async function chiudiIlMese(_: EsitoModulo, formData: FormData): Promise<
 }
 
 export async function richiediPagamento(): Promise<EsitoModulo> {
-  const { sessione, incaricato } = await verificaIncaricataOperativa();
+  const { sessione, incaricato } = await verificaAccessoProvvigioni();
   const esito = await esegui(async () => {
     const r = await creaRichiesta(incaricato.id, sessione.utenteId);
     return `Richiesta inviata: ${formattaEuro(r.lordo)} lordi. La contabilità la controlla e ti avvisa qui.`;

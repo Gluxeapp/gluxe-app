@@ -1,5 +1,5 @@
 import "server-only";
-import { and, asc, desc, eq, lte, gte, ne, sql } from "drizzle-orm";
+import { and, asc, desc, eq, lte, gte, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { parametriVersioni, prodotti, promozioni } from "@/db/schema";
 import { richiediIncaricataOperativa, richiediStaff } from "./accesso";
@@ -49,7 +49,7 @@ export async function catalogoIncaricata() {
     db()
       .select()
       .from(prodotti)
-      .where(and(eq(prodotti.attivo, true), ne(prodotti.tipo, "start_kit")))
+      .where(and(eq(prodotti.attivo, true), eq(prodotti.tipo, "prodotto")))
       .orderBy(asc(prodotti.ordine), asc(prodotti.nome)),
     promozioniDiOggi(),
   ]);
@@ -78,8 +78,8 @@ export async function catalogoStaff() {
   ]);
   return righe.map((prodotto) => ({
     prodotto,
-    prezzi: prodotto.tipo === "start_kit" ? undefined : prezziProdotto(prodotto.prezzoListino, p, puntiManualiDi(prodotto)),
-    automatici: prodotto.tipo === "start_kit" ? undefined : prezziProdotto(prodotto.prezzoListino, p),
+    prezzi: prodotto.tipo === "prodotto" ? prezziProdotto(prodotto.prezzoListino, p, puntiManualiDi(prodotto)) : undefined,
+    automatici: prodotto.tipo === "prodotto" ? prezziProdotto(prodotto.prezzoListino, p) : undefined,
     kit: prodotto.tipo === "start_kit" ? prezziStartKit(prodotto.prezzoListino, p) : undefined,
     promozione: promo.get(prodotto.id),
   }));

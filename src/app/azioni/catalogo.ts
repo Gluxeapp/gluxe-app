@@ -60,7 +60,7 @@ export async function salvaPuntiProdotto(_: EsitoModulo, formData: FormData): Pr
   const esito = await db().transaction(async (tx) => {
     const [prima] = await tx.select().from(prodotti).where(eq(prodotti.id, id)).for("update");
     if (!prima) return "assente";
-    if (prima.tipo === "start_kit") return "kit";
+    if (prima.tipo !== "prodotto") return "kit";
     await tx.update(prodotti).set({ puntiPersonaleManuali, puntiOnlineManuali }).where(eq(prodotti.id, id));
     await registra(tx, {
       utenteId: staff.utenteId,
@@ -72,7 +72,7 @@ export async function salvaPuntiProdotto(_: EsitoModulo, formData: FormData): Pr
     });
     return "ok";
   });
-  if (esito === "kit") return { messaggio: "I punti dello start kit sono un parametro del piano.", valori };
+  if (esito === "kit") return { messaggio: "Start kit e licenza non hanno punti modificabili: quelli dello start kit sono un parametro del piano.", valori };
   if (esito === "assente") return { messaggio: "Prodotto non trovato.", valori };
   revalidatePath("/staff/catalogo");
   revalidatePath(`/staff/catalogo/${id}`);
@@ -225,7 +225,7 @@ export async function creaPromozione(_: EsitoModulo, formData: FormData): Promis
     return { messaggio: "Controlla i campi evidenziati.", errori: erroriPerCampo(letto.error.issues), valori };
   }
   const [prodotto] = await db().select().from(prodotti).where(eq(prodotti.id, letto.data.prodottoId));
-  if (!prodotto || prodotto.tipo === "start_kit") return { errori: { prodottoId: "Prodotto non valido" }, valori };
+  if (!prodotto || prodotto.tipo !== "prodotto") return { errori: { prodottoId: "Prodotto non valido" }, valori };
   if (letto.data.prezzoPromo >= prodotto.prezzoListino) {
     return { errori: { prezzoPromo: "Il prezzo in promozione deve essere più basso del listino" }, valori };
   }

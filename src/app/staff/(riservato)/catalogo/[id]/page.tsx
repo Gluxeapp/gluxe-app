@@ -30,7 +30,7 @@ async function Contenuto({ params }: Pick<PageProps<"/staff/catalogo/[id]">, "pa
   if (!/^[0-9a-f-]{36}$/.test(id)) notFound();
   const [[p], parametri] = await Promise.all([db().select().from(prodotti).where(eq(prodotti.id, id)).limit(1), parametriCorrenti()]);
   if (!p) notFound();
-  const automatici = p.tipo === "start_kit" ? undefined : prezziProdotto(p.prezzoListino, parametri);
+  const automatici = p.tipo === "prodotto" ? prezziProdotto(p.prezzoListino, parametri) : undefined;
 
   const valori = {
     codice: p.codice,
@@ -49,12 +49,12 @@ async function Contenuto({ params }: Pick<PageProps<"/staff/catalogo/[id]">, "pa
           ← Catalogo
         </Link>
       </p>
-      <Titolo sottotitolo={`${p.codice} · ${p.attivo ? "attivo" : "disattivato"}${p.tipo === "start_kit" ? " · start kit" : ""}`}>
+      <Titolo sottotitolo={`${p.codice} · ${p.attivo ? "attivo" : "disattivato"}${p.tipo === "start_kit" ? " · start kit" : p.tipo === "licenza" ? " · rinnovo annuale della licenza" : ""}`}>
         {p.nome}
       </Titolo>
       <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
         {amministrazione ? (
-          <ModuloProdotto id={p.id} valori={valori} startKit={p.tipo === "start_kit"} />
+          <ModuloProdotto id={p.id} valori={valori} startKit={p.tipo === "start_kit"} licenza={p.tipo === "licenza"} />
         ) : (
           <Scheda>
             <p className="text-sm text-testo-tenue">Prezzo al pubblico</p>
@@ -76,7 +76,9 @@ async function Contenuto({ params }: Pick<PageProps<"/staff/catalogo/[id]">, "pa
               />
             ) : (
               <p className="mt-2 text-sm text-testo-tenue">
-                Lo start kit vale {formatta(parametri.puntiStartKit)} punti fissi: si cambiano dai parametri del piano.
+                {p.tipo === "licenza"
+                  ? "Il rinnovo della licenza non dà punti a nessuno: l'importo va tutto all'azienda (decisione 31)."
+                  : `Lo start kit vale ${formatta(parametri.puntiStartKit)} punti fissi: si cambiano dai parametri del piano.`}
               </p>
             )}
           </Scheda>

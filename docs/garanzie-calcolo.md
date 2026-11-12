@@ -73,6 +73,21 @@ Rischi: lo stesso cliente creato due volte da due ordini contemporanei (e quindi
 
 Verifiche: `npm run prova:garanzie` (tentativi vietati sui clienti e sugli ordini online) e `npm run prova:fase7` (database di prova: ordini dal negozio, legame, consenso, ordini contemporanei, limite, clienti fittizi, spostamento, apertura del pagamento Stripe di prova).
 
+## 5. La licenza annuale (decisione 31)
+
+Rischi: un rinnovo che dà punti o entra nell'incasso, due periodi per lo stesso pagamento, una scadenza allungata a mano, una decadenza che cambia un mese già chiuso o sposta la squadra senza traccia.
+
+| Garanzia | Come è ottenuta (migrazione 0009) |
+| --- | --- |
+| Il rinnovo non dà punti a nessuno | Controllo nel database: un ordine "licenza" ha punti, provvigione e spedizione a zero. Il calcolo del mese non legge gli ordini di licenza (né punti né incasso aziendale) |
+| Un pagamento vale un solo periodo | Chiave univoca dell'ordine nei periodi di licenza; il webhook di Stripe registra il periodo nella stessa transazione del pagamento, una volta sola anche se l'avviso arriva due volte (prova) |
+| La scadenza non si cambia a mano | Periodi di licenza solo in aggiunta; due rinnovi della stessa incaricata si mettono in fila (blocco sull'incaricata), perché la nuova scadenza dipende dalla precedente |
+| Mese fermo stabile | Il mese è fermo se la licenza è scaduta all'ultimo giorno del mese contando solo i pagamenti fatti entro quel giorno: un rinnovo successivo non cambia il passato. Alla chiusura il dato entra nella fotografia del mese |
+| Decadenza ordinata e tracciata | Avviene solo con la chiusura del mese (dopo la fotografia), con i cambi di sponsor e di cliente dichiarati come interventi tracciati: storico degli sponsor, storico dei legami dei clienti e registro modifiche |
+| Avvisi una volta sola | Tabella degli avvisi mandati con chiave incaricata + scadenza + giorni |
+
+Verifiche: `npm run prova:garanzie` (rinnovo con punti o spedizione, doppio periodo, periodo modificato) e `npm run prova:licenza` (database di prova: scadenza, negozio chiuso, mese fermo, rinnovo dopo la scadenza, punti e incasso invariati, decadenza con passaggio di dirette e clienti alla sponsor).
+
 ## Decisioni
 
 - **Pagamento confermato da Stripe dopo la chiusura del suo mese** (caso raro: Stripe ritenta l'avviso per qualche giorno se il sito non risponde): conta nel **primo mese ancora aperto**, come le rettifiche (fondatore, 29/10/2026).

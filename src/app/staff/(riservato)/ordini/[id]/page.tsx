@@ -42,7 +42,7 @@ async function Contenuto({ params }: Pick<PageProps<"/staff/ordini/[id]">, "para
       <Titolo
         sottotitolo={
           <>
-            {{ start_kit: "Start kit", personale: "Acquisto personale", online: "Negozio online" }[ordine.tipo]} · creato il{" "}
+            {{ start_kit: "Start kit", personale: "Acquisto personale", online: "Negozio online", licenza: "Rinnovo licenza (nessuna spedizione)" }[ordine.tipo]} · creato il{" "}
             {dataOra(ordine.creatoIl)}
             {ordine.pagatoIl && ` · pagato il ${dataOra(ordine.pagatoIl)}`}
           </>
@@ -107,7 +107,11 @@ async function Contenuto({ params }: Pick<PageProps<"/staff/ordini/[id]">, "para
         <div className="space-y-6">
           <Scheda>
             <h2 className="font-titoli text-xl text-oro-chiaro">Stato</h2>
-            <ModuloStato id={ordine.id} stato={ordine.stato} />
+            {ordine.tipo === "licenza" ? (
+              <p className="mt-2 text-sm text-testo-tenue">Rinnovo della licenza: niente da preparare né spedire.</p>
+            ) : (
+              <ModuloStato id={ordine.id} stato={ordine.stato} />
+            )}
           </Scheda>
 
           {ordine.clienteId && (

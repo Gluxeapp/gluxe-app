@@ -61,6 +61,7 @@ async function Elenco({ searchParams }: Pick<PageProps<"/staff/ordini">, "search
                   </Link>
                   {o.tipo === "start_kit" && <span className="text-testo-tenue"> · kit</span>}
                   {o.tipo === "online" && <span className="text-testo-tenue"> · negozio</span>}
+                  {o.tipo === "licenza" && <span className="text-testo-tenue"> · licenza</span>}
                 </td>
                 <td className="px-4 py-3">
                   {o.nome} {o.cognome} <span className="text-testo-tenue">{o.codice}</span>
