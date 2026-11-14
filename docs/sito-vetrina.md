@@ -55,6 +55,7 @@ Il fondatore ha indicato come riferimento il sito di Mary Kay (`marykay.com`, vi
 - **Caratteri:** titoli con grazie eleganti, come il logo (Mary Kay usa caratteri senza grazie); testi lunghi in un carattere semplice e leggibile. Nella bozza: Cormorant Garamond per i titoli e Montserrat per i testi (gli stessi dell'app); **nomi dei prodotti in Playfair Display**, perché in Cormorant i numeri (es. "10in1") non si leggono bene (fondatore, 10/11/2026).
 - **Bozza grafica della home:** pagina privata https://claude.ai/artifact/S8DVkKc7MW1FftY64KfMu6 (10/11/2026).
 - **Bozza della scheda prodotto** (esempio: Maschera Botox): pagina privata https://claude.ai/artifact/BTSM5zNzkzzhME9x7cFnzt (11/11/2026).
+- **Bozza della pagina Carriera:** pagina privata https://claude.ai/artifact/XJsLkg68ALi7K1nVUC6pAm (14/11/2026).
 - **Promozioni:** niente titoloni di promozioni sull'apertura; la home parla del marchio e dei risultati sui capelli.
 - **Carriera:** nessuna cifra di guadagno nelle fasce "Diventa incaricata" (legge 173/2005).
 - **Telefono prima di tutto:** la maggior parte delle visite arriverà dai social sul telefono; ogni sezione si progetta prima per il telefono (apertura con foto sopra e titolo sotto, prodotti scorrevoli di lato).
@@ -99,6 +100,19 @@ Dall'alto in basso:
 **Niente recensioni inventate.** La sezione delle recensioni si aggiunge solo quando ci saranno recensioni vere di clienti, raccolte con il loro consenso.
 
 ### Carriera in G LUXE
+**Bozza del 14/11/2026** (pagina privata sopra): stile più scuro e coinvolgente della home, con un piccolo gesto interattivo per sezione.
+1. **Apertura** nera con le onde dorate: "Nata per brillare. Anche nel lavoro.", pulsanti "Voglio saperne di più" e "Come funziona", tre cifre vere (sconto 40%, un negozio online tuo, 15 minuti di consulenza tricologica per le clienti).
+2. **"Fa per te?"**: cinque frasi da toccare; una barra si riempie e invita a "Parliamone". Niente punteggi né promesse.
+3. **Cosa ricevi**: sconto 40% dal secondo ordine, negozio online, provvigioni su ogni vendita, test del capello con link e QR, tricologa per le clienti (che restano dell'incaricata), pagamento il 20.
+4. **Come funziona** in quattro passi: codice sponsor, start kit, sconto e negozio dal secondo ordine, crescita.
+5. **L'app in tasca**: un telefono disegnato con quattro schermate da toccare (Negozio, Carriera, Provvigioni, Il mio link), con dati di esempio e **senza importi**.
+6. **Il percorso**: le cinque qualifiche del piano (New Star, Partner, Expert, Director, Leader) come gradini da toccare, con una frase per ciascuna, **senza percentuali né cifre**.
+7. **Trasparenza**: quanto costa iniziare (start kit 59,90 €, licenza 29,90 € all'anno dal secondo anno, spedizione 6,90 €) e spazio per **storie vere** delle incaricate, con foto e consenso scritto (nessuna storia inventata).
+8. **Domande frequenti**: esperienza, tempo (soglia di attività 33 punti), partita IVA [da confermare con il commercialista], pagamenti, magazzino [da confermare], codice sponsor.
+9. **Finale "Parliamone"**: modulo "Voglio saperne di più" (la richiesta di contatto già esistente nell'app) e "Hai già un codice sponsor? Registrati". Sul telefono una barra fissa in basso porta sempre al modulo.
+
+Frase legale sempre presente: "I risultati dipendono dall'impegno di ciascuna. G LUXE non promette guadagni. Le incaricate G LUXE sono incaricate alle vendite a domicilio (legge 173/2005)."
+
 - Perché diventare incaricata, come funziona in 4 passi, storie vere, domande frequenti.
 - Modulo "Voglio saperne di più": usa la **richiesta di contatto già esistente nell'app** (la sede la riceve come oggi, area sede + email).
 - Regola legale: nella vendita diretta (legge 173/2005) non si promettono guadagni. Nessuna cifra del tipo "guadagni X € al mese"; le regole di carriera, se citate, sono solo quelle di `docs/piano-compensi.md`.
