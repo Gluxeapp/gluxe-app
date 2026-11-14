@@ -21,7 +21,7 @@ Tutto ciò che è tra **[parentesi quadre]** va verificato o completato. In part
 ## 2. Come si presenta
 
 - Una domanda alla volta, con: **tema** (piccola etichetta, es. "Umidità"), **domanda**, **una riga che spiega perché conta**, le risposte.
-- Accanto (sotto, sul telefono) una **foto della chioma che accompagna le domande**: la didascalia segue il tema della domanda ("In ascolto · Umidità"). **Non** anticipa il profilo, perché il risultato si scopre solo via email. Foto dal servizio fotografico G LUXE.
+- Accanto (sotto, sul telefono) una **foto fissa**: una ragazza che tiene una ciocca e si guarda le punte, con aria dubbiosa. **Nessuna scritta sulla foto** (fondatore, 14/11/2026).
 - Barra di avanzamento "Domanda 3 di 8" e pulsante "Indietro".
 - Il test si fa senza registrazione; l'email serve solo alla fine, per ricevere il risultato.
 
@@ -270,7 +270,7 @@ Il fondatore ha indicato come riferimento `kisecretprestige.netlify.app` (visto 
 | --- | --- | --- |
 | R1 | Domande sul comportamento osservabile del capello | Domande 2, 3, 4 (asciugatura, umidità, tatto) e 5 (storico dell'ultimo anno) |
 | R2 | Tema e riga "perché conta" sotto ogni domanda | Sezione 3 |
-| R3 | Foto che cambia stato mentre si risponde | Sezione 2 (rev. 3: segue il tema della domanda, senza anticipare il profilo) |
+| R3 | Foto che cambia stato mentre si risponde | **Non adottata** (14/11/2026): foto fissa senza scritte (sezione 2) |
 | R4 | "Cosa significa" e protocollo di 7 giorni | Sezioni 4 e 6 |
 | R5 | Link personale dell'incaricata con WhatsApp e codice QR | Sezione 9 |
 | R6 | Risultato senza registrazione | **Non adottata** (rev. 3): il risultato arriva solo via email (T6) |
