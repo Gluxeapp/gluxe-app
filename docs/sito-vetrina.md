@@ -53,6 +53,8 @@ Il fondatore ha indicato come riferimento il sito di Mary Kay (`marykay.com`, vi
 **Cosa si cambia rispetto a Mary Kay**
 - **Colori:** al posto del fucsia, nero e oro del logo G LUXE (`assets/brand/logo-g-luxe.png`). Il nero si usa per fasce intere (carriera, piè di pagina) per dare un tono più lussuoso; il resto della pagina resta chiaro e arioso come in Mary Kay.
 - **Caratteri:** titoli con grazie eleganti, come il logo (Mary Kay usa caratteri senza grazie); testi lunghi in un carattere semplice e leggibile. Nella bozza: Cormorant Garamond per i titoli e Montserrat per i testi (gli stessi dell'app); **nomi dei prodotti in Playfair Display**, perché in Cormorant i numeri (es. "10in1") non si leggono bene (fondatore, 10/11/2026).
+- **Pulsanti arrotondati a pillola** in tutte le pagine del sito (fondatore, 14/11/2026).
+- **Apertura della pagina Carriera:** foto a tutta altezza sulla metà destra, senza cornice, sfumata nel nero verso il titolo; sul telefono in alto a tutta larghezza (fondatore, 14/11/2026).
 - **Bozza grafica della home:** pagina privata https://claude.ai/artifact/S8DVkKc7MW1FftY64KfMu6 (10/11/2026).
 - **Bozza della scheda prodotto** (esempio: Maschera Botox): pagina privata https://claude.ai/artifact/BTSM5zNzkzzhME9x7cFnzt (11/11/2026).
 - **Bozza della pagina Carriera:** pagina privata https://claude.ai/artifact/XJsLkg68ALi7K1nVUC6pAm (14/11/2026).
