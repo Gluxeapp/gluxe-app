@@ -58,6 +58,7 @@ Il fondatore ha indicato come riferimento il sito di Mary Kay (`marykay.com`, vi
 - **Bozza grafica della home:** pagina privata https://claude.ai/artifact/S8DVkKc7MW1FftY64KfMu6 (10/11/2026).
 - **Bozza della scheda prodotto** (esempio: Maschera Botox): pagina privata https://claude.ai/artifact/BTSM5zNzkzzhME9x7cFnzt (11/11/2026).
 - **Bozza della pagina Carriera:** pagina privata https://claude.ai/artifact/XJsLkg68ALi7K1nVUC6pAm (14/11/2026).
+- **Bozza completa del sito, navigabile** (home, Maschera Botox, Kit Routine Botox, Carriera, Blog e due articoli): pagina privata https://claude.ai/artifact/2dQ8LZL3E52ddYLrLciQXK (18/11/2026). Copia dei file in [docs/sito-bozza/](sito-bozza/) (si apre `index.html` nel browser).
 - **Promozioni:** niente titoloni di promozioni sull'apertura; la home parla del marchio e dei risultati sui capelli.
 - **Carriera:** nessuna cifra di guadagno nelle fasce "Diventa incaricata" (legge 173/2005).
 - **Telefono prima di tutto:** la maggior parte delle visite arriverà dai social sul telefono; ogni sezione si progetta prima per il telefono (apertura con foto sopra e titolo sotto, prodotti scorrevoli di lato).
@@ -126,6 +127,8 @@ Frase legale sempre presente: "I risultati dipendono dall'impegno di ciascuna. G
   - Claude prepara gli articoli come **bozze** nello stesso pannello. **Nessuna bozza di Claude va online senza l'approvazione del fondatore** (S4 bis, deciso).
 - **Calendario (S4 bis):** 7–8 articoli all'apertura del sito, poi 1 a settimana per 3 mesi (circa 13), poi 1 al mese.
 - Ogni articolo ha un pulsante per condividerlo: materiale pronto per le incaricate.
+- **Bozza della pagina Blog (18/11/2026):** filtri per categoria, articolo in evidenza, iscrizione con doppia conferma, riquadro per le incaricate. Gli articoli in griglia, tranne due, sono segnaposto.
+- **Primo articolo:** "Botox capelli a casa" ([testo e scheda SEO](marketing/blog/botox-capelli-a-casa.md), parole chiave da [analisi-keyword-blog.md](marketing/analisi-keyword-blog.md)), con l'infografica "Dove applicare la Maschera Botox" nel passaggio 2 ([immagini/](../immagini/)). Impaginazione da rivista con indice dei capitoli e pulsante finale verso il Kit Routine Botox. SEO: titolo e descrizione per Google, anteprima per i social, dati strutturati (articolo e percorso), indirizzo `/blog/botox-capelli-a-casa`; in bozza la pagina chiede a Google di non mostrarla (`noindex`, da togliere alla pubblicazione). **Prima di pubblicarlo:** confermare con chi produce la linea gli ingredienti (3 pesi molecolari, proteine del grano), i tempi di posa, l'uso dello spray e i risultati descritti.
 
 ### Pagine obbligatorie
 Privacy, cookie (con banner del consenso: si accettano solo i cookie tecnici finché la persona non sceglie), note legali, contatti.
