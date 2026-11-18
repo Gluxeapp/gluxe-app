@@ -469,8 +469,9 @@ a:hover .copertina-img { transform: scale(1.03); }
 /* ===== articolo: impaginazione da rivista ===== */
 .foto-vuota, .cornice-vuota { display: grid; place-items: center; background: repeating-linear-gradient(135deg, var(--avorio) 0 14px, var(--avorio-scuro) 14px 28px); border: 1px dashed var(--oro-scuro); color: var(--testo-tenue); font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; text-align: center; }
 .foto-vuota { aspect-ratio: 16 / 8; }
+.cornice-vuota { aspect-ratio: 16 / 10; }
 .foto-vuota span, .cornice-vuota span { background: var(--avorio); padding: 8px 14px; }
-@media (max-width: 960px) { .foto-vuota { aspect-ratio: 4 / 3; margin-inline: -16px; } }
+@media (max-width: 960px) { .foto-vuota { aspect-ratio: 4 / 3; } }
 .lettura { position: fixed; top: 0; left: 0; height: 3px; width: 0; background: linear-gradient(90deg, var(--oro-scuro), var(--oro)); z-index: 30; }
 .a-apertura { background: var(--avorio-scuro); padding-block: 26px 0; }
 .a-apertura .briciole { padding-top: 0; }
@@ -766,17 +767,17 @@ a:hover .copertina-img { transform: scale(1.03); }
           <h3>Capelli elettrici: cosa fare subito e perché tornano ogni inverno</h3>
           <p class="riassunto">Le cause vere, 3 rimedi veloci da usare oggi e le abitudini che li tengono a bada per tutto l'inverno.</p>
         </a>
+        <a class="articolo" href="articolo-capelli-che-si-sporcano-subito.html">
+          <div class="cornice"><img class="copertina-img" src="img/sporchi-scheda.jpg" alt="" loading="lazy" style="object-position: 50% 30%"></div>
+          <span class="meta">Cura dei capelli · 5 min</span>
+          <h3>Capelli che si sporcano subito: perché succede e cosa fare da domani</h3>
+          <p class="riassunto">Le cause vere, l'effetto rimbalzo e 5 abitudini per tenerli puliti più a lungo.</p>
+        </a>
         <a class="articolo" href="articolo-maschera-shampoo.html">
           <div class="cornice"><img class="copertina-img" src="img/doccia.jpg" alt="" loading="lazy" style="object-position: 50% 30%"></div>
           <span class="meta">Routine · 4 min</span>
           <h3>Maschera prima o dopo lo shampoo? L'ordine giusto della routine</h3>
           <p class="riassunto">Shampoo, maschera, spray: perché l'ordine conta e come fare ogni passaggio senza appesantire i capelli.</p>
-        </a>
-        <a class="articolo" href="blog.html#cura">
-          <div class="cornice"><img class="copertina-img" src="img/punte.jpg" alt="" loading="lazy" style="object-position: 50% 30%"></div>
-          <span class="meta">Cura dei capelli · 5 min</span>
-          <h3>Porosità dei capelli: cos'è e come capire la tua</h3>
-          <p class="riassunto">Bassa, media o alta: la porosità spiega perché alcuni prodotti funzionano e altri no. Ecco come riconoscerla.</p>
         </a>
       </div>
     </div>
