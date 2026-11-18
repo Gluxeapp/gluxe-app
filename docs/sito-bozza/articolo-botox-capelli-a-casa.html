@@ -467,6 +467,10 @@ a:hover .copertina-img { transform: scale(1.03); }
 }
 
 /* ===== articolo: impaginazione da rivista ===== */
+.foto-vuota, .cornice-vuota { display: grid; place-items: center; background: repeating-linear-gradient(135deg, var(--avorio) 0 14px, var(--avorio-scuro) 14px 28px); border: 1px dashed var(--oro-scuro); color: var(--testo-tenue); font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; text-align: center; }
+.foto-vuota { aspect-ratio: 16 / 8; }
+.foto-vuota span, .cornice-vuota span { background: var(--avorio); padding: 8px 14px; }
+@media (max-width: 960px) { .foto-vuota { aspect-ratio: 4 / 3; margin-inline: -16px; } }
 .lettura { position: fixed; top: 0; left: 0; height: 3px; width: 0; background: linear-gradient(90deg, var(--oro-scuro), var(--oro)); z-index: 30; }
 .a-apertura { background: var(--avorio-scuro); padding-block: 26px 0; }
 .a-apertura .briciole { padding-top: 0; }
@@ -482,7 +486,7 @@ a:hover .copertina-img { transform: scale(1.03); }
 .a-foto { position: relative; margin: 0; }
 .a-foto::before { content: ""; position: absolute; inset: 0 0 50%; background: var(--avorio-scuro); }
 .a-foto .dentro { position: relative; }
-.a-foto img { width: 100%; aspect-ratio: 16 / 8; object-fit: cover; object-position: 60% 30%; display: block; }
+.a-foto img { width: 100%; height: auto; aspect-ratio: 16 / 8; object-fit: cover; object-position: 60% 30%; display: block; }
 .a-foto figcaption { font-size: 12px; color: var(--testo-tenue); margin-top: 10px; padding-left: 12px; border-left: 1px solid var(--oro); }
 .a-griglia { display: grid; grid-template-columns: 230px minmax(0, 680px); gap: 72px; justify-content: center; padding-block: 56px 24px; }
 .indice { position: sticky; top: 100px; align-self: start; font-size: 13px; }
@@ -756,6 +760,12 @@ a:hover .copertina-img { transform: scale(1.03); }
         <a class="link-sotto" href="blog.html">Tutti gli articoli</a>
       </div>
       <div class="articoli">
+        <a class="articolo" href="articolo-capelli-elettrici-cosa-fare.html">
+          <div class="cornice"><img class="copertina-img" src="img/elettrici.jpg" alt="" loading="lazy" style="object-position: 45% 30%"></div>
+          <span class="meta">Cura dei capelli · 5 min</span>
+          <h3>Capelli elettrici: cosa fare subito e perché tornano ogni inverno</h3>
+          <p class="riassunto">Le cause vere, 3 rimedi veloci da usare oggi e le abitudini che li tengono a bada per tutto l'inverno.</p>
+        </a>
         <a class="articolo" href="articolo-maschera-shampoo.html">
           <div class="cornice"><img class="copertina-img" src="img/doccia.jpg" alt="" loading="lazy" style="object-position: 50% 30%"></div>
           <span class="meta">Routine · 4 min</span>
@@ -767,12 +777,6 @@ a:hover .copertina-img { transform: scale(1.03); }
           <span class="meta">Cura dei capelli · 5 min</span>
           <h3>Porosità dei capelli: cos'è e come capire la tua</h3>
           <p class="riassunto">Bassa, media o alta: la porosità spiega perché alcuni prodotti funzionano e altri no. Ecco come riconoscerla.</p>
-        </a>
-        <a class="articolo" href="blog.html#routine">
-          <div class="cornice"><img class="copertina-img" src="img/spray.jpg" alt="" loading="lazy" style="object-position: 50% 50%"></div>
-          <span class="meta">Routine · 3 min</span>
-          <h3>Spray senza risciacquo: cinque modi di usarlo durante la settimana</h3>
-          <p class="riassunto">Sui capelli umidi, prima del phon, per rinfrescare le punte: piccoli gesti per ogni giorno.</p>
         </a>
       </div>
     </div>
