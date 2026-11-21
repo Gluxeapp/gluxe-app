@@ -27,6 +27,25 @@ describe("Modulo dei parametri del piano", () => {
     expect(esito.parametri.titoli[4].generazioni).toEqual([400n, 300n, 200n, 200n, 150n]);
   });
 
+  test("si possono scrivere il simbolo % o € e il punto come virgola dei decimali", () => {
+    const v = valoriDelModulo(PARAMETRI_INIZIALI);
+    v.inpsAliquota = "33.72%";
+    v.inpsQuotaAzienda = "66,67 %";
+    v.inpsBaseImponibile = "78%";
+    v.inpsSogliaEsenzione = "5.000 €";
+    v.bolloSoglia = "77.47";
+    v["titoli.4.generazioni"] = "4%; 3%; 2; 2; 1.5";
+    const esito = parametriDaModulo(v);
+    expect(esito.ok).toBe(true);
+    if (!esito.ok) return;
+    expect(esito.parametri.inpsAliquota).toBe(3372n);
+    expect(esito.parametri.inpsQuotaAzienda).toBe(6667n);
+    expect(esito.parametri.inpsBaseImponibile).toBe(7800n);
+    expect(esito.parametri.inpsSogliaEsenzione).toBe(500000n);
+    expect(esito.parametri.bolloSoglia).toBe(7747n);
+    expect(esito.parametri.titoli[4].generazioni).toEqual([400n, 300n, 200n, 200n, 150n]);
+  });
+
   test("valori non validi: errore sul campo, nessun parametro", () => {
     const v = valoriDelModulo(PARAMETRI_INIZIALI);
     v.aliquotaIva = "ventidue";
