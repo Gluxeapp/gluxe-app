@@ -46,25 +46,56 @@ describe("Ricevuta o fattura delle provvigioni (sezione 8a)", () => {
     });
   });
 
-  test("T24 fattura forfettaria: niente IVA, bollo: 132,20 € → 106,48 €", () => {
-    expect(importiDocumento(c(132.2), "piva_forfettaria", P)).toMatchObject({
-      tipo: "fattura_forfettaria",
-      iva: 0n,
-      ritenuta: c(23.72),
-      bollo: c(2),
-      totale: c(106.48),
+  test("T24 regime forfettario non ammesso (decisione 33): nessun documento", () => {
+    expect(() => importiDocumento(c(132.2), "piva_forfettaria", P)).toThrow();
+  });
+
+  // Decisione 33: INPS sul reddito imponibile (78% delle provvigioni) oltre la franchigia di 5.000 € l'anno.
+  const PI = { ...P, inpsAliquota: 3372n, inpsBaseImponibile: 7800n, inpsQuotaAzienda: 6667n, inpsSogliaEsenzione: c(5000) };
+
+  test("T29 INPS oltre la franchigia: 6.000 € già pagati + 1.000 € → 988,90 €", () => {
+    expect(importiDocumento(c(1000), "piva_ordinaria", PI, c(6000))).toEqual({
+      tipo: "fattura_ordinaria",
+      imponibile: c(1000),
+      iva: c(220),
+      ritenuta: c(179.4),
+      inpsBase: c(460),
+      inpsIncaricata: c(51.7),
+      inpsAzienda: c(103.41),
+      bollo: 0n,
+      totale: c(988.9),
     });
   });
 
-  test("INPS con parametri impostati: solo sulla parte oltre la soglia annua, un terzo trattenuto", () => {
-    const p = { ...P, inpsAliquota: 3372n, inpsBaseImponibile: 7800n, inpsQuotaAzienda: 6667n, inpsSogliaEsenzione: c(5000) };
-    // Già 4.900 € nell'anno: dei 300 € solo 200 sono oltre la soglia. 200 × 33,72% × 78% = 52,60; azienda 2/3 = 35,07.
-    const d = importiDocumento(c(300), "piva_ordinaria", p, c(4900));
-    expect(d).toMatchObject({ inpsBase: c(200), inpsIncaricata: c(17.53), inpsAzienda: c(35.07) });
-    expect(d.totale).toBe(c(300) + c(66) - c(53.82) - c(17.53));
-    // Sotto la soglia nessun contributo; per le forfettarie mai.
-    expect(importiDocumento(c(300), "nessuna_piva", p, c(1000)).inpsIncaricata).toBe(0n);
-    expect(importiDocumento(c(300), "piva_forfettaria", p, c(9000)).inpsBase).toBe(0n);
+  test("T30 INPS già oltre la franchigia, senza partita IVA: 300 € → 217,88 €", () => {
+    expect(importiDocumento(c(300), "nessuna_piva", PI, c(10000))).toEqual({
+      tipo: "ricevuta",
+      imponibile: c(300),
+      iva: 0n,
+      ritenuta: c(53.82),
+      inpsBase: c(234),
+      inpsIncaricata: c(26.3),
+      inpsAzienda: c(52.6),
+      bollo: c(2),
+      totale: c(217.88),
+    });
+  });
+
+  test("T30 INPS sotto la franchigia e al confine dei 5.000 € di reddito", () => {
+    expect(importiDocumento(c(300), "nessuna_piva", PI, c(1000))).toMatchObject({ inpsBase: 0n, inpsIncaricata: 0n, inpsAzienda: 0n });
+    expect(importiDocumento(c(6410.26), "piva_ordinaria", PI).inpsBase).toBe(0n);
+    expect(importiDocumento(c(6410.27), "piva_ordinaria", PI).inpsBase).toBe(c(0.01));
+  });
+
+  test("INPS progressivo: pagamenti spezzati danno lo stesso reddito soggetto di un pagamento unico", () => {
+    const unico = importiDocumento(c(9000), "piva_ordinaria", PI, c(1000)).inpsBase;
+    const primo = importiDocumento(c(4000), "piva_ordinaria", PI, c(1000)).inpsBase;
+    const secondo = importiDocumento(c(5000), "piva_ordinaria", PI, c(5000)).inpsBase;
+    expect(primo + secondo).toBe(unico);
+  });
+
+  test("senza IVA per chi non ha la partita IVA (decisione 33)", () => {
+    expect(importiDocumento(c(500), "nessuna_piva", PI).iva).toBe(0n);
   });
 
   test("importo non positivo: errore", () => {

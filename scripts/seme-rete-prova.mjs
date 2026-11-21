@@ -3,7 +3,7 @@
 // le persone già create non si duplicano, gli ordini sì (ogni lancio aggiunge un giro di ordini).
 // Uso: npm run db:seme-rete-prova            (ordini pagati oggi)
 //      npm run db:seme-rete-prova -- --mese-scorso  (ordini pagati nel mese scorso, per provare chiusura e pagamenti)
-// Imposta anche, per le prove della Fase 6: Alice con partita IVA ordinaria, Bruna forfettaria, e dati
+// Imposta anche, per le prove della Fase 6: Alice e Bruna con partita IVA ordinaria, e dati
 // d'azienda FINTI (solo se ancora vuoti).
 // Gli ordini sono inseriti direttamente come pagati (senza Stripe): vanno bene solo per le prove.
 import postgres from "postgres";
@@ -107,13 +107,13 @@ try {
 
     // Fase 6: regimi fiscali diversi e dati d'azienda finti, per vedere ricevuta, fatture, F24 e file bonifici.
     await tx`update app.incaricati set partita_iva = '12345678903', regime_fiscale = 'piva_ordinaria' where id = ${id.get("alice.finta@gluxe.test")}`;
-    await tx`update app.incaricati set partita_iva = '09876543217', regime_fiscale = 'piva_forfettaria' where id = ${id.get("bruna.finta@gluxe.test")}`;
+    await tx`update app.incaricati set partita_iva = '09876543217', regime_fiscale = 'piva_ordinaria' where id = ${id.get("bruna.finta@gluxe.test")}`;
     await tx`update app.dati_azienda set ragione_sociale = 'G LUXE S.r.l. (DATI DI PROVA)', indirizzo = 'Via delle Prove 10', cap = '20100',
       citta = 'Milano', provincia = 'MI', codice_fiscale = '12345678903', partita_iva = '12345678903',
       iban = 'IT42X0306909606100000063127', cuc = 'PROVA001',
       autorizzazione_bollo = 'Autorizzazione Agenzia delle Entrate (DI PROVA) n. 0 del 01/01/2026', modificato_il = now()
       where id = 1 and ragione_sociale = ''`;
-    console.log("Alice: partita IVA ordinaria; Bruna: forfettaria; dati d'azienda di prova impostati (se vuoti).");
+    console.log("Alice e Bruna: partita IVA ordinaria; dati d'azienda di prova impostati (se vuoti).");
   });
 } finally {
   await sql.end();

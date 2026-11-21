@@ -5,7 +5,7 @@ if (!process.env.DATABASE_URL || process.env.DATABASE_URL === process.env.DATABA
   process.exit(1);
 }
 const sql = postgres(process.env.DATABASE_URL, { prepare: false, max: 1, onnotice: () => {} });
-await sql`update app.incaricati set regime_fiscale = 'piva_forfettaria' where partita_iva = '09876543217'`;
+await sql`update app.incaricati set regime_fiscale = 'piva_ordinaria' where partita_iva = '09876543217'`;
 await sql`update app.dati_azienda set ragione_sociale = 'G LUXE S.r.l. (DATI DI PROVA)', indirizzo = 'Via delle Prove 10', cap = '20100',
   citta = 'Milano', provincia = 'MI', codice_fiscale = '12345678903', partita_iva = '12345678903',
   iban = 'IT42X0306909606100000063127', cuc = 'PROVA001',

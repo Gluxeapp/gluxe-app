@@ -17,7 +17,6 @@ function letturaAnagrafica(formData: FormData) {
   return schemaAnagrafica.safeParse({
     ...Object.fromEntries(formData),
     haPartitaIva: formData.get("haPartitaIva") === "si",
-    forfettario: formData.get("regimePartitaIva") === "forfettario",
   });
 }
 
@@ -61,7 +60,7 @@ export async function modificaAnagrafica(_: EsitoModulo, formData: FormData): Pr
   if (!letto.success) {
     return { messaggio: "Controlla i campi evidenziati.", errori: erroriPerCampo(letto.error.issues), valori };
   }
-  const { email, haPartitaIva, partitaIva, forfettario, ...dati } = letto.data;
+  const { email, haPartitaIva, partitaIva, ...dati } = letto.data;
 
   try {
     await db().transaction(async (tx) => {
@@ -73,7 +72,7 @@ export async function modificaAnagrafica(_: EsitoModulo, formData: FormData): Pr
         .for("update");
       if (!prima) throw new Error("Incaricato non trovato");
 
-      const nuovi = { ...dati, partitaIva: haPartitaIva ? (partitaIva ?? null) : null, regimeFiscale: regimeDa({ haPartitaIva, forfettario }) };
+      const nuovi = { ...dati, partitaIva: haPartitaIva ? (partitaIva ?? null) : null, regimeFiscale: regimeDa({ haPartitaIva }) };
       await tx.update(incaricati).set(nuovi).where(eq(incaricati.id, id));
       await tx
         .update(utenti)

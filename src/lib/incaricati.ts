@@ -47,8 +47,6 @@ export const schemaAnagrafica = z
     iban: z.string().transform(normalizzaIban).refine(ibanValido, "IBAN non valido"),
     haPartitaIva: z.boolean(),
     partitaIva: z.string().trim().optional(),
-    /** Con partita IVA: regime forfettario (fattura senza IVA) invece dell'ordinario. */
-    forfettario: z.boolean().default(false),
   })
   .refine((d) => !d.haPartitaIva || (d.partitaIva && partitaIvaValida(d.partitaIva)), {
     message: "Partita IVA non valida (11 cifre)",
@@ -57,9 +55,9 @@ export const schemaAnagrafica = z
 
 export type Anagrafica = z.infer<typeof schemaAnagrafica>;
 
-/** Regime fiscale dai dati del modulo (decisione 28). */
-export function regimeDa(d: Pick<Anagrafica, "haPartitaIva" | "forfettario">) {
-  return !d.haPartitaIva ? ("nessuna_piva" as const) : d.forfettario ? ("piva_forfettaria" as const) : ("piva_ordinaria" as const);
+/** Regime fiscale dai dati del modulo (decisioni 28 e 33: il forfettario non è ammesso, Legge 190/2014). */
+export function regimeDa(d: Pick<Anagrafica, "haPartitaIva">) {
+  return d.haPartitaIva ? ("piva_ordinaria" as const) : ("nessuna_piva" as const);
 }
 
 export const schemaPassword = z.string().superRefine((p, ctx) => {
