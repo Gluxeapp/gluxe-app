@@ -34,10 +34,23 @@ export default function Accesso() {
           Diventa incaricata: registrati
         </Link>
 
+        <div className="mt-8 rounded-xl border border-bordo bg-superficie p-4 text-center">
+          <p className="font-titoli text-xl text-oro-chiaro">Sei un cliente?</p>
+          <p className="mt-1 text-sm text-testo-tenue">Acquista i prodotti G LUXE e ritrova i tuoi ordini.</p>
+          <Link href="/cliente/registrazione" className="mt-3 block rounded-lg border border-oro/60 py-3 text-oro-chiaro">
+            Acquista o crea il tuo profilo
+          </Link>
+          <p className="mt-2 text-sm">
+            <Link href="/cliente/accesso" className="text-testo-tenue underline">
+              Hai già un profilo? Accedi
+            </Link>
+          </p>
+        </div>
+
         <SuggerimentoInstallazione />
 
         <p className="mt-10 text-center text-xs text-testo-tenue">
-          <Link href="/cliente/accesso">Area clienti</Link> · <Link href="/staff/accesso">Accesso amministrazione</Link>
+          <Link href="/staff/accesso">Accesso amministrazione</Link>
         </p>
       </div>
     </main>
