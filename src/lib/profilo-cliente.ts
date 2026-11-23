@@ -147,7 +147,8 @@ export async function chiediConsulente(cliente: { id: string; nome: string; cogn
 
 /**
  * Contenuti di "Guadagna con G LUXE", già pronti come testi: sconto, provvigione, qualifiche e costi letti dai
- * parametri del piano e dal catalogo di oggi (niente numeri scritti nel codice). Nessuna promessa di guadagno.
+ * parametri del piano e dal catalogo di oggi (niente numeri scritti nel codice). Nessuna promessa di guadagno;
+ * per pool e bonus auto nessun importo né percentuale.
  */
 export async function datiGuadagna() {
   const p = await parametriCorrenti();
@@ -161,7 +162,6 @@ export async function datiGuadagna() {
   const licenza = righe.find((r) => r.tipo === "licenza");
   const perc = (pb: bigint) => `${formatta(pb).replace(/,00$/, "")}%`;
   const prezzi = esempio ? prezziProdotto(esempio.prezzoListino, p, { personale: esempio.puntiPersonale, online: esempio.puntiOnline }) : null;
-  const titoloMassimo = p.titoli.at(-1);
   return {
     sconto: perc(p.scontoIncaricata),
     provvigioneOnline: perc(p.provvigioneOnline),
@@ -175,7 +175,8 @@ export async function datiGuadagna() {
           }
         : null,
     qualifiche: p.qualifiche.map((q) => ({ nome: q.nome, soglia: formatta(q.soglia).replace(/,00$/, ""), percentuale: perc(q.percentuale) })),
-    bonusAutoMassimo: titoloMassimo && titoloMassimo.bonusAuto > 0n ? formattaEuro(titoloMassimo.bonusAuto) : null,
+    // Incentivi delle Leader: senza importi né percentuali (fondatore, 23/11/2026); solo il nome del primo titolo con bonus auto.
+    primoTitoloAuto: p.titoli.find((t) => t.bonusAuto > 0n)?.nome ?? null,
     sogliaAttivita: formatta(p.sogliaAttivita).replace(/,00$/, ""),
     startKit: startKit ? formattaEuro(startKit.prezzoListino) : null,
     puntiStartKit: formatta(p.puntiStartKit).replace(/,00$/, ""),
