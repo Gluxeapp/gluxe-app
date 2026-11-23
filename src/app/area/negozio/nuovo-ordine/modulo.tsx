@@ -67,7 +67,8 @@ export function ModuloOrdinePerCliente({ prodotti, spedizione }: { prodotti: Pro
       </fieldset>
       <div className="rounded-xl border border-bordo bg-superficie p-4 text-sm text-testo-tenue">
         Spedizione {spedizione}, pagata dal cliente. Il cliente vede il totale esatto e accetta l&apos;informativa privacy prima di pagare.
-        Se è già seguito da un&apos;altra consulente, l&apos;ordine non si può preparare.
+        Se è già seguito da un&apos;altra consulente, l&apos;ordine non si può preparare. Se il cliente è VIP, i prodotti a listino
+        hanno il prezzo VIP (punti e provvigione su quanto paga); i prodotti in promozione restano al loro prezzo.
       </div>
       <Pulsante type="submit" disabled={inCorso}>
         {inCorso ? "Preparazione…" : "Prepara l'ordine e manda il link"}

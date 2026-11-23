@@ -72,6 +72,12 @@ export const schemaParametri = z.object({
   /** Giorni prima della scadenza in cui arrivano i due avvisi (email e app). */
   licenzaPrimoAvvisoGiorni: z.number().int().min(1).max(120).default(30),
   licenzaSecondoAvvisoGiorni: z.number().int().min(1).max(120).default(7),
+  // Cliente VIP (decisione 35, sezione 2a)
+  /** Prodotti IVA inclusa di un ordine (spedizione esclusa) per diventare o restare VIP. */
+  vipSoglia: centesimi.default(9900n),
+  /** Sconto VIP sul listino IVA inclusa (promozioni escluse). */
+  vipSconto: puntiBase.default(1500n),
+  vipMesi: z.number().int().min(1).max(60).default(12),
   // Controlli prima della chiusura
   /** Compensi del mese (bonus auto escluso) al massimo questa percentuale dei punti aziendali. */
   limiteCompensiSuPunti: puntiBase,
@@ -132,6 +138,9 @@ export const PARAMETRI_INIZIALI: Parametri = {
   licenzaAnticipoGiorni: 30,
   licenzaPrimoAvvisoGiorni: 30,
   licenzaSecondoAvvisoGiorni: 7,
+  vipSoglia: 9900n,
+  vipSconto: 1500n,
+  vipMesi: 12,
   limiteCompensiSuPunti: 7000n,
 };
 

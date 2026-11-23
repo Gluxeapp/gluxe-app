@@ -48,6 +48,7 @@ async function Contenuto({ params }: Pick<PageProps<"/area/negozio/ordine/[id]">
                 <span className="block text-xs text-testo-tenue">
                   {formattaEuro(r.prezzoUnitarioIvato)} cad. · {formatta(r.totalePunti)} punti · provvigione {formattaEuro(r.totaleProvvigione)}
                   {r.tipoPrezzo === "promozione" && " · in promozione"}
+                  {r.tipoPrezzo === "listino_vip" && " · prezzo VIP"}
                 </span>
               </span>
               <span className="whitespace-nowrap">{formattaEuro(r.totaleIvato)}</span>

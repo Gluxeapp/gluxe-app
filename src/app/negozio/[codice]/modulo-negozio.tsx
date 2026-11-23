@@ -1,8 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import { useActionState } from "react";
+import { useActionState, useRef } from "react";
 import { ordinaDalNegozio } from "@/app/azioni/negozio";
+import type { FraseVip } from "@/app/azioni/vip";
+import { FraseVipCarrello } from "@/components/frase-vip";
 import { Avviso, Campo, Pulsante, type EsitoModulo } from "@/components/ui";
 
 type Prodotto = {
@@ -16,12 +18,13 @@ type Prodotto = {
   promozione?: string;
 };
 
-export function ModuloNegozio({ codice, prodotti, spedizione }: { codice: string; prodotti: Prodotto[]; spedizione: string }) {
+export function ModuloNegozio({ codice, prodotti, spedizione, fraseVip }: { codice: string; prodotti: Prodotto[]; spedizione: string; fraseVip: FraseVip }) {
   const [esito, azione, inCorso] = useActionState<EsitoModulo, FormData>(ordinaDalNegozio, {});
   const v = esito.valori ?? {};
+  const modulo = useRef<HTMLFormElement>(null);
 
   return (
-    <form action={azione} className="space-y-8" noValidate>
+    <form ref={modulo} action={azione} className="space-y-8" noValidate>
       <input type="hidden" name="negozio" value={codice} />
       {/* Trappola per i programmi automatici: nascosta alle persone. */}
       <div aria-hidden className="hidden">
@@ -76,6 +79,16 @@ export function ModuloNegozio({ codice, prodotti, spedizione }: { codice: string
           ))}
           {prodotti.length === 0 && <li className="text-testo-tenue">Nessun prodotto disponibile.</li>}
         </ul>
+        <div className="mt-4">
+          <FraseVipCarrello modulo={modulo} iniziale={fraseVip} daProfilo={false} />
+          <p className="mt-2 text-xs text-testo-tenue">
+            Sei già cliente VIP? I prezzi VIP li trovi nel tuo{" "}
+            <a href={`/cliente/accesso?negozio=${codice}`} className="text-oro-chiaro underline">
+              profilo cliente
+            </a>
+            .
+          </p>
+        </div>
       </section>
 
       <fieldset className="space-y-3">

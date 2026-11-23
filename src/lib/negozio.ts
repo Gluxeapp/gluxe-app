@@ -5,6 +5,9 @@ import { clienti, incaricati, ordini, prodotti, righeOrdine, storicoLegamiClient
 import { ErroreOrdine, type Articolo } from "./calcolo-ordine";
 import { formattaEuro } from "./denaro";
 import { parametriCorrenti, promozioniDiOggi } from "./catalogo";
+import { calcolaOrdine } from "./calcolo-ordine";
+import { clienteVipOggi, oggiItalia, vipDiOggi } from "./clienti-vip";
+import { contaProdotti, messaggioVip, prezzoVip, vipIl } from "./vip";
 import { licenzaScaduta } from "./licenze";
 import { inserisciOrdine, ORE_PER_PAGARE, type Spedizione } from "./ordini";
 import { prezziProdotto, prezziPromozione } from "./prezzi";
@@ -217,7 +220,10 @@ export async function creaOrdinePerCliente(dati: {
       await controllaOrdiniAperti(tx, cliente.id);
       if (!cliente.incaricatoId) cliente = await primoLegame(tx, cliente.id, dati.incaricatoId, motivo);
     }
+    // Cliente VIP: il prezzo VIP vale anche negli ordini preparati dalla sua incaricata (decisione 35).
+    const { vip } = await clienteVipOggi(cliente.id, tx);
     return inserisciOrdine(tx, {
+      vip,
       incaricatoId: dati.incaricatoId,
       tipo: "online",
       articoli,
@@ -259,7 +265,10 @@ export async function creaOrdineDaProfilo(dati: {
       if (!consulente) throw new ErroreOrdine("Per il primo acquisto serve il codice della tua consulente.");
       cliente = await primoLegame(tx, cliente.id, consulente.id, `Primo ordine dal profilo, codice ${consulente.codice}`);
     }
+    // Cliente VIP: dal profilo i prodotti a listino hanno il prezzo VIP (decisione 35).
+    const { vip } = await clienteVipOggi(cliente.id, tx);
     return inserisciOrdine(tx, {
+      vip,
       incaricatoId: cliente.incaricatoId!,
       tipo: "online",
       articoli,
@@ -317,7 +326,9 @@ export async function clientiDellIncaricata(incaricatoId: string) {
     .from(clienti)
     .where(eq(clienti.incaricatoId, incaricatoId))
     .orderBy(asc(clienti.cognome), asc(clienti.nome));
-  return righe.map(({ consenso, email, telefono, ...r }) => ({ ...r, contatti: consenso ? { email, telefono } : null }));
+  // Cliente VIP (decisione 35): l'incaricata vede chi lo è e fino a quando, per ricontattarla prima della scadenza.
+  const vip = await vipDiOggi(righe.map((r) => r.id));
+  return righe.map(({ consenso, email, telefono, ...r }) => ({ ...r, vipFino: vip.get(r.id) ?? null, contatti: consenso ? { email, telefono } : null }));
 }
 
 /** Ordini dei clienti attribuiti all'incaricata, senza indirizzi. */
@@ -375,20 +386,45 @@ export async function ordineDelNegozio(id: string, incaricatoId: string) {
 }
 
 
-/** Vetrina al pubblico già pronta da mostrare: prezzi pieni o in promozione e spedizione, come testi. */
-export async function vetrinaProdotti() {
-  const catalogo = await catalogoNegozio();
+/**
+ * Vetrina già pronta da mostrare: prezzi pieni o in promozione e spedizione, come testi. Per una cliente VIP
+ * (solo dal profilo, decisione 35) i prodotti a listino hanno il prezzo VIP con il listino barrato; le promozioni no.
+ */
+export async function vetrinaProdotti(opzioni: { vip?: boolean } = {}) {
+  const [catalogo, p] = await Promise.all([catalogoNegozio(), parametriCorrenti()]);
   return {
     spedizione: formattaEuro(catalogo.speseSpedizione),
-    prodotti: catalogo.prodotti.map((p) => ({
-      id: p.id,
-      nome: p.nome,
-      dettaglio: [p.linea, p.formato].filter(Boolean).join(" · "),
-      descrizione: p.descrizione,
-      immagineId: p.immagineId,
-      prezzo: formattaEuro(p.prezzo),
-      barrato: p.promozione && p.listino > p.prezzo ? formattaEuro(p.listino) : undefined,
-      promozione: p.promozione ?? undefined,
-    })),
+    prodotti: catalogo.prodotti.map((prodotto) => {
+      const vip = opzioni.vip && !prodotto.promozione;
+      const prezzo = vip ? prezzoVip(prodotto.listino, p) : prodotto.prezzo;
+      return {
+        id: prodotto.id,
+        nome: prodotto.nome,
+        dettaglio: [prodotto.linea, prodotto.formato].filter(Boolean).join(" · "),
+        descrizione: prodotto.descrizione,
+        immagineId: prodotto.immagineId,
+        prezzo: formattaEuro(prezzo),
+        barrato: prodotto.listino > prezzo ? formattaEuro(prodotto.listino) : undefined,
+        promozione: prodotto.promozione ?? (vip ? "Prezzo VIP" : undefined),
+      };
+    }),
   };
+}
+
+/**
+ * Frase del carrello sul Cliente VIP (decisione 35), calcolata sul server dalle quantità scelte.
+ * validaFino: scadenza dello status della cliente collegata (null per chi compra da ospite).
+ */
+export async function fraseVipDelCarrello(richiesti: { prodottoId: string; quantita: number }[], validaFino: string | null) {
+  const [p, oggi] = await Promise.all([parametriCorrenti(), oggiItalia()]);
+  const scelti = richiesti.filter((r) => r.quantita > 0);
+  let conteggio = { pagati: 0n, aListino: 0n };
+  if (scelti.length > 0) {
+    const ordine = calcolaOrdine(await articoliDalCatalogo(scelti), "online", p, { vip: vipIl(validaFino, oggi) });
+    conteggio = contaProdotti(ordine.righe);
+  }
+  const frase = messaggioVip({ validaFino, oggi, conteggio, p });
+  const base = frase.vip ? conteggio.aListino : conteggio.pagati;
+  const avanzamento = frase.raggiunto ? 100 : Number((base * 100n) / (p.vipSoglia === 0n ? 1n : p.vipSoglia));
+  return { ...frase, avanzamento: Math.min(100, avanzamento) };
 }

@@ -2,9 +2,10 @@
  * Calcolo di un ordine: righe con prezzi e punti "fotografati" e totali. Modulo puro (niente database),
  * usato dal server quando l'incaricata crea l'ordine. Regole in docs/piano-compensi.md, sezione 2.
  */
-import { scorporaIva, type Centesimi } from "./denaro";
+import { percentuale, scorporaIva, type Centesimi } from "./denaro";
 import type { Parametri } from "./parametri";
 import { prezziProdotto, prezziPromozione, prezziStartKit } from "./prezzi";
+import { prezzoVip, puntiManualiVip } from "./vip";
 
 export const QUANTITA_MASSIMA = 99;
 
@@ -31,7 +32,7 @@ export type RigaCalcolata = {
   prodottoId: string;
   codice: string;
   nome: string;
-  tipoPrezzo: "listino_scontato" | "promozione" | "start_kit" | "listino_pieno" | "licenza";
+  tipoPrezzo: "listino_scontato" | "promozione" | "start_kit" | "listino_pieno" | "listino_vip" | "licenza";
   promozioneId: string | null;
   quantita: number;
   prezzoUnitarioIvato: Centesimi;
@@ -48,7 +49,10 @@ export type RigaCalcolata = {
 
 export class ErroreOrdine extends Error {}
 
-function riga(a: Articolo, tipo: TipoOrdineCalcolabile, p: Parametri): RigaCalcolata {
+/** vip: ordine di una cliente VIP dal negozio online (sezione 2a): sconto sul listino dei prodotti non in promozione. */
+export type OpzioniOrdine = { vip?: boolean };
+
+function riga(a: Articolo, tipo: TipoOrdineCalcolabile, p: Parametri, opzioni: OpzioniOrdine): RigaCalcolata {
   const { prodotto, quantita, promozione } = a;
   let tipoPrezzo: RigaCalcolata["tipoPrezzo"];
   let unita: { ivaInclusa: Centesimi; ivaEsclusa: Centesimi; punti: Centesimi };
@@ -61,6 +65,14 @@ function riga(a: Articolo, tipo: TipoOrdineCalcolabile, p: Parametri): RigaCalco
     // Nessun punto a nessuno: l'importo va tutto all'azienda (decisione 31).
     tipoPrezzo = "licenza";
     unita = { ivaInclusa: prodotto.prezzoListino, ivaEsclusa: scorporaIva(prodotto.prezzoListino, p.aliquotaIva), punti: 0n };
+  } else if (tipo === "online" && opzioni.vip && !promozione) {
+    // Cliente VIP (decisione 35): listino − sconto VIP; punti su quanto pagato, punti a mano ridotti dello sconto.
+    tipoPrezzo = "listino_vip";
+    const ivaInclusa = prezzoVip(prodotto.prezzoListino, p);
+    const ivaEsclusa = scorporaIva(ivaInclusa, p.aliquotaIva);
+    const manuali = prodotto.puntiOnlineManuali;
+    unita = { ivaInclusa, ivaEsclusa, punti: manuali != null ? puntiManualiVip(manuali, p) : percentuale(ivaEsclusa, p.coefficientePunti) };
+    provvigione = percentuale(unita.punti, p.provvigioneOnline);
   } else if (tipo === "online") {
     // Negozio online: il cliente paga il listino pieno o il prezzo in promozione; provvigione = 50% dei punti online.
     const prezzi = promozione
@@ -103,7 +115,7 @@ const somma = (righe: RigaCalcolata[], campo: keyof RigaCalcolata) =>
   righe.reduce((totale, r) => totale + (r[campo] as Centesimi), 0n);
 
 /** Calcola righe e totali. Lancia ErroreOrdine se l'ordine non è ammesso. */
-export function calcolaOrdine(articoli: Articolo[], tipo: TipoOrdineCalcolabile, p: Parametri) {
+export function calcolaOrdine(articoli: Articolo[], tipo: TipoOrdineCalcolabile, p: Parametri, opzioni: OpzioniOrdine = {}) {
   if (articoli.length === 0) throw new ErroreOrdine("Scegli almeno un prodotto.");
   for (const a of articoli) {
     if (!Number.isInteger(a.quantita) || a.quantita < 1 || a.quantita > QUANTITA_MASSIMA) {
@@ -122,7 +134,7 @@ export function calcolaOrdine(articoli: Articolo[], tipo: TipoOrdineCalcolabile,
   }
   const spedizione = tipo === "licenza" ? 0n : p.speseSpedizione;
 
-  const righe = articoli.map((a) => riga(a, tipo, p));
+  const righe = articoli.map((a) => riga(a, tipo, p, opzioni));
   const merceIvaInclusa = somma(righe, "totaleIvato");
   return {
     righe,

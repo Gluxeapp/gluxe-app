@@ -1,7 +1,9 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useRef } from "react";
 import { chiediConsulenteAzione, ordinaDalProfilo } from "@/app/azioni/clienti";
+import type { FraseVip } from "@/app/azioni/vip";
+import { FraseVipCarrello } from "@/components/frase-vip";
 import { CampiSpedizione } from "@/app/area/ordini/campi-spedizione";
 import { SceltaProdotti, type ProdottoVetrina } from "@/components/scelta-prodotti";
 import { Avviso, Campo, Pulsante, PulsanteSecondario, type EsitoModulo } from "@/components/ui";
@@ -13,19 +15,25 @@ export function ModuloCarrello({
   spedizione,
   serveCodice,
   indirizzo,
+  fraseVip,
 }: {
   prodotti: ProdottoVetrina[];
   spedizione: string;
   serveCodice: boolean;
   indirizzo: Spedizione;
+  fraseVip: FraseVip;
 }) {
   const [esito, azione, inCorso] = useActionState<EsitoModulo, FormData>(ordinaDalProfilo, {});
+  const modulo = useRef<HTMLFormElement>(null);
   return (
-    <form action={azione} className="space-y-8" noValidate>
+    <form ref={modulo} action={azione} className="space-y-8" noValidate>
       {esito.messaggio && <Avviso tipo="errore">{esito.messaggio}</Avviso>}
       <section>
         <h2 className="mb-3 font-titoli text-2xl text-oro-chiaro">I prodotti</h2>
         <SceltaProdotti prodotti={prodotti} valori={esito.valori} />
+        <div className="mt-4">
+          <FraseVipCarrello modulo={modulo} iniziale={fraseVip} daProfilo />
+        </div>
       </section>
       <CampiSpedizione esito={esito} iniziale={indirizzo} />
       {serveCodice && (

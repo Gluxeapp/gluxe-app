@@ -78,6 +78,13 @@
       "when": 1794481521021,
       "tag": "0010_profilo_clienti",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1795434047249,
+      "tag": "0011_cliente_vip",
+      "breakpoints": true
     }
   ]
 }

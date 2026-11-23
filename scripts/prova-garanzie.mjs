@@ -326,6 +326,62 @@ try {
     await tx`insert into app.licenze (incaricato_id, ordine_id, pagato_il, dal, valida_fino) values (${a.id}, ${o.id}, current_date, current_date, current_date - 1)`;
   });
 
+  // 1f) Cliente VIP (migrazione 0011, decisione 35), in transazioni annullate.
+  const ordineVip = async (tx) => {
+    const [c] = await tx`
+      insert into app.clienti (incaricato_id, email, nome, cognome, telefono, privacy_accettata_il)
+      values (${a.id}, ${`vip-${randomUUID().slice(0, 8)}@gluxe.test`}, 'Vera', 'Prova', '3330000000', now()) returning id`;
+    const [o] = await tx`
+      insert into app.ordini (incaricato_id, tipo, parametri_versione_id, merce_iva_inclusa, merce_iva_esclusa, punti,
+        provvigione_acquisto, spese_spedizione, totale, destinatario, indirizzo, cap, citta, provincia, telefono, cliente_id)
+      values (${a.id}, 'online', ${parametri.id}, 10690, 8762, 7010, 3505, 690, 11380, 'Prova', 'Via Prova 4', '20100', 'Milano', 'MI', '3330000000', ${c.id})
+      returning id`;
+    const voce = (tipo, extra = {}) => tx`
+      insert into app.registro_vip (cliente_id, tipo, ordine_id, giorno, valida_fino, revoca_di, prodotti_pagati, prodotti_listino)
+      values (${c.id}, ${tipo}, ${o.id}, current_date, ${extra.validaFino === undefined ? sql`current_date + 364` : extra.validaFino}, ${extra.revocaDi ?? null}, 10690, 10690)
+      returning id`;
+    return { cliente: c, ordine: o, voce };
+  };
+  try {
+    await sql.begin(async (tx) => {
+      const { voce } = await ordineVip(tx);
+      const [v] = await voce("attivazione");
+      await voce("revoca", { validaFino: null, revocaDi: v.id });
+      throw new Error("ANNULLA");
+    });
+  } catch (e) {
+    esito(e.message === "ANNULLA", "accettato: attivazione VIP e sua revoca");
+  }
+  await deveFallire("due attivazioni VIP per lo stesso ordine", async (tx) => {
+    const { voce } = await ordineVip(tx);
+    await voce("attivazione");
+    await voce("rinnovo");
+  });
+  await deveFallire("allungare a mano lo status VIP", async (tx) => {
+    const { voce } = await ordineVip(tx);
+    const [v] = await voce("attivazione");
+    await tx`update app.registro_vip set valida_fino = valida_fino + 365 where id = ${v.id}`;
+  });
+  await deveFallire("cancellare una voce del registro VIP", async (tx) => {
+    const { voce } = await ordineVip(tx);
+    const [v] = await voce("attivazione");
+    await tx`delete from app.registro_vip where id = ${v.id}`;
+  });
+  await deveFallire("revoca VIP senza la voce revocata", async (tx) => {
+    const { voce } = await ordineVip(tx);
+    await voce("revoca", { validaFino: null });
+  });
+  await deveFallire("revocare due volte la stessa voce VIP", async (tx) => {
+    const { voce } = await ordineVip(tx);
+    const [v] = await voce("attivazione");
+    await voce("revoca", { validaFino: null, revocaDi: v.id });
+    await voce("revoca", { validaFino: null, revocaDi: v.id });
+  });
+  await deveFallire("status VIP senza scadenza", async (tx) => {
+    const { voce } = await ordineVip(tx);
+    await voce("attivazione", { validaFino: null });
+  });
+
   // 2) Conferme di pagamento contemporanee: 10 copie di due eventi diversi per lo stesso ordine.
   if (!segreto) throw new Error("Manca STRIPE_WEBHOOK_SECRET");
   const sessione = `cs_test_prova_${randomUUID()}`;

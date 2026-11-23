@@ -1,7 +1,8 @@
 import { Suspense } from "react";
 import { Avviso, Caricamento, Titolo } from "@/components/ui";
 import { richiediCliente } from "@/lib/accesso";
-import { vetrinaProdotti } from "@/lib/negozio";
+import { clienteVipOggi } from "@/lib/clienti-vip";
+import { fraseVipDelCarrello, vetrinaProdotti } from "@/lib/negozio";
 import { consulenteDi } from "@/lib/profilo-cliente";
 import { pagamentiAttivi } from "@/lib/stripe";
 import { ChiediConsulente, ModuloCarrello } from "./moduli";
@@ -27,7 +28,9 @@ async function Contenuto() {
       </>
     );
   }
-  const vetrina = await vetrinaProdotti();
+  // Cliente VIP (decisione 35): dal profilo i prodotti a listino hanno il prezzo VIP.
+  const { vip, validaFino } = await clienteVipOggi(cliente.id);
+  const [vetrina, fraseVip] = await Promise.all([vetrinaProdotti({ vip }), fraseVipDelCarrello([], validaFino)]);
   return (
     <>
       <Titolo sottotitolo={consulente ? `La tua consulente: ${consulente.nome}` : "Per il primo acquisto ti serve il codice della tua consulente."}>
@@ -42,6 +45,7 @@ async function Contenuto() {
         prodotti={vetrina.prodotti}
         spedizione={vetrina.spedizione}
         serveCodice={!consulente}
+        fraseVip={fraseVip}
         indirizzo={{
           destinatario: `${cliente.nome} ${cliente.cognome}`,
           indirizzo: cliente.indirizzo ?? "",

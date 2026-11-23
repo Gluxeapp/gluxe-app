@@ -7,6 +7,7 @@ import { ErroreOrdine } from "./calcolo-ordine";
 import { formatta, formattaEuro } from "./denaro";
 import { inviaEmail } from "./email";
 import { indirizzoApp } from "./indirizzo-app";
+import { registraVipDelPagamento, revocaVipDopoRimborso } from "./clienti-vip";
 import { registraPeriodoLicenza } from "./licenze";
 import { leggiOrdine, numeroOrdine, ORE_PER_PAGARE, registraStato } from "./ordini";
 import { configurazionePagamenti, stripe } from "./stripe";
@@ -150,7 +151,10 @@ export async function gestisciEventoStripe(evento: Stripe.Event): Promise<void> 
         }
         // Start kit e rinnovi: periodo di licenza di 12 mesi (decisione 31). Un pagamento arrivato dopo l'annullamento vale lo stesso.
         await registraPeriodoLicenza(tx, ordine, pagatoIl);
+        // Cliente VIP (decisione 35): un ordine del negozio da almeno 99 € di prodotti attiva o rinnova lo status.
+        const benvenutoVip = await registraVipDelPagamento(tx, ordine, pagatoIl);
         email.push(...(await emailPagato(tx, ordine.id, ordine.incaricatoId)));
+        if (benvenutoVip) email.push(benvenutoVip);
         return;
       }
 
@@ -179,6 +183,8 @@ export async function gestisciEventoStripe(evento: Stripe.Event): Promise<void> 
             .onConflictDoNothing();
         }
         const rimborsato = elenco.data.filter((r) => r.status === "succeeded").reduce((t, r) => t + BigInt(r.amount), 0n);
+        // Un reso che fa scendere i prodotti sotto la soglia toglie lo status VIP dato da questo ordine.
+        if (rimborsato > 0n) await revocaVipDopoRimborso(tx, ordine.id, rimborsato, new Date(evento.created * 1000));
         if (rimborsato >= ordine.totale && ordine.stato !== "annullato" && ordine.stato !== "reso") {
           const giaPartito = ordine.stato === "spedito" || ordine.stato === "consegnato";
           await registraStato(tx, ordine.id, giaPartito ? "reso" : "annullato", {
