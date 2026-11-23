@@ -377,6 +377,11 @@ try {
     await voce("revoca", { validaFino: null, revocaDi: v.id });
     await voce("revoca", { validaFino: null, revocaDi: v.id });
   });
+  await deveFallire("due avvisi di scadenza VIP per la stessa scadenza", async (tx) => {
+    const { cliente } = await ordineVip(tx);
+    await tx`insert into app.avvisi_vip (cliente_id, valida_fino) values (${cliente.id}, current_date + 10)`;
+    await tx`insert into app.avvisi_vip (cliente_id, valida_fino) values (${cliente.id}, current_date + 10)`;
+  });
   await deveFallire("status VIP senza scadenza", async (tx) => {
     const { voce } = await ordineVip(tx);
     await voce("attivazione", { validaFino: null });

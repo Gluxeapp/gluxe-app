@@ -185,8 +185,8 @@ Nessun cambiamento pratico. Lo sconto abbassa nella stessa misura punti e compen
 ## 8. Domande ancora aperte (non bloccano la scrittura delle regole)
 
 - ~~V1 – Costo dei prodotti~~: comunicato il 23/11/2026, il 15% regge (sezione 4.2). Resta da sapere: costo della pochette del Kit e costo vero di spedizione e imballo per ordine.
-- **V2 – Ordini fatti prima del lancio del programma:** contano per diventare VIP? Proposta: no, si parte dalla data di avvio.
-- **V3 – Email di scadenza e di rinnovo:** le vuoi (sezione 3)?
+- ~~V2 – Ordini fatti prima del lancio~~: non contano (fondatore, 23/11/2026); si parte dal 23/11/2026.
+- ~~V3 – Email di scadenza e di rinnovo~~: sì (fondatore, 23/11/2026): avviso da 30 giorni prima della scadenza ed email al rinnovo.
 - **V4 – Clienti segnalate come fittizie:** sospendere lo status finché la sede non controlla?
 - **V5 – Avvisi all'incaricata** quando una sua cliente diventa VIP o sta per scadere?
 

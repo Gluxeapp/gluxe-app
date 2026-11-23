@@ -78,6 +78,14 @@ export function vipIl(validaFino: string | null, giorno: string): boolean {
 }
 
 /**
+ * Avviso di scadenza: dovuto da N giorni prima della scadenza fino al giorno della scadenza compreso. Si manda una
+ * volta sola per ogni scadenza (lo garantisce il database): se un giorno il controllo salta, parte il giorno dopo.
+ */
+export function avvisoScadenzaVip(validaFino: string | null, oggi: string, p: Pick<Parametri, "vipAvvisoGiorni">): boolean {
+  return validaFino !== null && oggi <= validaFino && oggi >= piuGiorni(validaFino, -p.vipAvvisoGiorni);
+}
+
+/**
  * Effetto di un ordine pagato sullo status: con lo status valido il giorno del pagamento si rinnova (valore a listino
  * ≥ soglia); senza, si attiva (prodotti pagati ≥ soglia). Null se l'ordine non arriva alla soglia.
  */

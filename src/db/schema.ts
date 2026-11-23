@@ -806,3 +806,17 @@ export const registroVip = app.table(
     uniqueIndex("registro_vip_revoca").on(t.revocaDi),
   ],
 );
+
+/** Avvisi di scadenza VIP già mandati: uno solo per ogni scadenza di ogni cliente (decisione 35). */
+export const avvisiVip = app.table(
+  "avvisi_vip",
+  {
+    id: bigserial("id", { mode: "bigint" }).primaryKey(),
+    clienteId: uuid("cliente_id")
+      .notNull()
+      .references(() => clienti.id),
+    validaFino: date("valida_fino").notNull(),
+    creatoIl: creatoIl(),
+  },
+  (t) => [uniqueIndex("avvisi_vip_unico").on(t.clienteId, t.validaFino)],
+);

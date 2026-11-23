@@ -78,6 +78,8 @@ export const schemaParametri = z.object({
   /** Sconto VIP sul listino IVA inclusa (promozioni escluse). */
   vipSconto: puntiBase.default(1500n),
   vipMesi: z.number().int().min(1).max(60).default(12),
+  /** Da quanti giorni prima della scadenza parte l'avviso via email. */
+  vipAvvisoGiorni: z.number().int().min(1).max(120).default(30),
   // Controlli prima della chiusura
   /** Compensi del mese (bonus auto escluso) al massimo questa percentuale dei punti aziendali. */
   limiteCompensiSuPunti: puntiBase,
@@ -141,6 +143,7 @@ export const PARAMETRI_INIZIALI: Parametri = {
   vipSoglia: 9900n,
   vipSconto: 1500n,
   vipMesi: 12,
+  vipAvvisoGiorni: 30,
   limiteCompensiSuPunti: 7000n,
 };
 

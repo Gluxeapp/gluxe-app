@@ -6,7 +6,7 @@ import { and, eq, sql } from "drizzle-orm";
 import { expect, test } from "vitest";
 import { db } from "@/db";
 import { clienti, ordini, prodotti, registroVip, righeOrdine } from "@/db/schema";
-import { clienteVipOggi, oggiItalia, registraVipDelPagamento, revocaVipDopoRimborso } from "@/lib/clienti-vip";
+import { clienteVipOggi, inviaAvvisiVip, oggiItalia, registraVipDelPagamento, revocaVipDopoRimborso } from "@/lib/clienti-vip";
 import { fraseVipDelCarrello } from "@/lib/negozio";
 import { inserisciOrdine } from "@/lib/ordini";
 
@@ -58,8 +58,10 @@ test("Cliente VIP: attivazione, prezzo VIP, rinnovo, revoca e registro", async (
       expect(riga).toMatchObject({ tipoPrezzo: "listino_vip", listinoUnitarioIvato: kit.prezzoListino });
       expect(riga.prezzoUnitarioIvato).toBe((kit.prezzoListino * 8500n + 5000n) / 10000n);
       expect(riga.provvigioneUnitaria * 2n - riga.puntiUnitari).toBeLessThanOrEqual(1n);
-      // 106,90 € a listino: rinnova (nessuna email: è solo per l'attivazione).
-      expect(await registraVipDelPagamento(tx, secondo, new Date())).toBeNull();
+      // 106,90 € a listino: rinnova, con l'email di rinnovo e la nuova scadenza.
+      const rinnovo = await registraVipDelPagamento(tx, secondo, new Date());
+      expect(rinnovo?.oggetto).toMatch(/rinnovato/);
+      expect(rinnovo?.testo).toMatch(/rinnovato fino al \d{2}\/\d{2}\/\d{4}/);
       const voci = await tx.select().from(registroVip).where(eq(registroVip.clienteId, cliente.id));
       expect(voci.map((v) => v.tipo).sort()).toEqual(["attivazione", "rinnovo"]);
 
@@ -76,6 +78,22 @@ test("Cliente VIP: attivazione, prezzo VIP, rinnovo, revoca e registro", async (
       // Un ordine piccolo (sotto i 99 €) non attiva nulla.
       const piccolo = await ordine(false, 1, shampoo);
       expect(await registraVipDelPagamento(tx, piccolo, new Date())).toBeNull();
+
+      // Avviso di scadenza: una cliente VIP che scade tra 10 giorni riceve l'avviso una volta sola.
+      const [altra] = await tx
+        .insert(clienti)
+        .values({ incaricatoId: incaricata.id, email: `vip-${randomUUID().slice(0, 8)}@gluxe.test`, nome: "Sara", cognome: "Prova", telefono: "3471234567", privacyAccettataIl: new Date() })
+        .returning();
+      const [ordineAltra] = await tx.select({ id: ordini.id }).from(ordini).where(eq(ordini.id, piccolo.id));
+      await tx.execute(sql`insert into app.registro_vip (cliente_id, tipo, ordine_id, giorno, valida_fino, prodotti_pagati, prodotti_listino)
+        values (${altra.id}, 'attivazione', ${ordineAltra.id}, (current_date - 355), (current_date + 10), 9900, 9900)`);
+      const primoGiro = await inviaAvvisiVip(tx);
+      expect(primoGiro).toBeGreaterThanOrEqual(1);
+      const [{ n }] = (await tx.execute<{ n: number }>(sql`select count(*)::int n from app.avvisi_vip where cliente_id = ${altra.id}`)).rows;
+      expect(n).toBe(1);
+      await inviaAvvisiVip(tx);
+      const [{ n: dopoSecondo }] = (await tx.execute<{ n: number }>(sql`select count(*)::int n from app.avvisi_vip where cliente_id = ${altra.id}`)).rows;
+      expect(dopoSecondo).toBe(1);
 
       // Il registro è solo in aggiunta: il database vieta di modificarlo.
       await expect(tx.execute(sql`savepoint prova_modifica`)).resolves.toBeDefined();

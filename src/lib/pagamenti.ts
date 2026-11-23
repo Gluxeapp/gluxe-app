@@ -151,10 +151,10 @@ export async function gestisciEventoStripe(evento: Stripe.Event): Promise<void> 
         }
         // Start kit e rinnovi: periodo di licenza di 12 mesi (decisione 31). Un pagamento arrivato dopo l'annullamento vale lo stesso.
         await registraPeriodoLicenza(tx, ordine, pagatoIl);
-        // Cliente VIP (decisione 35): un ordine del negozio da almeno 99 € di prodotti attiva o rinnova lo status.
-        const benvenutoVip = await registraVipDelPagamento(tx, ordine, pagatoIl);
+        // Cliente VIP (decisione 35): un ordine del negozio da almeno 99 € attiva o rinnova lo status (email di benvenuto o di rinnovo).
+        const emailVip = await registraVipDelPagamento(tx, ordine, pagatoIl);
         email.push(...(await emailPagato(tx, ordine.id, ordine.incaricatoId)));
-        if (benvenutoVip) email.push(benvenutoVip);
+        if (emailVip) email.push(emailVip);
         return;
       }
 

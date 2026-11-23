@@ -1,11 +1,12 @@
 import "server-only";
 import { and, asc, eq, inArray, sql } from "drizzle-orm";
 import { db, type Esecutore } from "@/db";
-import { clienti, incaricati, registroVip, righeOrdine } from "@/db/schema";
+import { avvisiVip, clienti, incaricati, registroVip, righeOrdine } from "@/db/schema";
 import { parametriCorrenti } from "./catalogo";
 import { formattaEuro } from "./denaro";
+import { inviaEmail } from "./email";
 import { indirizzoApp } from "./indirizzo-app";
-import { contaProdotti, daRevocare, dataItaliana, esitoVipDelPagamento, validaFinoVip, vipIl, type VoceRegistroVip } from "./vip";
+import { avvisoScadenzaVip, contaProdotti, daRevocare, dataItaliana, esitoVipDelPagamento, validaFinoVip, vipIl, type VoceRegistroVip } from "./vip";
 
 /**
  * Cliente VIP (docs/piano-compensi.md, sezione 2a, decisione 35): letture e scritture sul database.
@@ -111,8 +112,68 @@ export async function registraVipDelPagamento(
     })
     .onConflictDoNothing()
     .returning({ id: registroVip.id });
-  if (!nuova || esito.tipo !== "attivazione") return null;
+  if (!nuova) return null;
+  if (esito.tipo === "rinnovo") return emailRinnovoVip(cliente, esito.validaFino, p);
   return emailBenvenutoVip(tx, cliente, esito.validaFino, p);
+}
+
+/** Dove la cliente vede i suoi prezzi VIP: il suo profilo, oppure come crearlo con la stessa email. */
+function linkProfilo(cliente: typeof clienti.$inferSelect, codiceConsulente?: string): string {
+  return cliente.utenteId
+    ? `Entra nel tuo profilo per vedere i tuoi prezzi VIP: ${indirizzoApp()}/cliente/accesso`
+    : `I prezzi VIP li vedi nel tuo profilo cliente. Crealo con questa stessa email (ti mandiamo un link per scegliere la password):\n` +
+        `${indirizzoApp()}/cliente/registrazione${codiceConsulente ? `?negozio=${codiceConsulente}` : ""}`;
+}
+
+/** Email quando lo status si rinnova (decisione 35): nuova scadenza. */
+function emailRinnovoVip(cliente: typeof clienti.$inferSelect, validaFino: string, p: { vipSoglia: bigint; vipMesi: number }): Messaggio {
+  return {
+    a: cliente.email,
+    oggetto: "G LUXE: il tuo status VIP è rinnovato",
+    testo:
+      `Ciao ${cliente.nome},\n\ngrazie per il tuo ordine: il tuo status di cliente VIP G LUXE è rinnovato fino al ${dataItaliana(validaFino)}.\n\n` +
+      `Continui ad avere lo sconto VIP su tutto il listino. Per rinnovarlo ancora per ${p.vipMesi} mesi basta un ordine da almeno ` +
+      `${formattaEuro(p.vipSoglia)} a listino prima della scadenza.\n\n${linkProfilo(cliente)}\n\nCon affetto,\nGiovanna Di Lillo e il team G LUXE`,
+  };
+}
+
+/**
+ * Avvisi di scadenza VIP del giorno (decisione 35): dai N giorni prima della scadenza fino alla scadenza, uno solo
+ * per ogni scadenza di ogni cliente (tabella avvisi_vip). Lo chiama ogni giorno il controllo automatico.
+ */
+export async function inviaAvvisiVip(e: Esecutore = db()): Promise<number> {
+  const p = await parametriCorrenti();
+  const oggi = await oggiItalia(e);
+  const righe = await e
+    .select({ clienteId: registroVip.clienteId, id: registroVip.id, tipo: registroVip.tipo, ordineId: registroVip.ordineId, validaFino: registroVip.validaFino, revocaDi: registroVip.revocaDi })
+    .from(registroVip);
+  const perCliente = new Map<string, VoceRegistroVip[]>();
+  for (const r of righe) {
+    const voci = perCliente.get(r.clienteId) ?? [];
+    voci.push({ id: r.id.toString(), tipo: r.tipo, ordineId: r.ordineId, validaFino: r.validaFino, revocaDi: r.revocaDi?.toString() ?? null });
+    perCliente.set(r.clienteId, voci);
+  }
+  let inviati = 0;
+  for (const [clienteId, voci] of perCliente) {
+    const validaFino = validaFinoVip(voci);
+    if (!validaFino || !avvisoScadenzaVip(validaFino, oggi, p)) continue;
+    const [nuovo] = await e.insert(avvisiVip).values({ clienteId, validaFino }).onConflictDoNothing().returning({ id: avvisiVip.id });
+    if (!nuovo) continue;
+    const [cliente] = await e.select().from(clienti).where(eq(clienti.id, clienteId));
+    const [consulente] = cliente.incaricatoId
+      ? await e.select({ codice: incaricati.codice }).from(incaricati).where(eq(incaricati.id, cliente.incaricatoId))
+      : [];
+    await inviaEmail({
+      a: cliente.email,
+      oggetto: "G LUXE: il tuo status VIP sta per scadere",
+      testo:
+        `Ciao ${cliente.nome},\n\nil tuo status di cliente VIP G LUXE è valido fino al ${dataItaliana(validaFino)}.\n\n` +
+        `Per rinnovarlo per altri ${p.vipMesi} mesi basta un ordine da almeno ${formattaEuro(p.vipSoglia)} a listino entro quella data: ` +
+        `intanto lo paghi già con lo sconto VIP.\n\n${linkProfilo(cliente, consulente?.codice)}\n\nCon affetto,\nGiovanna Di Lillo e il team G LUXE`,
+    });
+    inviati++;
+  }
+  return inviati;
 }
 
 /**
@@ -155,10 +216,7 @@ async function emailBenvenutoVip(
     ? await tx.select({ nome: incaricati.nome, cognome: incaricati.cognome, codice: incaricati.codice }).from(incaricati).where(eq(incaricati.id, cliente.incaricatoId))
     : [];
   const sconto = `${Number(p.vipSconto) / 100}`.replace(".", ",");
-  const accesso = cliente.utenteId
-    ? `Entra nel tuo profilo per vedere i tuoi prezzi VIP: ${indirizzoApp()}/cliente/accesso`
-    : `I prezzi VIP li vedi nel tuo profilo cliente. Crealo con questa stessa email (ti mandiamo un link per scegliere la password):\n` +
-      `${indirizzoApp()}/cliente/registrazione${consulente ? `?negozio=${consulente.codice}` : ""}`;
+  const accesso = linkProfilo(cliente, consulente?.codice);
   return {
     a: cliente.email,
     oggetto: "Benvenuta tra le clienti VIP G LUXE",

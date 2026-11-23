@@ -7,6 +7,7 @@ import { calcolaOrdine } from "./calcolo-ordine";
 import { PARAMETRI_INIZIALI as P } from "./parametri";
 import { calcolaMese } from "./provvigioni/motore";
 import {
+  avvisoScadenzaVip,
   contaProdotti,
   daRevocare,
   esitoVipDelPagamento,
@@ -172,6 +173,21 @@ describe("registro e revoche", () => {
     const rinnovo = { pagati: 9241n, aListino: 10870n };
     expect(daRevocare({ tipo: "rinnovo", conteggio: rinnovo, rimborsato: 0n, p: P })).toBe(false);
     expect(daRevocare({ tipo: "rinnovo", conteggio: rinnovo, rimborsato: 2882n, p: P })).toBe(true);
+  });
+});
+
+describe("avviso di scadenza", () => {
+  test("parte da 30 giorni prima fino al giorno della scadenza compreso", () => {
+    expect(avvisoScadenzaVip("2027-12-31", "2027-11-30", P)).toBe(false);
+    expect(avvisoScadenzaVip("2027-12-31", "2027-12-01", P)).toBe(true);
+    expect(avvisoScadenzaVip("2027-12-31", "2027-12-31", P)).toBe(true);
+    expect(avvisoScadenzaVip("2027-12-31", "2028-01-01", P)).toBe(false);
+    expect(avvisoScadenzaVip(null, "2027-12-20", P)).toBe(false);
+  });
+
+  test("i giorni sono un parametro", () => {
+    expect(avvisoScadenzaVip("2027-12-31", "2027-12-20", { ...P, vipAvvisoGiorni: 7 })).toBe(false);
+    expect(avvisoScadenzaVip("2027-12-31", "2027-12-24", { ...P, vipAvvisoGiorni: 7 })).toBe(true);
   });
 });
 
