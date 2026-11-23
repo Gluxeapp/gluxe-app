@@ -133,5 +133,21 @@ export async function verificaStaff(_: EsitoModulo, formData: FormData): Promise
 export async function esci() {
   const sessione = await leggiSessione();
   await chiudiSessione();
-  redirect(sessione && sessione.ruolo !== "incaricato" ? "/staff/accesso" : "/");
+  redirect(!sessione || sessione.ruolo === "incaricato" ? "/" : sessione.ruolo === "cliente" ? "/cliente/accesso" : "/staff/accesso");
+}
+
+/** Accesso dei clienti con il loro profilo (decisione 32): email e password. */
+export async function accediCliente(_: EsitoModulo, formData: FormData): Promise<EsitoModulo> {
+  const email = String(formData.get("email") ?? "").trim().toLowerCase();
+  const password = String(formData.get("password") ?? "");
+  const [utente] = await db()
+    .select({ id: utenti.id, passwordHash: utenti.passwordHash, tentativiFalliti: utenti.tentativiFalliti, bloccatoFino: utenti.bloccatoFino })
+    .from(utenti)
+    .where(and(sql`lower(${utenti.email}) = ${email}`, eq(utenti.ruolo, "cliente"), eq(utenti.attivo, true)))
+    .limit(1);
+  const errore = await controllaPassword(utente, password);
+  if (errore) return { messaggio: errore.replace("Credenziali", "Email o password"), valori: { email } };
+  await creaSessione(utente.id, { verificata: true, durataOre: DURATA_INCARICATO_ORE });
+  const destinazione = String(formData.get("dopo") ?? "");
+  redirect(destinazione.startsWith("/cliente") ? destinazione : "/cliente");
 }

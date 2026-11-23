@@ -51,6 +51,10 @@ async function Contenuto({ params }: Pick<PageProps<"/negozio/[codice]">, "param
       <p className="text-xs uppercase tracking-[0.3em] text-testo-tenue">Il negozio di</p>
       <h1 className="mt-1 font-titoli text-4xl font-semibold testo-oro">{negozio.nome}</h1>
       <p className="mt-1 text-sm text-testo-tenue">Consulente G LUXE · {negozio.codice}</p>
+      <p className="mt-2 text-xs text-testo-tenue">
+        Hai un profilo? <a href={`/cliente/accesso?negozio=${negozio.codice}`} className="text-oro-chiaro underline">Accedi</a> · oppure{" "}
+        <a href={`/cliente/registrazione?negozio=${negozio.codice}`} className="text-oro-chiaro underline">crea il tuo profilo</a> per ritrovare ordini e indirizzo
+      </p>
     </div>
   );
 

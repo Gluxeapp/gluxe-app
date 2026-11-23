@@ -59,7 +59,7 @@ export async function reimpostaPassword(_: EsitoModulo, formData: FormData): Pro
   return {
     ok: true,
     messaggio: "Password salvata. Ora puoi accedere.",
-    valori: { destinazione: utente && utente.ruolo !== "incaricato" ? "/staff/accesso" : "/" },
+    valori: { destinazione: !utente || utente.ruolo === "incaricato" ? "/" : utente.ruolo === "cliente" ? "/cliente/accesso" : "/staff/accesso" },
   };
 }
 

@@ -71,6 +71,13 @@
       "when": 1794477231328,
       "tag": "0009_licenza_annuale",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1794481521021,
+      "tag": "0010_profilo_clienti",
+      "breakpoints": true
     }
   ]
 }

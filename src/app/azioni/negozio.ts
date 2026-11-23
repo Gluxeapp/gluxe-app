@@ -6,12 +6,13 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { erroriPerCampo, valoriDa, type EsitoModulo } from "@/components/ui";
 import { db } from "@/db";
-import { incaricati } from "@/db/schema";
-import { richiediStaff } from "@/lib/accesso";
+import { clienti, incaricati } from "@/db/schema";
+import { richiediStaff, verificaIncaricataOperativa } from "@/lib/accesso";
 import { ErroreOrdine, QUANTITA_MASSIMA } from "@/lib/calcolo-ordine";
 import { spostaCliente } from "@/lib/clienti";
 import { indirizzoApp } from "@/lib/indirizzo-app";
-import { creaOrdineOnline, ordineDelCliente } from "@/lib/negozio";
+import { creaOrdineOnline, creaOrdinePerCliente, ordineDelCliente } from "@/lib/negozio";
+import { inviaEmail } from "@/lib/email";
 import { registraStato } from "@/lib/ordini";
 import { apriPagamentoCliente, chiudiPagamento } from "@/lib/pagamenti";
 import { schemaSpedizione, schemaTelefono, testoObbligatorio } from "@/lib/spedizione";
@@ -106,6 +107,14 @@ export async function pagaOrdineCliente(_: EsitoModulo, formData: FormData): Pro
   const ordine = await ordineDelCliente(letto.data.id, letto.data.c);
   if (!ordine) return { messaggio: "Ordine non trovato." };
   if (!pagamentiAttivi()) return { messaggio: "Il pagamento online sarà attivo a breve." };
+  // Ordine preparato dalla consulente (decisione 32): il cliente accetta qui l'informativa e sceglie il consenso.
+  if (!ordine.cliente.privacyAccettataIl) {
+    if (formData.get("privacy") !== "on") return { messaggio: "Per pagare serve la presa visione dell'informativa privacy." };
+    await db()
+      .update(clienti)
+      .set({ privacyAccettataIl: new Date(), consensoContattiIl: formData.get("consensoContatti") === "on" ? new Date() : null })
+      .where(eq(clienti.id, ordine.cliente.id));
+  }
   let url: string;
   try {
     url = await apriPagamentoCliente(ordine.ordine.id, ordine.cliente.email, `${indirizzoApp()}${linkOrdine(ordine.ordine.id, letto.data.c)}`);
@@ -150,7 +159,89 @@ export async function spostaClienteAzione(_: EsitoModulo, formData: FormData): P
   const esito = await spostaCliente({ clienteId: letto.data.id, incaricatoId: destinazione.id, motivo: letto.data.motivo, utenteId: staff.utenteId });
   if (esito === "assente") return { messaggio: "Cliente non trovato." };
   if (esito === "uguale") return { messaggio: "Il cliente è già legato a questa incaricata.", valori };
+  if (esito === "assegnato") {
+    // Cliente registrato senza consulente (decisione 32): gli diciamo chi lo segue, così può fare il primo acquisto.
+    const [c] = await db().select({ email: clienti.email, nome: clienti.nome }).from(clienti).where(eq(clienti.id, letto.data.id));
+    if (c) {
+      await inviaEmail({
+        a: c.email,
+        oggetto: "G LUXE: ecco la tua consulente",
+        testo: `Ciao ${c.nome},
+
+la tua consulente G LUXE è ${destinazione.nome} ${destinazione.cognome.slice(0, 1)}. (codice ${destinazione.codice}).
+Puoi già fare il tuo primo acquisto dal tuo profilo: ${indirizzoApp()}/cliente
+
+G LUXE`,
+      });
+    }
+  }
   revalidatePath(`/staff/clienti/${letto.data.id}`);
   revalidatePath("/staff/clienti");
   return { ok: true, messaggio: `Cliente spostato a ${destinazione.nome} ${destinazione.cognome} (${destinazione.codice}): vale per i prossimi ordini.` };
+}
+
+/**
+ * "Ordine per un cliente" (decisione 32): l'incaricata sceglie prodotti e dati del cliente; il cliente riceve il link
+ * per pagare (email, e l'incaricata può girarlo con un messaggio). Il link torna nel risultato per essere condiviso.
+ */
+export async function preparaOrdinePerCliente(_: EsitoModulo, formData: FormData): Promise<EsitoModulo> {
+  const { incaricato } = await verificaIncaricataOperativa();
+  const valori = valoriDa(formData);
+  if (!pagamentiAttivi()) return { messaggio: "Il pagamento online sarà attivo a breve.", valori };
+  const richiesti: { prodottoId: string; quantita: number }[] = [];
+  for (const [chiave, valore] of formData) {
+    if (!chiave.startsWith("q_") || typeof valore !== "string" || valore.trim() === "") continue;
+    const quantita = Number(valore);
+    if (!Number.isInteger(quantita) || quantita < 0 || quantita > QUANTITA_MASSIMA) {
+      return { messaggio: `Le quantità vanno da 0 a ${QUANTITA_MASSIMA}.`, valori };
+    }
+    const prodottoId = chiave.slice(2);
+    if (quantita > 0 && z.uuid().safeParse(prodottoId).success) richiesti.push({ prodottoId, quantita });
+  }
+  if (richiesti.length === 0) return { messaggio: "Scegli almeno un prodotto.", valori };
+  const cliente = schemaCliente.safeParse(Object.fromEntries(formData));
+  const spedizione = schemaSpedizione.safeParse({
+    ...Object.fromEntries(formData),
+    destinatario: `${String(formData.get("nome") ?? "").trim()} ${String(formData.get("cognome") ?? "").trim()}`.trim(),
+  });
+  if (!cliente.success || !spedizione.success) {
+    return {
+      messaggio: "Controlla i campi evidenziati.",
+      errori: erroriPerCampo([...(cliente.error?.issues ?? []), ...(spedizione.error?.issues ?? [])]),
+      valori,
+    };
+  }
+  let creato: Awaited<ReturnType<typeof creaOrdinePerCliente>>;
+  try {
+    creato = await creaOrdinePerCliente({
+      incaricatoId: incaricato.id,
+      codiceIncaricata: incaricato.codice,
+      richiesti,
+      cliente: cliente.data,
+      spedizione: spedizione.data,
+    });
+  } catch (e) {
+    if (e instanceof ErroreOrdine) return { messaggio: e.message, valori };
+    throw e;
+  }
+  const link = `${indirizzoApp()}${linkOrdine(creato.id, creato.codice)}`;
+  await inviaEmail({
+    a: creato.email,
+    oggetto: "G LUXE: il tuo ordine è pronto da pagare",
+    testo:
+      `Ciao ${creato.nome},\n\nla tua consulente G LUXE ${incaricato.nome} ha preparato il tuo ordine. ` +
+      `Controllalo e paga in sicurezza (carta, PayPal o Klarna) da qui:\n${link}\n\nIl link vale ${24} ore.\n\nG LUXE`,
+  });
+  revalidatePath("/area/negozio");
+  return { ok: true, messaggio: "Ordine pronto: abbiamo mandato il link al cliente via email. Puoi anche girarglielo tu.", valori: { link } };
+}
+
+/** L'incaricata sceglie se mostrare telefono ed email ai suoi clienti nel loro profilo (decisione 32). */
+export async function mostraContattiAiClienti(formData: FormData): Promise<void> {
+  const { incaricato } = await verificaIncaricataOperativa();
+  await db()
+    .update(incaricati)
+    .set({ mostraContattiClienti: formData.get("mostra") === "si" })
+    .where(eq(incaricati.id, incaricato.id));
+  revalidatePath("/area/negozio");
 }

@@ -8,10 +8,10 @@ import { NextResponse, type NextRequest } from "next/server";
 export function proxy(request: NextRequest) {
   if (request.cookies.has("gluxe_sessione")) return NextResponse.next();
   const percorso = request.nextUrl.pathname;
-  const destinazione = percorso.startsWith("/staff") ? "/staff/accesso" : "/";
+  const destinazione = percorso.startsWith("/staff") ? "/staff/accesso" : percorso.startsWith("/cliente") ? "/cliente/accesso" : "/";
   return NextResponse.redirect(new URL(destinazione, request.url));
 }
 
 export const config = {
-  matcher: ["/area/:path*", "/staff", "/staff/((?!accesso).*)"],
+  matcher: ["/area/:path*", "/staff", "/staff/((?!accesso).*)", "/cliente", "/cliente/((?!accesso|registrazione).*)"],
 };

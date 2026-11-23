@@ -37,7 +37,7 @@ async function Contenuto({ params, searchParams }: Pick<PageProps<"/negozio/ordi
   const codice = typeof c === "string" ? c : "";
   const letto = await ordineDelCliente(id, codice);
   if (!letto) notFound();
-  const { ordine, righe, storico, scaduto, consulente } = letto;
+  const { ordine, righe, storico, scaduto, consulente, cliente } = letto;
   const inAttesa = ordine.stato === "inserito";
   const tornatoDaStripe = esito === "pagato";
 
@@ -84,7 +84,9 @@ async function Contenuto({ params, searchParams }: Pick<PageProps<"/negozio/ordi
         </ul>
       </Scheda>
 
-      {inAttesa && !tornatoDaStripe && <AzioniOrdineCliente id={ordine.id} codice={codice} scaduto={scaduto} />}
+      {inAttesa && !tornatoDaStripe && (
+        <AzioniOrdineCliente id={ordine.id} codice={codice} scaduto={scaduto} serveInformativa={!cliente.privacyAccettataIl} />
+      )}
 
       <Scheda>
         <h2 className="font-titoli text-xl text-oro-chiaro">Spedizione</h2>

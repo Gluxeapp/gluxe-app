@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { cache } from "react";
 import { db } from "@/db";
-import { incaricati } from "@/db/schema";
+import { clienti, incaricati } from "@/db/schema";
 import { leggiSessione } from "./sessione";
 
 /**
@@ -66,8 +66,18 @@ export const richiediIncaricataOperativa = cache(async () => verificaIncaricataO
 /** Persona dello staff collegata e verificata con il codice via email; facoltativamente con un ruolo preciso. */
 export async function richiediStaff(ruoli: RuoloStaff[] = ["amministrazione", "contabilita", "ordini"]) {
   const sessione = await sessioneCorrente();
-  if (!sessione || sessione.ruolo === "incaricato") redirect("/staff/accesso");
+  if (!sessione || sessione.ruolo === "incaricato" || sessione.ruolo === "cliente") redirect("/staff/accesso");
   if (!sessione.verificata) redirect("/staff/verifica");
   if (!ruoli.includes(sessione.ruolo)) redirect("/staff");
   return { ...sessione, ruolo: sessione.ruolo as RuoloStaff };
 }
+
+/** Cliente del negozio collegato con il suo profilo (decisione 32), altrimenti alla pagina di accesso dei clienti. */
+export async function verificaCliente(sessione?: Awaited<ReturnType<typeof leggiSessione>>) {
+  sessione ??= await leggiSessione();
+  if (!sessione || sessione.ruolo !== "cliente") redirect("/cliente/accesso");
+  const [cliente] = await db().select().from(clienti).where(eq(clienti.utenteId, sessione.utenteId)).limit(1);
+  if (!cliente) redirect("/cliente/accesso");
+  return { sessione, cliente };
+}
+export const richiediCliente = cache(async () => verificaCliente(await sessioneCorrente()));

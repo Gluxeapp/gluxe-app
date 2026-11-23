@@ -71,7 +71,16 @@ Rischi: lo stesso cliente creato due volte da due ordini contemporanei (e quindi
 | Abusi | Al massimo 5 ordini non pagati per cliente nelle 24 ore; campo nascosto contro i programmi automatici |
 | Punti e provvigioni | Come per tutti gli ordini: contano solo con il pagamento confermato dal webhook di Stripe (una volta sola) |
 
-Verifiche: `npm run prova:garanzie` (tentativi vietati sui clienti e sugli ordini online) e `npm run prova:fase7` (database di prova: ordini dal negozio, legame, consenso, ordini contemporanei, limite, clienti fittizi, spostamento, apertura del pagamento Stripe di prova).
+Profilo cliente e ordine per un cliente (migrazione 0010, decisione 32):
+
+| Garanzia | Come è ottenuta |
+| --- | --- |
+| Un cliente senza consulente si lega una volta sola, poi solo la sede lo sposta | Il database accetta il primo legame (codice al primo acquisto, link del negozio, ordine preparato da un'incaricata, assegnazione della sede) e da lì in poi solo gli spostamenti tracciati della sede; un cliente legato non torna mai senza consulente. Ogni legame va nello storico |
+| Nessuno entra nei dati di un altro cliente | Un profilo per email (chiave univoca); se l'email ha già acquisti, il profilo si attiva solo scegliendo la password dal link mandato a quella email; il profilo di un cliente non si scambia con un altro |
+| L'incaricata non prepara ordini ai clienti altrui | Controllo sul server nella stessa transazione (blocco sull'email del cliente) prima di creare l'ordine |
+| Il cliente accetta l'informativa | Gli ordini preparati dall'incaricata si pagano solo dopo la spunta dell'informativa, controllata sul server |
+
+Verifiche: `npm run prova:garanzie` (tentativi vietati sui clienti e sugli ordini online), `npm run prova:clienti` (profili, codice al primo acquisto, attivazione protetta, ordine per un cliente, legami) e `npm run prova:fase7` (database di prova: ordini dal negozio, legame, consenso, ordini contemporanei, limite, clienti fittizi, spostamento, apertura del pagamento Stripe di prova).
 
 ## 5. La licenza annuale (decisione 31)
 

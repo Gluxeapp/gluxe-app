@@ -102,14 +102,21 @@ async function Contenuto({ params }: Pick<PageProps<"/staff/clienti/[id]">, "par
               {c.consensoContattiIl
                 ? `Contatti condivisi con l'incaricata dal ${dataOra(c.consensoContattiIl)}.`
                 : "Contatti non condivisi con l'incaricata."}{" "}
-              Privacy accettata il {dataOra(c.privacyAccettataIl)}.
+              {c.privacyAccettataIl ? `Privacy accettata il ${dataOra(c.privacyAccettataIl)}.` : "Informativa non ancora accettata (ordine preparato dalla consulente, non ancora pagato)."}{" "}
+              {c.utenteId ? "Ha un profilo cliente." : "Compra come ospite (senza profilo)."}
             </p>
           </Scheda>
 
           <Scheda>
             <h2 className="font-titoli text-xl text-oro-chiaro">Incaricata</h2>
             <p className="mt-2 text-sm">
-              {scheda.incaricata} <span className="text-testo-tenue">{scheda.codice}</span>
+              {scheda.codice ? (
+                <>
+                  {scheda.incaricata} <span className="text-testo-tenue">{scheda.codice}</span>
+                </>
+              ) : (
+                <span className="text-errore">Da assegnare: il cliente si è registrato senza consulente.</span>
+              )}
             </p>
             {staff.ruolo === "amministrazione" ? (
               <ModuloSposta id={c.id} />

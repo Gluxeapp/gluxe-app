@@ -1,4 +1,8 @@
+import { eq } from "drizzle-orm";
 import Link from "next/link";
+import { mostraContattiAiClienti } from "@/app/azioni/negozio";
+import { db } from "@/db";
+import { incaricati } from "@/db/schema";
 import { Suspense } from "react";
 import { EtichettaStato } from "@/components/etichetta-stato";
 import { Avviso, Caricamento, Scheda, Titolo } from "@/components/ui";
@@ -28,7 +32,12 @@ async function Contenuto() {
   const { incaricato } = await richiediIncaricataOperativa();
   const stato = statoNegozio({ ...incaricato, licenzaScaduta: await licenzaScaduta(incaricato.id) });
   const link = `${indirizzoApp()}/negozio/${incaricato.codice}`;
-  const [clienti, ordini] = await Promise.all([clientiDellIncaricata(incaricato.id), ordiniDelNegozio(incaricato.id)]);
+  const [clienti, ordini, [preferenze]] = await Promise.all([
+    clientiDellIncaricata(incaricato.id),
+    ordiniDelNegozio(incaricato.id),
+    db().select({ mostra: incaricati.mostraContattiClienti }).from(incaricati).where(eq(incaricati.id, incaricato.id)),
+  ]);
+  const mostra = preferenze?.mostra ?? false;
 
   return (
     <div className="grid gap-4">
@@ -41,8 +50,29 @@ async function Contenuto() {
         )}
         <p className="mt-3 text-xs text-testo-tenue">
           Chi compra dal tuo link resta tua cliente per sempre, anche se in futuro usa il link di un&apos;altra incaricata.
-          Provvigione online: 50% dei punti di ogni ordine, anche nei mesi in cui non sei attiva.
+          Provvigione online: 50% dei punti di ogni ordine, anche nei mesi in cui non sei attiva. Dal tuo link i clienti
+          possono anche creare un profilo e ricomprare da soli.
         </p>
+        {stato.aperto && (
+          <Link href="/area/negozio/nuovo-ordine" className="mt-4 block rounded-lg bg-oro py-3 text-center font-semibold text-nero">
+            Prepara un ordine per un cliente
+          </Link>
+        )}
+      </Scheda>
+
+      <Scheda>
+        <h2 className="font-titoli text-xl text-oro-chiaro">I tuoi contatti nel profilo dei clienti</h2>
+        <p className="mt-1 text-sm text-testo-tenue">
+          {mostra
+            ? "I tuoi clienti con un profilo vedono il tuo telefono e la tua email."
+            : "I tuoi clienti con un profilo vedono solo il tuo nome."}
+        </p>
+        <form action={mostraContattiAiClienti} className="mt-3">
+          <input type="hidden" name="mostra" value={mostra ? "no" : "si"} />
+          <button type="submit" className="rounded-lg border border-oro/60 px-4 py-2 text-sm text-oro-chiaro">
+            {mostra ? "Nascondi i miei contatti" : "Mostra telefono ed email ai miei clienti"}
+          </button>
+        </form>
       </Scheda>
 
       <Scheda>
