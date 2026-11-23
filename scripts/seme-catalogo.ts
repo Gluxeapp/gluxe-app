@@ -55,7 +55,7 @@ try {
   const [kit] = await sql`select id from app.prodotti where tipo = 'start_kit'`;
   if (!kit) {
     await sql`insert into app.prodotti (codice, nome, descrizione, tipo, prezzo_listino, ordine)
-      values ('KIT', 'Start kit', 'Shampoo, spray 12in1, licenza account incaricata, borsa campionario e materiale formativo.', 'start_kit', 5990, 0)`;
+      values ('KIT', 'Start kit', 'Shampoo, spray 12in1, licenza account incaricata, borsa campionario e materiale formativo.', 'start_kit', 6990, 0)`;
     console.log("Prodotto creato: Start kit");
   }
 } finally {

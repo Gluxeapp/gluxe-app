@@ -4,7 +4,7 @@ import { PARAMETRI_INIZIALI as p } from "./parametri";
 
 const shampoo = { id: "s", codice: "HB-SH", nome: "Shampoo", tipo: "prodotto" as const, prezzoListino: 3290n };
 const kitRoutine = { id: "k", codice: "KR", nome: "Kit routine", tipo: "prodotto" as const, prezzoListino: 13900n };
-const startKit = { id: "sk", codice: "KIT", nome: "Start kit", tipo: "start_kit" as const, prezzoListino: 5990n };
+const startKit = { id: "sk", codice: "KIT", nome: "Start kit", tipo: "start_kit" as const, prezzoListino: 6990n };
 
 describe("calcolaOrdine", () => {
   test("acquisto personale a listino: sconto 40%, punti per unità × quantità, spedizione a parte", () => {
@@ -105,9 +105,9 @@ describe("calcolaOrdine", () => {
 
   test("T8: start kit con 33 punti fissi e spedizione", () => {
     const o = calcolaOrdine([{ prodotto: startKit, quantita: 1 }], "start_kit", p);
-    expect(o.righe[0]).toMatchObject({ tipoPrezzo: "start_kit", prezzoUnitarioIvato: 5990n, prezzoUnitarioIvaEsclusa: 4910n, puntiUnitari: 3300n });
+    expect(o.righe[0]).toMatchObject({ tipoPrezzo: "start_kit", prezzoUnitarioIvato: 6990n, prezzoUnitarioIvaEsclusa: 5730n, puntiUnitari: 3300n });
     expect(o.punti).toBe(3300n);
-    expect(o.totale).toBe(5990n + 690n);
+    expect(o.totale).toBe(6990n + 690n);
   });
 
   test("più righe: i totali sono la somma delle righe già arrotondate", () => {

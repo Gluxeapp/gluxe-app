@@ -27,9 +27,9 @@ describe("prezzi e punti (piano rev. 5)", () => {
     expect(p.incaricata.ivaInclusa).toBe(1974n);
   });
 
-  it("start kit 59,90 €: 33 punti fissi, nessuna provvigione online", () => {
-    const k = prezziStartKit(5990n, P);
-    expect(k.ivaEsclusa).toBe(4910n);
+  it("start kit 69,90 €: 33 punti fissi (il prezzo non cambia i punti), nessuna provvigione online", () => {
+    const k = prezziStartKit(6990n, P);
+    expect(k.ivaEsclusa).toBe(5730n);
     expect(k.punti).toBe(3300n);
   });
 
