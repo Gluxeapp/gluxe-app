@@ -29,6 +29,7 @@ export const GRUPPI_PARAMETRI: { titolo: string; campi: CampoParametro[] }[] = [
       { chiave: "vipSoglia", etichetta: "Prodotti di un ordine per diventare o restare VIP (€ IVA inclusa)", tipo: "euro" },
       { chiave: "vipSconto", etichetta: "Sconto VIP sul listino (%)", tipo: "percentuale" },
       { chiave: "vipMesi", etichetta: "Durata dello status VIP (mesi)", tipo: "intero" },
+      { chiave: "vipAvvisoGiorni", etichetta: "Avviso di scadenza VIP (giorni prima)", tipo: "intero" },
     ],
   },
   {

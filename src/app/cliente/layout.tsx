@@ -33,7 +33,10 @@ async function Menu() {
   const sessione = await sessioneCorrente();
   if (!sessione || sessione.ruolo !== "cliente") return null;
   return (
-    <nav className="flex items-center gap-4 text-sm text-testo-tenue">
+    <nav className="flex flex-wrap items-center justify-end gap-x-4 gap-y-1 text-sm text-testo-tenue">
+      <Link href="/cliente/guadagna" className="font-semibold text-oro-chiaro">
+        Guadagna con G LUXE
+      </Link>
       <Link href="/cliente">Acquista</Link>
       <Link href="/cliente/ordini">Ordini</Link>
       <Link href="/cliente/profilo">Profilo</Link>

@@ -78,6 +78,14 @@ export function vipIl(validaFino: string | null, giorno: string): boolean {
 }
 
 /**
+ * Avviso di scadenza: dovuto da N giorni prima della scadenza fino al giorno della scadenza compreso. Si manda una
+ * volta sola per ogni scadenza (lo garantisce il database): se un giorno il controllo salta, parte il giorno dopo.
+ */
+export function avvisoScadenzaVip(validaFino: string | null, oggi: string, p: Pick<Parametri, "vipAvvisoGiorni">): boolean {
+  return validaFino !== null && oggi <= validaFino && oggi >= piuGiorni(validaFino, -p.vipAvvisoGiorni);
+}
+
+/**
  * Effetto di un ordine pagato sullo status: con lo status valido il giorno del pagamento si rinnova (valore a listino
  * ≥ soglia); senza, si attiva (prodotti pagati ≥ soglia). Null se l'ordine non arriva alla soglia.
  */
@@ -114,27 +122,37 @@ function percentualeTesto(puntiBase: bigint): string {
 }
 
 /** Frase del carrello che invita a raggiungere la soglia (o a rinnovare lo status). */
-export function messaggioVip(d: { validaFino: string | null; oggi: string; conteggio: ConteggioVip; p: ParametriVip }): {
+/**
+ * barra: se mostrare l'avanzamento verso la soglia. Per una VIP l'invito a rinnovare compare solo vicino alla scadenza
+ * (dagli stessi giorni dell'avviso via email, fondatore 23/11/2026); prima si ricorda solo la scadenza e lo sconto.
+ */
+export function messaggioVip(d: { validaFino: string | null; oggi: string; conteggio: ConteggioVip; p: ParametriVip & Pick<Parametri, "vipAvvisoGiorni"> }): {
   testo: string;
   vip: boolean;
   raggiunto: boolean;
+  barra: boolean;
 } {
-  const vantaggio = `dal prossimo ordine avrai il ${percentualeTesto(d.p.vipSconto)} di sconto su tutto il listino per ${d.p.vipMesi} mesi.`;
+  const sconto = percentualeTesto(d.p.vipSconto);
+  const vantaggio = `dal prossimo ordine avrai il ${sconto} di sconto su tutto il listino per ${d.p.vipMesi} mesi.`;
   if (vipIl(d.validaFino, d.oggi)) {
-    const fino = `Sei cliente VIP fino al ${dataItaliana(d.validaFino!)}.`;
+    const scadenza = dataItaliana(d.validaFino!);
+    if (!avvisoScadenzaVip(d.validaFino, d.oggi, d.p)) {
+      return { vip: true, raggiunto: false, barra: false, testo: `Sei cliente VIP fino al ${scadenza}: i prodotti a listino hanno già il ${sconto} di sconto.` };
+    }
+    const fino = `Sei cliente VIP fino al ${scadenza}.`;
     const nuova = dataItaliana(validaFinoVipDa(d.oggi, d.p));
     if (d.conteggio.aListino >= d.p.vipSoglia) {
-      return { vip: true, raggiunto: true, testo: `${fino} Con questo ordine rinnovi il tuo status VIP fino al ${nuova}.` };
+      return { vip: true, raggiunto: true, barra: true, testo: `${fino} Con questo ordine rinnovi il tuo status VIP fino al ${nuova}.` };
     }
     const mancano = formattaEuro(d.p.vipSoglia - d.conteggio.aListino);
-    return { vip: true, raggiunto: false, testo: `${fino} Ti mancano ${mancano} a listino per rinnovare il tuo status VIP fino al ${nuova}.` };
+    return { vip: true, raggiunto: false, barra: true, testo: `${fino} Ti mancano ${mancano} a listino per rinnovare il tuo status VIP fino al ${nuova}.` };
   }
   if (d.conteggio.pagati >= d.p.vipSoglia) {
-    return { vip: false, raggiunto: true, testo: `Con questo ordine diventi cliente VIP G LUXE: ${vantaggio}` };
+    return { vip: false, raggiunto: true, barra: true, testo: `Con questo ordine diventi cliente VIP G LUXE: ${vantaggio}` };
   }
   if (d.conteggio.pagati === 0n) {
-    return { vip: false, raggiunto: false, testo: `Con un ordine da ${formattaEuro(d.p.vipSoglia)} diventi cliente VIP G LUXE: ${vantaggio}` };
+    return { vip: false, raggiunto: false, barra: true, testo: `Con un ordine da ${formattaEuro(d.p.vipSoglia)} diventi cliente VIP G LUXE: ${vantaggio}` };
   }
   const mancano = formattaEuro(d.p.vipSoglia - d.conteggio.pagati);
-  return { vip: false, raggiunto: false, testo: `Ti mancano ${mancano} per diventare cliente VIP G LUXE: ${vantaggio}` };
+  return { vip: false, raggiunto: false, barra: true, testo: `Ti mancano ${mancano} per diventare cliente VIP G LUXE: ${vantaggio}` };
 }

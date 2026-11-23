@@ -7,6 +7,7 @@ import { calcolaOrdine } from "./calcolo-ordine";
 import { PARAMETRI_INIZIALI as P } from "./parametri";
 import { calcolaMese } from "./provvigioni/motore";
 import {
+  avvisoScadenzaVip,
   contaProdotti,
   daRevocare,
   esitoVipDelPagamento,
@@ -175,6 +176,21 @@ describe("registro e revoche", () => {
   });
 });
 
+describe("avviso di scadenza", () => {
+  test("parte da 30 giorni prima fino al giorno della scadenza compreso", () => {
+    expect(avvisoScadenzaVip("2027-12-31", "2027-11-30", P)).toBe(false);
+    expect(avvisoScadenzaVip("2027-12-31", "2027-12-01", P)).toBe(true);
+    expect(avvisoScadenzaVip("2027-12-31", "2027-12-31", P)).toBe(true);
+    expect(avvisoScadenzaVip("2027-12-31", "2028-01-01", P)).toBe(false);
+    expect(avvisoScadenzaVip(null, "2027-12-20", P)).toBe(false);
+  });
+
+  test("i giorni sono un parametro", () => {
+    expect(avvisoScadenzaVip("2027-12-31", "2027-12-20", { ...P, vipAvvisoGiorni: 7 })).toBe(false);
+    expect(avvisoScadenzaVip("2027-12-31", "2027-12-24", { ...P, vipAvvisoGiorni: 7 })).toBe(true);
+  });
+});
+
 describe("frase nel carrello", () => {
   const oggi = "2027-03-01";
 
@@ -191,11 +207,23 @@ describe("frase nel carrello", () => {
     });
   });
 
-  test("VIP: scadenza e quanto manca (a listino) per rinnovare", () => {
-    const m = messaggioVip({ validaFino: "2027-12-31", oggi, conteggio: { pagati: 6274n, aListino: 7380n }, p: P });
-    expect(m.testo).toBe("Sei cliente VIP fino al 31/12/2027. Ti mancano 25,20 € a listino per rinnovare il tuo status VIP fino al 29/02/2028.");
-    expect(messaggioVip({ validaFino: "2027-12-31", oggi, conteggio: { pagati: 9241n, aListino: 10870n }, p: P }).testo).toBe(
-      "Sei cliente VIP fino al 31/12/2027. Con questo ordine rinnovi il tuo status VIP fino al 29/02/2028.",
+  test("VIP lontana dalla scadenza: solo la scadenza e lo sconto, niente rinnovo né barra", () => {
+    for (const conteggio of [{ pagati: 0n, aListino: 0n }, { pagati: 6274n, aListino: 7380n }, { pagati: 9241n, aListino: 10870n }]) {
+      expect(messaggioVip({ validaFino: "2027-12-31", oggi, conteggio, p: P })).toEqual({
+        vip: true,
+        raggiunto: false,
+        barra: false,
+        testo: "Sei cliente VIP fino al 31/12/2027: i prodotti a listino hanno già il 15% di sconto.",
+      });
+    }
+  });
+
+  test("VIP vicina alla scadenza (dai 30 giorni prima): quanto manca, a listino, per rinnovare", () => {
+    const m = messaggioVip({ validaFino: "2027-03-20", oggi, conteggio: { pagati: 6274n, aListino: 7380n }, p: P });
+    expect(m).toMatchObject({ vip: true, raggiunto: false, barra: true });
+    expect(m.testo).toBe("Sei cliente VIP fino al 20/03/2027. Ti mancano 25,20 € a listino per rinnovare il tuo status VIP fino al 29/02/2028.");
+    expect(messaggioVip({ validaFino: "2027-03-20", oggi, conteggio: { pagati: 9241n, aListino: 10870n }, p: P }).testo).toBe(
+      "Sei cliente VIP fino al 20/03/2027. Con questo ordine rinnovi il tuo status VIP fino al 29/02/2028.",
     );
   });
 

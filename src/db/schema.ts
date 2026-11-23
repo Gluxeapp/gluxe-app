@@ -122,8 +122,13 @@ export const richiesteContatto = app.table("richieste_contatto", {
   note: text("note"),
   gestitaDa: uuid("gestita_da").references(() => utenti.id),
   gestitaIl: timestamp("gestita_il", { withTimezone: true }),
-  /** "incaricata": chi vuole diventare incaricata e non ha uno sponsor; "cliente": cliente registrato senza consulente (decisione 32). */
+  /**
+   * "incaricata": chi vuole diventare incaricata e non ha uno sponsor; "cliente": cliente registrato senza consulente
+   * (decisione 32); "candidatura": cliente con profilo che chiede di diventare incaricata da "Guadagna con G LUXE".
+   */
   tipo: text("tipo").notNull().default("incaricata"),
+  /** Messaggio facoltativo di chi si candida (le note restano alla sede). */
+  messaggio: text("messaggio"),
   clienteId: uuid("cliente_id").references((): AnyPgColumn => clienti.id),
   creatoIl: creatoIl(),
 });
@@ -805,4 +810,18 @@ export const registroVip = app.table(
     uniqueIndex("registro_vip_ordine").on(t.ordineId).where(sql`${t.tipo} <> 'revoca'`),
     uniqueIndex("registro_vip_revoca").on(t.revocaDi),
   ],
+);
+
+/** Avvisi di scadenza VIP già mandati: uno solo per ogni scadenza di ogni cliente (decisione 35). */
+export const avvisiVip = app.table(
+  "avvisi_vip",
+  {
+    id: bigserial("id", { mode: "bigint" }).primaryKey(),
+    clienteId: uuid("cliente_id")
+      .notNull()
+      .references(() => clienti.id),
+    validaFino: date("valida_fino").notNull(),
+    creatoIl: creatoIl(),
+  },
+  (t) => [uniqueIndex("avvisi_vip_unico").on(t.clienteId, t.validaFino)],
 );

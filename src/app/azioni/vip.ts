@@ -16,7 +16,7 @@ const schemaRichiesti = z
   .array(z.object({ prodottoId: z.uuid(), quantita: z.number().int().min(0).max(QUANTITA_MASSIMA) }))
   .max(50);
 
-export type FraseVip = { testo: string; vip: boolean; raggiunto: boolean; avanzamento: number };
+export type FraseVip = { testo: string; vip: boolean; raggiunto: boolean; barra: boolean; avanzamento: number };
 
 export async function fraseVip(richiesti: unknown, daProfilo: boolean): Promise<FraseVip | null> {
   const letti = schemaRichiesti.safeParse(richiesti);
