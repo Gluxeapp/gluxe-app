@@ -24,7 +24,7 @@ export default function Registrazione() {
 
 // Il prezzo dello start kit si legge dal catalogo: se la sede lo cambia, il modulo si aggiorna da solo.
 async function Modulo() {
-  const [kit] = await db
+  const [kit] = await db()
     .select({ prezzo: prodotti.prezzoListino })
     .from(prodotti)
     .where(and(eq(prodotti.tipo, "start_kit"), eq(prodotti.attivo, true)))
