@@ -377,6 +377,24 @@ try {
     await voce("revoca", { validaFino: null, revocaDi: v.id });
     await voce("revoca", { validaFino: null, revocaDi: v.id });
   });
+  // 1g) Candidature delle clienti da "Guadagna con G LUXE" (migrazione 0013).
+  const candidatura = async (tx, clienteId, messaggio = null) => tx`
+    insert into app.richieste_contatto (nome, cognome, telefono, email, citta, tipo, cliente_id, messaggio)
+    values ('Vera', 'Prova', '3330000000', 'cand@gluxe.test', 'Milano', 'candidatura', ${clienteId}, ${messaggio})`;
+  try {
+    await sql.begin(async (tx) => {
+      const { cliente: c } = await ordineVip(tx);
+      await candidatura(tx, c.id, "Mi piacerebbe provare");
+      throw new Error("ANNULLA");
+    });
+  } catch (e) {
+    esito(e.message === "ANNULLA", "accettato: candidatura di una cliente con il suo messaggio");
+  }
+  await deveFallire("candidatura senza la cliente", (tx) => candidatura(tx, null));
+  await deveFallire("messaggio di candidatura oltre 1000 caratteri", async (tx) => {
+    const { cliente: c } = await ordineVip(tx);
+    await candidatura(tx, c.id, "x".repeat(1001));
+  });
   await deveFallire("due avvisi di scadenza VIP per la stessa scadenza", async (tx) => {
     const { cliente } = await ordineVip(tx);
     await tx`insert into app.avvisi_vip (cliente_id, valida_fino) values (${cliente.id}, current_date + 10)`;

@@ -1,8 +1,11 @@
 import "server-only";
 import { and, asc, desc, eq, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { clienti, incaricati, ordini, richiesteContatto, righeOrdine, storicoLegamiClienti, storicoStatiOrdine, utenti } from "@/db/schema";
+import { clienti, incaricati, ordini, prodotti, richiesteContatto, righeOrdine, storicoLegamiClienti, storicoStatiOrdine, utenti } from "@/db/schema";
+import { parametriCorrenti } from "./catalogo";
 import { creaCodice } from "./codici-verifica";
+import { formatta, formattaEuro } from "./denaro";
+import { prezziProdotto } from "./prezzi";
 import { inviaEmail } from "./email";
 import { indirizzoApp } from "./indirizzo-app";
 import { negozioDi } from "./negozio";
@@ -117,7 +120,7 @@ export async function chiediConsulente(cliente: { id: string; nome: string; cogn
   const [aperta] = await db()
     .select({ id: richiesteContatto.id })
     .from(richiesteContatto)
-    .where(and(eq(richiesteContatto.clienteId, cliente.id), eq(richiesteContatto.stato, "nuova")));
+    .where(and(eq(richiesteContatto.clienteId, cliente.id), eq(richiesteContatto.tipo, "cliente"), eq(richiesteContatto.stato, "nuova")));
   if (aperta) return false;
   await db().insert(richiesteContatto).values({
     nome: cliente.nome,
@@ -137,6 +140,96 @@ export async function chiediConsulente(cliente: { id: string; nome: string; cogn
       a: a.email,
       oggetto: "G LUXE: un cliente chiede una consulente",
       testo: `Un cliente registrato chiede una consulente per il primo acquisto.\n\nAssegnala o comunicagli un codice da qui:\n${indirizzoApp()}/staff/richieste`,
+    });
+  }
+  return true;
+}
+
+/**
+ * Contenuti di "Guadagna con G LUXE", già pronti come testi: sconto, provvigione, qualifiche e costi letti dai
+ * parametri del piano e dal catalogo di oggi (niente numeri scritti nel codice). Nessuna promessa di guadagno.
+ */
+export async function datiGuadagna() {
+  const p = await parametriCorrenti();
+  const righe = await db()
+    .select({ nome: prodotti.nome, tipo: prodotti.tipo, prezzoListino: prodotti.prezzoListino, puntiOnline: prodotti.puntiOnlineManuali, puntiPersonale: prodotti.puntiPersonaleManuali })
+    .from(prodotti)
+    .where(eq(prodotti.attivo, true))
+    .orderBy(asc(prodotti.ordine), asc(prodotti.nome));
+  const esempio = righe.find((r) => r.tipo === "prodotto");
+  const startKit = righe.find((r) => r.tipo === "start_kit");
+  const licenza = righe.find((r) => r.tipo === "licenza");
+  const perc = (pb: bigint) => `${formatta(pb).replace(/,00$/, "")}%`;
+  const prezzi = esempio ? prezziProdotto(esempio.prezzoListino, p, { personale: esempio.puntiPersonale, online: esempio.puntiOnline }) : null;
+  const titoloMassimo = p.titoli.at(-1);
+  return {
+    sconto: perc(p.scontoIncaricata),
+    provvigioneOnline: perc(p.provvigioneOnline),
+    esempio:
+      esempio && prezzi
+        ? {
+            nome: esempio.nome,
+            listino: formattaEuro(esempio.prezzoListino),
+            scontato: formattaEuro(prezzi.incaricata.ivaInclusa),
+            provvigione: formattaEuro(prezzi.provvigioneOnline),
+          }
+        : null,
+    qualifiche: p.qualifiche.map((q) => ({ nome: q.nome, soglia: formatta(q.soglia).replace(/,00$/, ""), percentuale: perc(q.percentuale) })),
+    bonusAutoMassimo: titoloMassimo && titoloMassimo.bonusAuto > 0n ? formattaEuro(titoloMassimo.bonusAuto) : null,
+    sogliaAttivita: formatta(p.sogliaAttivita).replace(/,00$/, ""),
+    startKit: startKit ? formattaEuro(startKit.prezzoListino) : null,
+    puntiStartKit: formatta(p.puntiStartKit).replace(/,00$/, ""),
+    licenza: licenza ? formattaEuro(licenza.prezzoListino) : null,
+    licenzaMesi: p.licenzaMesi,
+  };
+}
+
+/** C'è già una candidatura della cliente non ancora gestita dalla sede? */
+export async function candidaturaAperta(clienteId: string): Promise<boolean> {
+  const [aperta] = await db()
+    .select({ id: richiesteContatto.id })
+    .from(richiesteContatto)
+    .where(and(eq(richiesteContatto.clienteId, clienteId), eq(richiesteContatto.tipo, "candidatura"), eq(richiesteContatto.stato, "nuova")));
+  return Boolean(aperta);
+}
+
+/**
+ * "Guadagna con G LUXE" → "Invia la tua candidatura": la richiesta arriva alla sede (Richieste di contatto ed email
+ * all'amministrazione), che contatta la cliente. Una candidatura aperta alla volta.
+ */
+export async function inviaCandidatura(
+  cliente: { id: string; nome: string; cognome: string; telefono: string; email: string },
+  d: { citta: string; messaggio: string | null },
+): Promise<boolean> {
+  const inserita = await db().transaction(async (tx) => {
+    await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended(${`candidatura:${cliente.id}`}, 0))`);
+    const [aperta] = await tx
+      .select({ id: richiesteContatto.id })
+      .from(richiesteContatto)
+      .where(and(eq(richiesteContatto.clienteId, cliente.id), eq(richiesteContatto.tipo, "candidatura"), eq(richiesteContatto.stato, "nuova")));
+    if (aperta) return false;
+    await tx.insert(richiesteContatto).values({
+      nome: cliente.nome,
+      cognome: cliente.cognome,
+      telefono: cliente.telefono,
+      email: cliente.email,
+      citta: d.citta,
+      messaggio: d.messaggio,
+      tipo: "candidatura",
+      clienteId: cliente.id,
+    });
+    return true;
+  });
+  if (!inserita) return false;
+  const amministratori = await db()
+    .select({ email: utenti.email })
+    .from(utenti)
+    .where(and(eq(utenti.ruolo, "amministrazione"), eq(utenti.attivo, true)));
+  for (const a of amministratori) {
+    await inviaEmail({
+      a: a.email,
+      oggetto: "G LUXE: una cliente si candida come incaricata",
+      testo: `Una cliente con profilo ha inviato la sua candidatura da "Guadagna con G LUXE".\n\nContattala da qui:\n${indirizzoApp()}/staff/richieste`,
     });
   }
   return true;

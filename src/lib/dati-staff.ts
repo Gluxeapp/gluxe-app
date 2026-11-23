@@ -2,7 +2,7 @@ import "server-only";
 import { and, count, desc, eq, gte, ilike, or, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { db } from "@/db";
-import { incaricati, registroModifiche, richiesteContatto, storicoSponsor, utenti } from "@/db/schema";
+import { clienti, incaricati, registroModifiche, richiesteContatto, storicoSponsor, utenti } from "@/db/schema";
 import { richiediStaff } from "./accesso";
 
 /** Tutte le funzioni qui controllano da sole che chi chiede sia dello staff con il ruolo giusto. */
@@ -107,9 +107,16 @@ export async function elencoRichieste() {
   await richiediStaff(["amministrazione"]);
   const gestore = alias(utenti, "gestore");
   return db()
-    .select({ richiesta: richiesteContatto, gestore: gestore.nome })
+    .select({
+      richiesta: richiesteContatto,
+      gestore: gestore.nome,
+      // Consulente attuale della cliente (per le candidature: probabile sponsor).
+      consulente: sql<string | null>`${incaricati.nome} || ' ' || ${incaricati.cognome} || ' (' || ${incaricati.codice} || ')'`,
+    })
     .from(richiesteContatto)
     .leftJoin(gestore, eq(gestore.id, richiesteContatto.gestitaDa))
+    .leftJoin(clienti, eq(clienti.id, richiesteContatto.clienteId))
+    .leftJoin(incaricati, eq(incaricati.id, clienti.incaricatoId))
     .orderBy(sql`${richiesteContatto.stato} = 'gestita'`, desc(richiesteContatto.creatoIl))
     .limit(200);
 }

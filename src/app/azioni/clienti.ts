@@ -14,7 +14,7 @@ import { indirizzoApp } from "@/lib/indirizzo-app";
 import { creaOrdineDaProfilo } from "@/lib/negozio";
 import { registraStato } from "@/lib/ordini";
 import { apriPagamentoCliente, chiudiPagamento } from "@/lib/pagamenti";
-import { aggiornaProfilo, chiediConsulente, ordineDelProfilo, registraCliente } from "@/lib/profilo-cliente";
+import { aggiornaProfilo, chiediConsulente, inviaCandidatura, ordineDelProfilo, registraCliente } from "@/lib/profilo-cliente";
 import { creaSessione, DURATA_INCARICATO_ORE } from "@/lib/sessione";
 import { schemaSpedizione, schemaTelefono, testoObbligatorio } from "@/lib/spedizione";
 import { pagamentiAttivi } from "@/lib/stripe";
@@ -92,6 +92,26 @@ export async function chiediConsulenteAzione(_: EsitoModulo, formData: FormData)
     messaggio: nuova
       ? "Richiesta inviata: l'azienda ti contatterà con il codice della tua consulente."
       : "Hai già una richiesta in corso: l'azienda ti contatterà a breve.",
+  };
+}
+
+/** "Guadagna con G LUXE": candidatura della cliente per diventare incaricata; la sede la contatta. */
+export async function inviaCandidaturaAzione(_: EsitoModulo, formData: FormData): Promise<EsitoModulo> {
+  const { cliente } = await verificaCliente();
+  const valori = valoriDa(formData);
+  const citta = String(formData.get("citta") ?? "").trim().slice(0, 80);
+  const messaggio = String(formData.get("messaggio") ?? "").trim();
+  if (!citta) return { messaggio: "Indica la tua città.", errori: { citta: "Obbligatoria" }, valori };
+  if (messaggio.length > 1000) return { messaggio: "Il messaggio è troppo lungo (al massimo 1000 caratteri).", errori: { messaggio: "Troppo lungo" }, valori };
+  if (formData.get("consenso") !== "on") {
+    return { messaggio: "Per inviare la candidatura serve il consenso a essere contattata.", errori: { consenso: "Obbligatorio" }, valori };
+  }
+  const nuova = await inviaCandidatura(cliente, { citta, messaggio: messaggio || null });
+  return {
+    ok: true,
+    messaggio: nuova
+      ? "Candidatura inviata! La sede G LUXE ti contatterà a breve per darti tutte le informazioni."
+      : "Hai già inviato la tua candidatura: la sede ti contatterà a breve.",
   };
 }
 

@@ -92,6 +92,13 @@
       "when": 1795452663407,
       "tag": "0012_avvisi_vip",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1795455480194,
+      "tag": "0013_candidature_clienti",
+      "breakpoints": true
     }
   ]
 }
