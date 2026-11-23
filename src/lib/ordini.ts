@@ -72,10 +72,12 @@ export async function inserisciOrdine(
     /** Solo ordini dal negozio online. */
     clienteId?: string;
     accessoClienteImpronta?: string;
+    /** Cliente VIP oggi (decisione 35): prezzi VIP sui prodotti a listino. Solo ordini dal negozio online. */
+    vip?: boolean;
   },
 ) {
   const parametri = await parametriCorrenti();
-  const calcolo = calcolaOrdine(dati.articoli, dati.tipo, parametri);
+  const calcolo = calcolaOrdine(dati.articoli, dati.tipo, parametri, { vip: dati.tipo === "online" && dati.vip === true });
   const [nuovo] = await tx
     .insert(ordini)
     .values({

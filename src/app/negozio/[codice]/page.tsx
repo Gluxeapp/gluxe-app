@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { Avviso, Caricamento } from "@/components/ui";
 import { formattaEuro } from "@/lib/denaro";
-import { catalogoNegozio, negozioDi } from "@/lib/negozio";
+import { catalogoNegozio, fraseVipDelCarrello, negozioDi } from "@/lib/negozio";
 import { pagamentiAttivi } from "@/lib/stripe";
 import { ModuloNegozio } from "./modulo-negozio";
 
@@ -84,7 +84,12 @@ async function Contenuto({ params }: Pick<PageProps<"/negozio/[codice]">, "param
     <>
       {intestazione}
       {pagamentiAttivi() ? (
-        <ModuloNegozio codice={negozio.codice} prodotti={prodotti} spedizione={formattaEuro(catalogo.speseSpedizione)} />
+        <ModuloNegozio
+          codice={negozio.codice}
+          prodotti={prodotti}
+          spedizione={formattaEuro(catalogo.speseSpedizione)}
+          fraseVip={await fraseVipDelCarrello([], null)}
+        />
       ) : (
         <Avviso>Il pagamento online sarà attivo a breve. Torna a trovarci presto!</Avviso>
       )}

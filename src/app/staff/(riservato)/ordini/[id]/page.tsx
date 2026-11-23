@@ -66,6 +66,7 @@ async function Contenuto({ params }: Pick<PageProps<"/staff/ordini/[id]">, "para
                       <span className="block text-xs text-testo-tenue">
                         {formattaEuro(r.prezzoUnitarioIvato)} cad. · {formatta(r.totalePunti)} punti
                         {r.tipoPrezzo === "promozione" && " · in promozione"}
+                        {r.tipoPrezzo === "listino_vip" && " · prezzo VIP"}
                       </span>
                     </td>
                     <td className="py-2 text-right whitespace-nowrap">{formattaEuro(r.totaleIvato)}</td>

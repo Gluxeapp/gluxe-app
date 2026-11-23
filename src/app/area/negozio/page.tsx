@@ -111,7 +111,11 @@ async function Contenuto() {
               <li key={c.id} className="py-3">
                 <p className="font-semibold">
                   {c.nome} {c.cognome}
+                  {c.vipFino && (
+                    <span className="ml-2 inline-block rounded-full bg-oro px-2 py-0.5 align-middle text-[11px] font-semibold text-nero">VIP</span>
+                  )}
                 </p>
+                {c.vipFino && <p className="text-xs text-oro-chiaro">Cliente VIP fino al {dataItaliana(c.vipFino)}: prezzi VIP dal suo profilo</p>}
                 <p className="text-xs text-testo-tenue">
                   {c.ordini} {c.ordini === 1 ? "ordine pagato" : "ordini pagati"}
                   {c.ultimo && ` · ultimo il ${dataItaliana(c.ultimo)}`}

@@ -270,7 +270,7 @@ export const statoOrdine = app.enum("stato_ordine", [
   "reso",
 ]);
 /** Come è stato calcolato il prezzo di una riga: serve al motore provvigioni (Fase 4). */
-export const tipoPrezzoRiga = app.enum("tipo_prezzo_riga", ["listino_scontato", "promozione", "start_kit", "listino_pieno", "licenza"]);
+export const tipoPrezzoRiga = app.enum("tipo_prezzo_riga", ["listino_scontato", "promozione", "start_kit", "listino_pieno", "licenza", "listino_vip"]);
 
 /** Numeri d'ordine progressivi e leggibili (n. 1, 2, 3…), mai riutilizzati. */
 export const sequenzaNumeroOrdine = app.sequence("sequenza_numero_ordine", { startWith: 1 });
@@ -766,4 +766,43 @@ export const avvisiLicenza = app.table(
     creatoIl: creatoIl(),
   },
   (t) => [uniqueIndex("avvisi_licenza_unico").on(t.incaricatoId, t.validaFino, t.giorni)],
+);
+
+// ── Cliente VIP (decisione 35, docs/piano-compensi.md sezione 2a) ────────────
+
+export const tipoVoceVip = app.enum("tipo_voce_vip", ["attivazione", "rinnovo", "revoca"]);
+
+/**
+ * Registro dello status VIP delle clienti, solo in aggiunta: ogni ordine pagato che raggiunge la soglia è
+ * un'attivazione o un rinnovo; un reso che la fa scendere sotto la soglia è una revoca di quella voce.
+ * Lo status del giorno si ricava da qui (src/lib/vip.ts), mai da un campo modificabile a mano.
+ */
+export const registroVip = app.table(
+  "registro_vip",
+  {
+    id: bigserial("id", { mode: "bigint" }).primaryKey(),
+    clienteId: uuid("cliente_id")
+      .notNull()
+      .references(() => clienti.id),
+    tipo: tipoVoceVip("tipo").notNull(),
+    ordineId: uuid("ordine_id")
+      .notNull()
+      .references(() => ordini.id),
+    /** Giorno del pagamento (attivazione, rinnovo) o del rimborso (revoca), ora italiana. */
+    giorno: date("giorno").notNull(),
+    /** Ultimo giorno valido; vuoto per le revoche. */
+    validaFino: date("valida_fino"),
+    /** Solo per le revoche: la voce annullata. */
+    revocaDi: bigint("revoca_di", { mode: "bigint" }).references((): AnyPgColumn => registroVip.id),
+    /** Prodotti dell'ordine al momento del pagamento: pagati e a listino (centesimi), per decidere un'eventuale revoca. */
+    prodottiPagati: bigint("prodotti_pagati", { mode: "bigint" }).notNull(),
+    prodottiListino: bigint("prodotti_listino", { mode: "bigint" }).notNull(),
+    creatoIl: creatoIl(),
+  },
+  (t) => [
+    index("registro_vip_cliente").on(t.clienteId, t.id),
+    // Un ordine dà al massimo un'attivazione o un rinnovo, e una voce si revoca una volta sola.
+    uniqueIndex("registro_vip_ordine").on(t.ordineId).where(sql`${t.tipo} <> 'revoca'`),
+    uniqueIndex("registro_vip_revoca").on(t.revocaDi),
+  ],
 );

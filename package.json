@@ -27,7 +27,8 @@
     "prova:clienti": "node --env-file=.env.local node_modules/vitest/vitest.mjs run --config prove/clienti/vitest.config.mts",
     "prova:licenza": "node --env-file=.env.local node_modules/vitest/vitest.mjs run --config prove/licenza/vitest.config.mts",
     "prova:fase7": "node --env-file=.env.local node_modules/vitest/vitest.mjs run --config prove/fase7/vitest.config.mts",
-    "prova:fase6": "bash prove/fase6/azzera.sh && node --env-file=.env.local node_modules/vitest/vitest.mjs run --config prove/fase6/vitest.config.mts && bash prove/fase6/azzera.sh"
+    "prova:fase6": "bash prove/fase6/azzera.sh && node --env-file=.env.local node_modules/vitest/vitest.mjs run --config prove/fase6/vitest.config.mts && bash prove/fase6/azzera.sh",
+    "prova:vip": "node --env-file=.env.local node_modules/vitest/vitest.mjs run --config prove/vip/vitest.config.mts"
   },
   "dependencies": {
     "@node-rs/argon2": "^2.2.2",
