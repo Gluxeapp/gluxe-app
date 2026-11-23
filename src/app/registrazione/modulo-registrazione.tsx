@@ -6,7 +6,7 @@ import { registraIncaricato, verificaCodiceSponsor } from "@/app/azioni/registra
 import { CampiAnagrafica, Sezione } from "@/components/campi-anagrafica";
 import { Avviso, Campo, Pulsante, PulsanteSecondario, type EsitoModulo } from "@/components/ui";
 
-export function ModuloRegistrazione() {
+export function ModuloRegistrazione({ prezzoKit }: { prezzoKit?: string }) {
   const [esito, azione, inCorso] = useActionState<EsitoModulo, FormData>(registraIncaricato, {});
   const [sponsor, setSponsor] = useState<{ etichetta?: string; errore?: string }>({});
   const [verificaInCorso, avviaVerifica] = useTransition();
@@ -78,7 +78,7 @@ export function ModuloRegistrazione() {
       </Sezione>
 
       <Avviso>
-        Per completare la registrazione è previsto l&apos;acquisto dello <strong>start kit (59,90 €)</strong>. Dopo aver
+        Per completare la registrazione è previsto l&apos;acquisto dello <strong>start kit{prezzoKit && ` (${prezzoKit})`}</strong>. Dopo aver
         inviato i dati lo paghi online (carta, PayPal o Klarna): con il pagamento il tuo account si attiva.
       </Avviso>
 
