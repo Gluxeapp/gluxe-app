@@ -19,7 +19,7 @@ import { registra } from "../registro";
 import { distintaSepaCbi, ErroreDistinta } from "../sepa";
 import { ibanValido } from "../validazioni";
 import { meseCorrente, meseDopo, ultimoMeseChiuso, giornoDiOggi } from "./dati";
-import { importiDocumento } from "./documento";
+import { importiDocumento, MESSAGGIO_FORFETTARIO } from "./documento";
 import { dataPagamento, datiF24, finestraRichiestaAperta, pagamentoRichiedibile } from "./pagamenti";
 
 /**
@@ -140,6 +140,7 @@ export async function approvaRichiesta(richiestaId: string, utenteId: string) {
       })
       .from(documentiProvvigioni)
       .where(and(eq(documentiProvvigioni.incaricatoId, r.incaricatoId), eq(documentiProvvigioni.anno, anno)));
+    if (i.incaricato.regimeFiscale === "piva_forfettaria") throw new ErrorePagamento(MESSAGGIO_FORFETTARIO);
     const importi = importiDocumento(r.lordo, i.incaricato.regimeFiscale, p, BigInt(prec.compensi));
     const inc = i.incaricato;
     const [d] = await tx

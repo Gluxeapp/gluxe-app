@@ -119,7 +119,7 @@ export function FoglioDocumento({ documento: d, percentuali: q }: { documento: D
         {ordinaria && <Riga etichetta={`IVA ${pct(d.aliquotaIva)}`} valore={`+ ${euro(d.iva)}`} />}
         <Riga etichetta={`Ritenuta d'imposta a titolo esaustivo del ${pct(q.ritenutaAliquota)} sul ${pct(q.ritenutaBase)}`} valore={`− ${euro(d.ritenuta)}`} />
         {(ordinaria || d.inpsIncaricata > 0n) && (
-          <Riga etichetta={`Ritenuta previdenziale INPS gestione separata (su ${euro(d.inpsBase)} oltre la soglia annua)`} valore={`− ${euro(d.inpsIncaricata)}`} />
+          <Riga etichetta={`Ritenuta previdenziale INPS gestione separata (su ${euro(d.inpsBase)} di reddito oltre la franchigia annua)`} valore={`− ${euro(d.inpsIncaricata)}`} />
         )}
         {d.bollo > 0n && <Riga etichetta="Imposta di bollo" valore={`− ${euro(d.bollo)}`} />}
         <Riga etichetta="Totale da pagare" valore={euro(d.totale)} forte />

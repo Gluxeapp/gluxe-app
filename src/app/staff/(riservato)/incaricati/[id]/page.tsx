@@ -37,7 +37,6 @@ async function Contenuto({ params }: Pick<PageProps<"/staff/incaricati/[id]">, "
     iban: i.iban,
     haPartitaIva: i.partitaIva ? "si" : "no",
     partitaIva: i.partitaIva ?? "",
-    regimePartitaIva: i.regimeFiscale === "piva_forfettaria" ? "forfettario" : "ordinario",
   };
 
   return (
@@ -54,6 +53,13 @@ async function Contenuto({ params }: Pick<PageProps<"/staff/incaricati/[id]">, "
       >
         {i.nome} {i.cognome}
       </Titolo>
+
+      {i.regimeFiscale === "piva_forfettaria" && (
+        <p role="alert" className="mb-6 rounded border border-oro/60 p-3 text-sm">
+          Questa incaricata risulta in regime forfettario, che non è ammesso per le vendite a domicilio (Legge 190/2014). Le sue richieste di
+          pagamento non si possono approvare finché non salvi di nuovo la scheda: con la partita IVA il regime diventa ordinario.
+        </p>
+      )}
 
       <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
         <div className="space-y-6">

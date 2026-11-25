@@ -70,9 +70,9 @@ export const GRUPPI_PARAMETRI: { titolo: string; campi: CampoParametro[] }[] = [
       { chiave: "ritenutaBase", etichetta: "Ritenuta: base imponibile (% dell'importo)", tipo: "percentuale" },
       { chiave: "inpsAliquota", etichetta: "INPS: aliquota (%)", tipo: "percentuale" },
       { chiave: "inpsQuotaAzienda", etichetta: "INPS: quota a carico dell'azienda (%)", tipo: "percentuale" },
-      { chiave: "inpsBaseImponibile", etichetta: "INPS: base imponibile (% dei compensi)", tipo: "percentuale" },
-      { chiave: "inpsSogliaEsenzione", etichetta: "INPS: soglia di esenzione annua (€)", tipo: "euro" },
-      { chiave: "bolloImporto", etichetta: "Bollo su ricevute e fatture senza IVA (€)", tipo: "euro" },
+      { chiave: "inpsBaseImponibile", etichetta: "INPS: reddito imponibile (% delle provvigioni)", tipo: "percentuale" },
+      { chiave: "inpsSogliaEsenzione", etichetta: "INPS: franchigia annua sul reddito imponibile (€)", tipo: "euro" },
+      { chiave: "bolloImporto", etichetta: "Bollo sulle ricevute (€)", tipo: "euro" },
       { chiave: "bolloSoglia", etichetta: "Bollo dovuto oltre (€)", tipo: "euro" },
       { chiave: "licenzaMesi", etichetta: "Licenza annuale: durata (mesi)", tipo: "intero" },
       { chiave: "licenzaAnticipoGiorni", etichetta: "Licenza: rinnovabile da giorni prima della scadenza", tipo: "intero" },
@@ -84,6 +84,15 @@ export const GRUPPI_PARAMETRI: { titolo: string; campi: CampoParametro[] }[] = [
 ];
 
 const numero = (v: bigint) => formatta(v).replace(/,00$/, "");
+
+/**
+ * Numero scritto nel modulo: accetta il simbolo % o € e, se non c'è la virgola, un punto seguito da
+ * 1 o 2 cifre finali come virgola dei decimali ("33.72%" → 33,72). "9.000" resta novemila.
+ */
+function daTestoModulo(s: string) {
+  const pulito = s.replace(/[%€\s]/g, "");
+  return daTesto(/^-?\d+\.\d{1,2}$/.test(pulito) ? pulito.replace(".", ",") : pulito);
+}
 
 function testo(tipo: Tipo, v: unknown): string {
   if (tipo === "booleano") return v ? "si" : "no";
@@ -142,8 +151,8 @@ export function parametriDaModulo(v: Record<string, string>, base: Parametri = P
   for (const g of GRUPPI_PARAMETRI) {
     for (const c of g.campi) {
       const k = c.chiave;
-      if (c.tipo === "percentuale") out[k] = leggi(k, daTesto, percento);
-      else if (c.tipo === "punti" || c.tipo === "euro") out[k] = leggi(k, daTesto, nonNegativo);
+      if (c.tipo === "percentuale") out[k] = leggi(k, daTestoModulo, percento);
+      else if (c.tipo === "punti" || c.tipo === "euro") out[k] = leggi(k, daTestoModulo, nonNegativo);
       else if (c.tipo === "intero") out[k] = leggi(k, intero, (x) => (x < 1 ? "Almeno 1" : undefined));
       else if (c.tipo === "giorno") out[k] = leggi(k, intero, (x) => (x < 1 || x > 28 ? "Tra 1 e 28" : undefined));
       else if (c.tipo === "booleano") out[k] = v[k] === "si";
@@ -158,19 +167,19 @@ export function parametriDaModulo(v: Record<string, string>, base: Parametri = P
 
   out.qualifiche = base.qualifiche.map((q, i) => ({
     nome: q.nome,
-    soglia: leggi(`qualifiche.${i}.soglia`, daTesto, nonNegativo),
-    percentuale: leggi(`qualifiche.${i}.percentuale`, daTesto, percento),
+    soglia: leggi(`qualifiche.${i}.soglia`, daTestoModulo, nonNegativo),
+    percentuale: leggi(`qualifiche.${i}.percentuale`, daTestoModulo, percento),
   }));
   out.titoli = base.titoli.map((t, i) => ({
     nome: t.nome,
     linee: leggi(`titoli.${i}.linee`, intero, (x) => (x < 1 ? "Almeno 1" : undefined)),
     generazioni: leggi(
       `titoli.${i}.generazioni`,
-      (s) => (s === "" ? [] : s.split(";").map((x) => daTesto(x))),
+      (s) => (s === "" ? [] : s.split(";").map((x) => daTestoModulo(x.trim()))),
       (xs) => (xs.some((x) => x < 0n || x > 10000n) ? "Percentuali tra 0 e 100, separate da ;" : undefined),
     ),
     quotePool: leggi(`titoli.${i}.quotePool`, (s) => (s === "" ? 0 : intero(s))),
-    bonusAuto: leggi(`titoli.${i}.bonusAuto`, daTesto, nonNegativo),
+    bonusAuto: leggi(`titoli.${i}.bonusAuto`, daTestoModulo, nonNegativo),
   }));
 
   // Coerenza fra i valori.
