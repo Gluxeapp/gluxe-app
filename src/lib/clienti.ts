@@ -31,7 +31,7 @@ async function improntePerOrdini(per: "cliente" | "incaricata", ids: string[]) {
 }
 
 /** Segnalazioni di un gruppo di clienti, confrontati con l'incaricata a cui sono legati. */
-async function segnalazioni(tutti: { id: string; email: string; telefono: string; incaricatoId: string | null }[]) {
+async function segnalazioni(tutti: { id: string; email: string; codiceFiscale: string | null; telefono: string; incaricatoId: string | null }[]) {
   // I clienti senza consulente non hanno nessuno con cui confrontarli.
   const elenco = tutti.filter((c): c is typeof c & { incaricatoId: string } => c.incaricatoId !== null);
   const esito = new Map<string, Motivo[]>();
@@ -41,7 +41,7 @@ async function segnalazioni(tutti: { id: string; email: string; telefono: string
     improntePerOrdini("cliente", elenco.map((c) => c.id)),
     improntePerOrdini("incaricata", idIncaricate),
     db()
-      .select({ id: incaricati.id, email: utenti.email, telefono: incaricati.telefono, indirizzo: incaricati.indirizzo, cap: incaricati.cap })
+      .select({ id: incaricati.id, email: utenti.email, codiceFiscale: incaricati.codiceFiscale, telefono: incaricati.telefono, indirizzo: incaricati.indirizzo, cap: incaricati.cap })
       .from(incaricati)
       .innerJoin(utenti, eq(utenti.id, incaricati.utenteId))
       .where(inArray(incaricati.id, idIncaricate)),
@@ -55,9 +55,10 @@ async function segnalazioni(tutti: { id: string; email: string; telefono: string
     esito.set(
       c.id,
       segnalazioniCliente(
-        { email: c.email, telefoni: [c.telefono, ...ordiniCliente.telefoni], indirizzi: ordiniCliente.indirizzi, metodi: ordiniCliente.metodi },
+        { email: c.email, codiceFiscale: c.codiceFiscale, telefoni: [c.telefono, ...ordiniCliente.telefoni], indirizzi: ordiniCliente.indirizzi, metodi: ordiniCliente.metodi },
         {
           email: profilo.email,
+          codiceFiscale: profilo.codiceFiscale,
           telefoni: [profilo.telefono, ...ordiniIncaricata.telefoni],
           indirizzi: [{ indirizzo: profilo.indirizzo, cap: profilo.cap }, ...ordiniIncaricata.indirizzi],
           metodi: ordiniIncaricata.metodi,
@@ -75,6 +76,7 @@ export async function elencoClienti() {
       id: clienti.id,
       nome: clienti.nome,
       cognome: clienti.cognome,
+      codiceFiscale: clienti.codiceFiscale,
       email: clienti.email,
       telefono: clienti.telefono,
       incaricatoId: clienti.incaricatoId,
@@ -134,6 +136,33 @@ export async function schedaCliente(id: string) {
 }
 
 /** Sposta un cliente a un'altra incaricata (solo amministrazione): vale per gli ordini futuri. */
+/**
+ * Correzione del codice fiscale di un cliente (decisione 36): solo la sede, con motivo, nel registro modifiche.
+ * Se il codice è già di un altro cliente non si uniscono i due in automatico.
+ */
+export async function correggiCodiceFiscale(dati: { clienteId: string; codiceFiscale: string; motivo: string; utenteId: string }) {
+  return db().transaction(async (tx) => {
+    await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended(${`cliente-cf:${dati.codiceFiscale}`}, 0))`);
+    const [prima] = await tx.select().from(clienti).where(eq(clienti.id, dati.clienteId)).for("update");
+    if (!prima) return "assente" as const;
+    if (prima.codiceFiscale === dati.codiceFiscale) return "uguale" as const;
+    const [altro] = await tx.select({ id: clienti.id }).from(clienti).where(eq(clienti.codiceFiscale, dati.codiceFiscale));
+    if (altro) return "altrui" as const;
+    // Il database accetta il cambio solo se dichiarato come intervento tracciato della sede (migrazione 0014).
+    await tx.execute(sql`select set_config('app.correggi_codice_fiscale', 'tracciato', true)`);
+    await tx.update(clienti).set({ codiceFiscale: dati.codiceFiscale }).where(eq(clienti.id, dati.clienteId));
+    await registra(tx, {
+      utenteId: dati.utenteId,
+      azione: "cliente.codice_fiscale_corretto",
+      entita: "cliente",
+      entitaId: dati.clienteId,
+      prima: { codiceFiscale: prima.codiceFiscale },
+      dopo: { codiceFiscale: dati.codiceFiscale, motivo: dati.motivo },
+    });
+    return "ok" as const;
+  });
+}
+
 export async function spostaCliente(dati: { clienteId: string; incaricatoId: string; motivo: string; utenteId: string }) {
   return db().transaction(async (tx) => {
     const [prima] = await tx.select().from(clienti).where(eq(clienti.id, dati.clienteId)).for("update");

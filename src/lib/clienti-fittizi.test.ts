@@ -35,6 +35,14 @@ describe("Clienti fittizi (sezione 10, decisione 29)", () => {
     expect(segnalazioniCliente({ ...pulito, indirizzi: [{ indirizzo: "Via Roma 10", cap: "00100" }] }, incaricata)).toEqual([]);
   });
 
+  test("stesso codice fiscale dell'incaricata (decisione 36): il cliente è lei", () => {
+    const conCf = { ...incaricata, codiceFiscale: "RSSNNA80A41F205X" };
+    expect(segnalazioniCliente({ ...pulito, codiceFiscale: "rssnna80a41f205x" }, conCf)).toEqual(["codice_fiscale"]);
+    expect(segnalazioniCliente({ ...pulito, codiceFiscale: "VRDLGU85B12H501K" }, conCf)).toEqual([]);
+    // Cliente nato prima del codice fiscale: nessun confronto.
+    expect(segnalazioniCliente({ ...pulito, codiceFiscale: null }, conCf)).toEqual([]);
+  });
+
   test("stesso metodo di pagamento", () => {
     expect(segnalazioniCliente({ ...pulito, metodi: ["carta_xyz", "carta_abc"] }, incaricata)).toEqual(["pagamento"]);
   });

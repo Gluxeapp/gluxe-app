@@ -2,6 +2,7 @@
 // consenso ai contatti, ordini contemporanei, clienti fittizi, quote di vendita e pagine. Gli ordini creati restano
 // "annullati" e i clienti finti hanno email @gluxe.test con un codice casuale (il database non li lascia cancellare).
 import { randomUUID } from "node:crypto";
+import { codiceFiscaleCasuale } from "../codice-fiscale-casuale";
 import { sql } from "drizzle-orm";
 import { afterAll, expect, test } from "vitest";
 import { db } from "@/db";
@@ -39,7 +40,7 @@ test("Fase 7: negozio, legame del cliente, consenso, contemporaneità, controlli
 
   // Primo ordine dal negozio di Alice: il cliente nasce legato ad Alice, senza consenso ai contatti.
   const email = `cliente-${randomUUID().slice(0, 8)}@gluxe.test`;
-  const dati = { nome: "Cliente", cognome: "Prova", email: email.toUpperCase(), telefono: "3471234567" };
+  const dati = { nome: "Cliente", cognome: "Prova", codiceFiscale: codiceFiscaleCasuale(), email: email.toUpperCase(), telefono: "3471234567" };
   const primo = await creaOrdineOnline({ codiceNegozio: alice.codice, richiesti: [{ prodottoId: prodotto.id, quantita: 2 }], cliente: dati, spedizione, consensoContatti: false });
   creati.push(primo.id);
   const letto = await leggiOrdine(primo.id);
@@ -86,9 +87,10 @@ test("Fase 7: negozio, legame del cliente, consenso, contemporaneità, controlli
 
   // Ordini contemporanei di un cliente nuovo da due negozi: un solo cliente, un solo legame.
   const nuovaEmail = `contemporaneo-${randomUUID().slice(0, 8)}@gluxe.test`;
+  const nuovoCf = codiceFiscaleCasuale();
   const insieme = await Promise.all(
     [alice.codice, bruna.codice, alice.codice].map((codiceNegozio) =>
-      creaOrdineOnline({ codiceNegozio, richiesti: [{ prodottoId: prodotto.id, quantita: 1 }], cliente: { ...dati, email: nuovaEmail }, spedizione, consensoContatti: false }),
+      creaOrdineOnline({ codiceNegozio, richiesti: [{ prodottoId: prodotto.id, quantita: 1 }], cliente: { ...dati, codiceFiscale: nuovoCf, email: nuovaEmail }, spedizione, consensoContatti: false }),
     ),
   );
   creati.push(...insieme.map((o) => o.id));
@@ -99,16 +101,16 @@ test("Fase 7: negozio, legame del cliente, consenso, contemporaneità, controlli
 
   // Limite contro gli abusi: al massimo 5 ordini non pagati per cliente nelle 24 ore (qui ne ha già 3).
   for (let i = 0; i < 2; i++) {
-    const o = await creaOrdineOnline({ codiceNegozio: alice.codice, richiesti: [{ prodottoId: prodotto.id, quantita: 1 }], cliente: { ...dati, email: nuovaEmail }, spedizione, consensoContatti: false });
+    const o = await creaOrdineOnline({ codiceNegozio: alice.codice, richiesti: [{ prodottoId: prodotto.id, quantita: 1 }], cliente: { ...dati, codiceFiscale: nuovoCf, email: nuovaEmail }, spedizione, consensoContatti: false });
     creati.push(o.id);
   }
   await expect(
-    creaOrdineOnline({ codiceNegozio: alice.codice, richiesti: [{ prodottoId: prodotto.id, quantita: 1 }], cliente: { ...dati, email: nuovaEmail }, spedizione, consensoContatti: false }),
+    creaOrdineOnline({ codiceNegozio: alice.codice, richiesti: [{ prodottoId: prodotto.id, quantita: 1 }], cliente: { ...dati, codiceFiscale: nuovoCf, email: nuovaEmail }, spedizione, consensoContatti: false }),
   ).rejects.toThrow(/in attesa di pagamento/);
 
   // Clienti fittizi: il cliente che usa il telefono dell'incaricata è segnalato.
   const sospetto = `sospetto-${randomUUID().slice(0, 8)}@gluxe.test`;
-  const o = await creaOrdineOnline({ codiceNegozio: bruna.codice, richiesti: [{ prodottoId: prodotto.id, quantita: 1 }], cliente: { ...dati, email: sospetto, telefono: bruna.telefono }, spedizione, consensoContatti: false });
+  const o = await creaOrdineOnline({ codiceNegozio: bruna.codice, richiesti: [{ prodottoId: prodotto.id, quantita: 1 }], cliente: { ...dati, codiceFiscale: codiceFiscaleCasuale(), email: sospetto, telefono: bruna.telefono }, spedizione, consensoContatti: false });
   creati.push(o.id);
   const elenco = await elencoClienti();
   expect(elenco.find((x) => x.email === sospetto)?.motivi).toContain("telefono");

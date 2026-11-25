@@ -296,7 +296,12 @@ export const clienti = app.table(
     utenteId: uuid("utente_id")
       .unique()
       .references(() => utenti.id),
-    /** Sempre in minuscolo. */
+    /**
+     * Codice fiscale, in maiuscolo: riconosce il cliente (decisione 36). Vuoto solo per i clienti nati prima,
+     * finché non lo scrivono al prossimo acquisto. Una volta scritto lo corregge solo la sede.
+     */
+    codiceFiscale: text("codice_fiscale"),
+    /** Sempre in minuscolo. Più clienti possono avere la stessa email (decisione 36). */
     email: text("email").notNull(),
     nome: text("nome").notNull(),
     cognome: text("cognome").notNull(),
@@ -312,7 +317,13 @@ export const clienti = app.table(
     privacyAccettataIl: timestamp("privacy_accettata_il", { withTimezone: true }),
     creatoIl: creatoIl(),
   },
-  (t) => [uniqueIndex("clienti_email").on(t.email), index("clienti_incaricato").on(t.incaricatoId)],
+  (t) => [
+    uniqueIndex("clienti_codice_fiscale").on(t.codiceFiscale).where(sql`${t.codiceFiscale} is not null`),
+    index("clienti_email").on(t.email),
+    // Clienti nati prima del codice fiscale: al massimo uno per email (era la vecchia regola).
+    uniqueIndex("clienti_email_senza_codice_fiscale").on(t.email).where(sql`${t.codiceFiscale} is null`),
+    index("clienti_incaricato").on(t.incaricatoId),
+  ],
 );
 
 /** Storico dei legami cliente → incaricata: il primo e ogni spostamento fatto dalla sede, con motivo. */

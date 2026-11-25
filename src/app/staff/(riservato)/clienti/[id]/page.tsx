@@ -8,6 +8,7 @@ import { schedaCliente } from "@/lib/clienti";
 import { ETICHETTE_MOTIVO } from "@/lib/clienti-fittizi";
 import { formatta, formattaEuro } from "@/lib/denaro";
 import { dataOra, ETICHETTE_STATO, numeroOrdine } from "@/lib/ordini";
+import { ModuloCodiceFiscale } from "./modulo-codice-fiscale";
 import { ModuloSposta } from "./modulo-sposta";
 
 export default function SchedaCliente({ params }: PageProps<"/staff/clienti/[id]">) {
@@ -94,6 +95,8 @@ async function Contenuto({ params }: Pick<PageProps<"/staff/clienti/[id]">, "par
           <Scheda>
             <h2 className="font-titoli text-xl text-oro-chiaro">Dati</h2>
             <p className="mt-2 text-sm">
+              {c.codiceFiscale ? <>Codice fiscale {c.codiceFiscale}</> : <span className="text-testo-tenue">Codice fiscale non ancora indicato</span>}
+              <br />
               {c.email}
               <br />
               Tel. {c.telefono}
@@ -105,6 +108,7 @@ async function Contenuto({ params }: Pick<PageProps<"/staff/clienti/[id]">, "par
               {c.privacyAccettataIl ? `Privacy accettata il ${dataOra(c.privacyAccettataIl)}.` : "Informativa non ancora accettata (ordine preparato dalla consulente, non ancora pagato)."}{" "}
               {c.utenteId ? "Ha un profilo cliente." : "Compra come ospite (senza profilo)."}
             </p>
+            {staff.ruolo === "amministrazione" && <ModuloCodiceFiscale id={c.id} />}
           </Scheda>
 
           <Scheda>

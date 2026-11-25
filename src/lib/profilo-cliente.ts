@@ -1,5 +1,5 @@
 import "server-only";
-import { and, asc, desc, eq, sql } from "drizzle-orm";
+import { and, asc, desc, eq, isNull, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { clienti, incaricati, ordini, prodotti, richiesteContatto, righeOrdine, storicoLegamiClienti, storicoStatiOrdine, utenti } from "@/db/schema";
 import { parametriCorrenti } from "./catalogo";
@@ -17,59 +17,131 @@ import { cifraPassword } from "./sicurezza";
  * I controlli di accesso li fanno le azioni e le pagine (richiediCliente).
  */
 
-export type NuovoCliente = { nome: string; cognome: string; email: string; telefono: string; password: string; codiceNegozio?: string };
+export type NuovoCliente = {
+  nome: string;
+  cognome: string;
+  codiceFiscale: string;
+  email: string;
+  telefono: string;
+  password: string;
+  codiceNegozio?: string;
+};
+
+export type EsitoRegistrazione = { esito: "attivo"; utenteId: string } | { esito: "conferma" } | { esito: "esiste" } | { esito: "sede" };
 
 /**
- * Registrazione. Email nuova: profilo attivo subito (legato all'incaricata del link, se c'è). Email di un cliente che
- * esiste già (ha comprato come ospite o gli è stato preparato un ordine): il profilo si attiva solo scegliendo la
- * password dal link mandato a quell'email, così nessuno vede ordini e dati altrui scrivendo la sua email.
+ * Registrazione. Il cliente si riconosce dal codice fiscale (decisione 36).
+ * - Codice fiscale ed email nuovi: profilo attivo subito (legato all'incaricata del link, se c'è).
+ * - Codice fiscale di un cliente che esiste già (ha comprato come ospite o gli è stato preparato un ordine): il profilo
+ *   si attiva solo scegliendo la password dal link mandato all'email con cui ha comprato (che resta quella del profilo),
+ *   così nessuno vede ordini e dati altrui scrivendo un codice fiscale. Se ha già un profilo, a quell'email arriva un
+ *   promemoria. La risposta sullo schermo è la stessa nei due casi.
+ * - Cliente nato prima del codice fiscale (stessa email, senza codice): come sopra, e gli si scrive il codice fiscale.
  */
-export async function registraCliente(d: NuovoCliente): Promise<{ esito: "attivo"; utenteId: string } | { esito: "conferma" } | { esito: "esiste" }> {
+export async function registraCliente(d: NuovoCliente): Promise<EsitoRegistrazione> {
   const email = d.email.trim().toLowerCase();
   const negozio = d.codiceNegozio ? await negozioDi(d.codiceNegozio) : undefined;
   const legata = negozio?.stato.aperto ? negozio : undefined;
   const hash = await cifraPassword(d.password);
 
-  const esito = await db().transaction(async (tx) => {
+  type Avviso = { tipo: "attiva" | "promemoria"; utenteId: string; email: string; nome: string };
+  const esito = await db().transaction(async (tx): Promise<EsitoRegistrazione | { esito: "avviso"; avviso: Avviso }> => {
+    // Stesso ordine dei blocchi degli ordini (codice fiscale → email): due richieste insieme non si incastrano.
+    await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended(${`cliente-cf:${d.codiceFiscale}`}, 0))`);
     await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended(${`cliente:${email}`}, 0))`);
-    const [profilo] = await tx
-      .select({ id: utenti.id })
-      .from(utenti)
-      .where(and(sql`lower(${utenti.email}) = ${email}`, eq(utenti.ruolo, "cliente")));
-    if (profilo) return { esito: "esiste" as const };
-    const [esistente] = await tx.select().from(clienti).where(eq(clienti.email, email)).for("update");
-    const nome = esistente ? `${esistente.nome} ${esistente.cognome}` : `${d.nome} ${d.cognome}`;
+    const profiloCon = async (e: string) =>
+      (await tx.select({ id: utenti.id }).from(utenti).where(and(sql`lower(${utenti.email}) = ${e}`, eq(utenti.ruolo, "cliente"))))[0];
+
+    const [perCodice] = await tx.select().from(clienti).where(eq(clienti.codiceFiscale, d.codiceFiscale)).for("update");
+    if (perCodice) {
+      if (perCodice.utenteId) {
+        return { esito: "avviso", avviso: { tipo: "promemoria", utenteId: perCodice.utenteId, email: perCodice.email, nome: perCodice.nome } };
+      }
+      // Un profilo con l'email del cliente esiste già (di un'altra persona con la stessa email): lo sistema la sede.
+      if (await profiloCon(perCodice.email)) return { esito: "sede" };
+      const [utente] = await tx
+        .insert(utenti)
+        .values({ ruolo: "cliente", email: perCodice.email, nome: `${perCodice.nome} ${perCodice.cognome}`, passwordHash: null })
+        .returning({ id: utenti.id });
+      await tx.update(clienti).set({ utenteId: utente.id }).where(eq(clienti.id, perCodice.id));
+      return { esito: "avviso", avviso: { tipo: "attiva", utenteId: utente.id, email: perCodice.email, nome: perCodice.nome } };
+    }
+
+    if (await profiloCon(email)) return { esito: "esiste" };
+    const [senzaCodice] = await tx
+      .select()
+      .from(clienti)
+      .where(and(eq(clienti.email, email), isNull(clienti.codiceFiscale)))
+      .for("update");
+    if (senzaCodice) {
+      const [utente] = await tx
+        .insert(utenti)
+        .values({ ruolo: "cliente", email, nome: `${senzaCodice.nome} ${senzaCodice.cognome}`, passwordHash: null })
+        .returning({ id: utenti.id });
+      await tx.update(clienti).set({ utenteId: utente.id, codiceFiscale: d.codiceFiscale }).where(eq(clienti.id, senzaCodice.id));
+      return { esito: "avviso", avviso: { tipo: "attiva", utenteId: utente.id, email, nome: senzaCodice.nome } };
+    }
+
     const [utente] = await tx
       .insert(utenti)
-      .values({ ruolo: "cliente", email, nome, passwordHash: esistente ? null : hash })
+      .values({ ruolo: "cliente", email, nome: `${d.nome} ${d.cognome}`, passwordHash: hash })
       .returning({ id: utenti.id });
-    if (esistente) {
-      await tx.update(clienti).set({ utenteId: utente.id }).where(eq(clienti.id, esistente.id));
-      return { esito: "conferma" as const, utente: { id: utente.id, email, nome: esistente.nome } };
-    }
-    const ora = new Date();
     const [cliente] = await tx
       .insert(clienti)
-      .values({ incaricatoId: legata?.id ?? null, utenteId: utente.id, email, nome: d.nome, cognome: d.cognome, telefono: d.telefono, privacyAccettataIl: ora })
+      .values({
+        incaricatoId: legata?.id ?? null,
+        utenteId: utente.id,
+        codiceFiscale: d.codiceFiscale,
+        email,
+        nome: d.nome,
+        cognome: d.cognome,
+        telefono: d.telefono,
+        privacyAccettataIl: new Date(),
+      })
       .returning({ id: clienti.id });
     if (legata) {
       await tx.insert(storicoLegamiClienti).values({ clienteId: cliente.id, incaricatoId: legata.id, motivo: `Registrazione dal negozio ${legata.codice}` });
     }
-    return { esito: "attivo" as const, utenteId: utente.id };
+    return { esito: "attivo", utenteId: utente.id };
   });
 
-  if (esito.esito === "conferma") {
-    const token = await creaCodice(esito.utente.id, "recupero_password");
-    await inviaEmail({
-      a: esito.utente.email,
-      oggetto: "G LUXE: conferma il tuo profilo",
-      testo:
-        `Ciao ${esito.utente.nome},\n\nhai chiesto di creare il tuo profilo cliente G LUXE. Per attivarlo scegli la password da questo link:\n` +
-        `${indirizzoApp()}/reimposta-password?token=${token}\n\nIl link vale un'ora. Se non sei stata tu, ignora questa email.`,
-    });
-    return { esito: "conferma" };
-  }
-  return esito;
+  if (esito.esito !== "avviso") return esito;
+  const { avviso } = esito;
+  const token = await creaCodice(avviso.utenteId, "recupero_password");
+  await inviaEmail({
+    a: avviso.email,
+    oggetto: avviso.tipo === "attiva" ? "G LUXE: conferma il tuo profilo" : "G LUXE: hai già un profilo",
+    testo:
+      avviso.tipo === "attiva"
+        ? `Ciao ${avviso.nome},\n\nhai chiesto di creare il tuo profilo cliente G LUXE. Per attivarlo scegli la password da questo link:\n` +
+          `${indirizzoApp()}/reimposta-password?token=${token}\n\nIl link vale un'ora. Se non sei stata tu, ignora questa email.`
+        : `Ciao ${avviso.nome},\n\nhai chiesto di creare un profilo cliente G LUXE, ma ne hai già uno: accedi con questa email. ` +
+          `Se non ricordi la password, scegline una nuova da questo link:\n${indirizzoApp()}/reimposta-password?token=${token}\n\n` +
+          `Il link vale un'ora. Se non sei stata tu, ignora questa email.`,
+  });
+  return { esito: "conferma" };
+}
+
+export const MESSAGGIO_CODICE_FISCALE_DI_ALTRI =
+  "Questo codice fiscale risulta già di un altro cliente: controlla di averlo scritto bene, oppure contatta l'azienda.";
+
+/**
+ * Codice fiscale per i profili nati prima della decisione 36: si scrive una volta sola. Se è già di un altro cliente
+ * non si unisce nulla in automatico (potrebbe essere un errore di battitura): lo sistema la sede.
+ */
+export async function aggiungiCodiceFiscale(clienteId: string, codiceFiscale: string): Promise<{ ok: true } | { ok: false; messaggio: string }> {
+  return db().transaction(async (tx) => {
+    await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended(${`cliente-cf:${codiceFiscale}`}, 0))`);
+    const [altro] = await tx.select({ id: clienti.id }).from(clienti).where(eq(clienti.codiceFiscale, codiceFiscale));
+    if (altro && altro.id !== clienteId) return { ok: false, messaggio: MESSAGGIO_CODICE_FISCALE_DI_ALTRI };
+    const [fatto] = await tx
+      .update(clienti)
+      .set({ codiceFiscale })
+      .where(and(eq(clienti.id, clienteId), isNull(clienti.codiceFiscale)))
+      .returning({ id: clienti.id });
+    if (!fatto && !altro) return { ok: false, messaggio: "Il codice fiscale è già nel profilo: per correggerlo contatta l'azienda." };
+    return { ok: true };
+  });
 }
 
 /** Modifica dei dati del profilo: nome, telefono, indirizzo di spedizione e consenso ai contatti (email e legame no). */

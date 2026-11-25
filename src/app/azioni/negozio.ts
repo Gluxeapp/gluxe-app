@@ -9,13 +9,13 @@ import { db } from "@/db";
 import { clienti, incaricati } from "@/db/schema";
 import { richiediStaff, verificaIncaricataOperativa } from "@/lib/accesso";
 import { ErroreOrdine, QUANTITA_MASSIMA } from "@/lib/calcolo-ordine";
-import { spostaCliente } from "@/lib/clienti";
+import { correggiCodiceFiscale, spostaCliente } from "@/lib/clienti";
 import { indirizzoApp } from "@/lib/indirizzo-app";
 import { creaOrdineOnline, creaOrdinePerCliente, ordineDelCliente } from "@/lib/negozio";
 import { inviaEmail } from "@/lib/email";
 import { registraStato } from "@/lib/ordini";
 import { apriPagamentoCliente, chiudiPagamento } from "@/lib/pagamenti";
-import { schemaSpedizione, schemaTelefono, testoObbligatorio } from "@/lib/spedizione";
+import { schemaCodiceFiscale, schemaSpedizione, schemaTelefono, testoObbligatorio } from "@/lib/spedizione";
 import { pagamentiAttivi } from "@/lib/stripe";
 import { normalizzaCodiceIncaricato } from "@/lib/validazioni";
 
@@ -27,6 +27,8 @@ import { normalizzaCodiceIncaricato } from "@/lib/validazioni";
 const schemaCliente = z.object({
   nome: testoObbligatorio("Nome", 60),
   cognome: testoObbligatorio("Cognome", 60),
+  // Decisione 36: il cliente si riconosce dal codice fiscale.
+  codiceFiscale: schemaCodiceFiscale,
   email: z.string().trim().toLowerCase().max(160).email("Email non valida"),
   telefono: schemaTelefono,
 });
@@ -144,6 +146,24 @@ export async function annullaOrdineCliente(_: EsitoModulo, formData: FormData): 
 }
 
 /** La sede sposta un cliente a un'altra incaricata (solo amministrazione, con motivo). */
+/** La sede corregge il codice fiscale di un cliente (decisione 36): solo amministrazione, con motivo. */
+export async function correggiCodiceFiscaleAzione(_: EsitoModulo, formData: FormData): Promise<EsitoModulo> {
+  const staff = await richiediStaff(["amministrazione"]);
+  const valori = valoriDa(formData);
+  const letto = z
+    .object({ id: z.uuid(), codiceFiscale: schemaCodiceFiscale, motivo: z.string().trim().min(5, "Indica il motivo").max(300) })
+    .safeParse(Object.fromEntries(formData));
+  if (!letto.success) return { messaggio: "Controlla i campi.", errori: erroriPerCampo(letto.error.issues), valori };
+  const esito = await correggiCodiceFiscale({ clienteId: letto.data.id, codiceFiscale: letto.data.codiceFiscale, motivo: letto.data.motivo, utenteId: staff.utenteId });
+  if (esito === "assente") return { messaggio: "Cliente non trovato.", valori };
+  if (esito === "uguale") return { messaggio: "Il cliente ha già questo codice fiscale.", valori };
+  if (esito === "altrui") {
+    return { messaggio: "Questo codice fiscale è già di un altro cliente: i due clienti non si uniscono in automatico.", errori: { codiceFiscale: "Già di un altro cliente" }, valori };
+  }
+  revalidatePath(`/staff/clienti/${letto.data.id}`);
+  return { ok: true, messaggio: "Codice fiscale corretto." };
+}
+
 export async function spostaClienteAzione(_: EsitoModulo, formData: FormData): Promise<EsitoModulo> {
   const staff = await richiediStaff(["amministrazione"]);
   const valori = valoriDa(formData);

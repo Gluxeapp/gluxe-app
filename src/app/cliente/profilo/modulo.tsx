@@ -4,7 +4,7 @@ import { useActionState } from "react";
 import { salvaProfiloCliente } from "@/app/azioni/clienti";
 import { Avviso, Campo, Pulsante, type EsitoModulo } from "@/components/ui";
 
-export function ModuloProfiloCliente({ valori }: { valori: Record<string, string> }) {
+export function ModuloProfiloCliente({ valori, chiediCodiceFiscale }: { valori: Record<string, string>; chiediCodiceFiscale: boolean }) {
   const [esito, azione, inCorso] = useActionState<EsitoModulo, FormData>(salvaProfiloCliente, { valori });
   return (
     <form action={azione} className="space-y-3" noValidate>
@@ -13,6 +13,16 @@ export function ModuloProfiloCliente({ valori }: { valori: Record<string, string
         <Campo etichetta="Nome" name="nome" esito={esito} defaultValue={valori.nome} autoComplete="given-name" />
         <Campo etichetta="Cognome" name="cognome" esito={esito} defaultValue={valori.cognome} autoComplete="family-name" />
       </div>
+      {chiediCodiceFiscale && (
+        <Campo
+          etichetta="Codice fiscale"
+          name="codiceFiscale"
+          esito={esito}
+          autoCapitalize="characters"
+          maxLength={16}
+          aiuto="Serve per ordinare: ti riconosce come cliente anche se cambi email. Si scrive una volta sola."
+        />
+      )}
       <Campo etichetta="Telefono" name="telefono" type="tel" esito={esito} defaultValue={valori.telefono} autoComplete="tel" />
       <Campo etichetta="Indirizzo di spedizione" name="indirizzo" esito={esito} defaultValue={valori.indirizzo} autoComplete="street-address" />
       <div className="grid grid-cols-[1fr_2fr_1fr] gap-3">
