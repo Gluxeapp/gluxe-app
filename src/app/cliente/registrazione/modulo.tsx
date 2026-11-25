@@ -19,6 +19,7 @@ export function ModuloRegistrazioneCliente({ negozio }: { negozio: string }) {
       <div className="grid gap-3 sm:grid-cols-2">
         <Campo etichetta="Nome" name="nome" esito={esito} autoComplete="given-name" />
         <Campo etichetta="Cognome" name="cognome" esito={esito} autoComplete="family-name" />
+        <Campo etichetta="Codice fiscale" name="codiceFiscale" esito={esito} autoCapitalize="characters" maxLength={16} aiuto="Serve a riconoscerti come cliente, anche se cambi email." />
       </div>
       <Campo etichetta="Email" name="email" type="email" esito={esito} autoComplete="email" />
       <Campo etichetta="Telefono" name="telefono" type="tel" esito={esito} autoComplete="tel" />

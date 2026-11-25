@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { codiceFiscaleValido, normalizzaCodiceFiscale } from "./validazioni";
 
 /** Controllo dei dati di spedizione di un ordine (acquisti personali, start kit e negozio online). */
 export const testoObbligatorio = (nome: string, max: number) =>
@@ -8,6 +9,12 @@ export const schemaTelefono = z
   .string()
   .trim()
   .regex(/^\+?[\d\s]{8,16}$/, "Numero di telefono non valido");
+
+/** Codice fiscale del cliente (decisione 36): normalizzato e con il carattere di controllo verificato. */
+export const schemaCodiceFiscale = z
+  .string()
+  .transform(normalizzaCodiceFiscale)
+  .refine(codiceFiscaleValido, "Codice fiscale non valido");
 
 export const schemaSpedizione = z.object({
   destinatario: testoObbligatorio("Destinatario", 120),

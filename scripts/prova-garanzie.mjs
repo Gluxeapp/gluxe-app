@@ -232,7 +232,7 @@ try {
     const [o] = await ordineOnline(tx, await cliente(tx));
     await tx`update app.ordini set cliente_id = ${await cliente(tx)} where id = ${o.id}`;
   });
-  await deveFallire("due clienti con la stessa email", async (tx) => {
+  await deveFallire("due clienti senza codice fiscale con la stessa email (clienti nati prima)", async (tx) => {
     await cliente(tx, "doppio-garanzie@gluxe.test");
     await cliente(tx, "doppio-garanzie@gluxe.test");
   });
@@ -263,6 +263,39 @@ try {
     });
   } catch (e) {
     esito(e.message === "ANNULLA", "accettato: spostamento di un cliente come intervento tracciato della sede");
+  }
+
+  // 1d-ter) Cliente riconosciuto dal codice fiscale (migrazione 0014, decisione 36), in transazioni annullate.
+  const conCodice = async (tx, cf, email = `garanzie-${randomUUID()}@gluxe.test`) => {
+    const [c] = await tx`insert into app.clienti (incaricato_id, codice_fiscale, email, nome, cognome, telefono, privacy_accettata_il)
+      values (${a.id}, ${cf}, ${email}, 'Prova', 'Garanzie', '3470000000', now()) returning id`;
+    return c.id;
+  };
+  await deveFallire("due clienti con lo stesso codice fiscale", async (tx) => {
+    await conCodice(tx, "GRNPRV80A01H501U");
+    await conCodice(tx, "GRNPRV80A01H501U");
+  });
+  await deveFallire("codice fiscale del cliente in minuscolo", (tx) => conCodice(tx, "grnprv80a01h501u"));
+  await deveFallire("codice fiscale del cliente troppo corto", (tx) => conCodice(tx, "GRNPRV80A01"));
+  await deveFallire("cambiare il codice fiscale di un cliente senza l'intervento tracciato della sede", async (tx) => {
+    const c = await conCodice(tx, "GRNPRV80A01H501U");
+    await tx`update app.clienti set codice_fiscale = 'GRNPRV80A01H501V' where id = ${c}`;
+  });
+  try {
+    await sql.begin(async (tx) => {
+      await conCodice(tx, "GRNPRV80A01H501U", "famiglia-garanzie@gluxe.test");
+      await conCodice(tx, "GRNPRV80A01H501V", "famiglia-garanzie@gluxe.test");
+      const c = await cliente(tx);
+      await tx`update app.clienti set codice_fiscale = 'GRNPRV80A01H501W' where id = ${c}`;
+      await tx`select set_config('app.correggi_codice_fiscale', 'tracciato', true)`;
+      await tx`update app.clienti set codice_fiscale = 'GRNPRV80A01H501X' where id = ${c}`;
+      throw new Error("ANNULLA");
+    });
+  } catch (e) {
+    esito(
+      e.message === "ANNULLA",
+      "accettato: stessa email con codici fiscali diversi, codice fiscale scritto la prima volta, correzione tracciata della sede",
+    );
   }
 
   // 1d-bis) Profilo cliente (migrazione 0010, decisione 32), in transazioni annullate.

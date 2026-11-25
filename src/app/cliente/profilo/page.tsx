@@ -45,8 +45,12 @@ async function Contenuto() {
       </Scheda>
       <Scheda>
         <h2 className="mb-3 font-titoli text-xl text-oro-chiaro">I tuoi dati</h2>
-        <p className="mb-3 text-sm text-testo-tenue">Email: {cliente.email}</p>
+        <p className="mb-3 text-sm text-testo-tenue">
+          Email: {cliente.email}
+          {cliente.codiceFiscale && <> · Codice fiscale: {cliente.codiceFiscale}</>}
+        </p>
         <ModuloProfiloCliente
+          chiediCodiceFiscale={!cliente.codiceFiscale}
           valori={{
             nome: cliente.nome,
             cognome: cliente.cognome,

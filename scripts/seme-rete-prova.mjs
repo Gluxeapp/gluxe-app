@@ -77,11 +77,14 @@ try {
         const [inc] = await tx`select codice, telefono from app.incaricati where id = ${id.get(o.chi)}`;
         const email = `cliente.${inc.codice.toLowerCase()}@gluxe.test`;
         const telefono = o.chi === "carla.finta@gluxe.test" ? inc.telefono : "3470000000";
-        const [c] = await tx`
-          insert into app.clienti (incaricato_id, email, nome, cognome, telefono, consenso_contatti_il, privacy_accettata_il)
-          values (${id.get(o.chi)}, ${email}, 'Cliente', ${`di ${inc.codice}`}, ${telefono}, now(), now())
-          on conflict (email) do update set nome = excluded.nome
-          returning id, (xmax = 0) as nuovo`;
+        // Clienti finti senza codice fiscale (come quelli nati prima della decisione 36): uno per email.
+        let [c] = await tx`select id, false as nuovo from app.clienti where email = ${email} and codice_fiscale is null`;
+        if (!c) {
+          [c] = await tx`
+            insert into app.clienti (incaricato_id, email, nome, cognome, telefono, consenso_contatti_il, privacy_accettata_il)
+            values (${id.get(o.chi)}, ${email}, 'Cliente', ${`di ${inc.codice}`}, ${telefono}, now(), now())
+            returning id, true as nuovo`;
+        }
         if (c.nuovo) {
           await tx`insert into app.storico_legami_clienti (cliente_id, incaricato_id, motivo) values (${c.id}, ${id.get(o.chi)}, 'Cliente finto per le prove')`;
         }

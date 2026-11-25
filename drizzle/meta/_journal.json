@@ -99,6 +99,13 @@
       "when": 1795455480194,
       "tag": "0013_candidature_clienti",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1795602536087,
+      "tag": "0014_clienti_codice_fiscale",
+      "breakpoints": true
     }
   ]
 }

@@ -14,9 +14,9 @@ import { indirizzoApp } from "@/lib/indirizzo-app";
 import { creaOrdineDaProfilo } from "@/lib/negozio";
 import { registraStato } from "@/lib/ordini";
 import { apriPagamentoCliente, chiudiPagamento } from "@/lib/pagamenti";
-import { aggiornaProfilo, chiediConsulente, inviaCandidatura, ordineDelProfilo, registraCliente } from "@/lib/profilo-cliente";
+import { aggiornaProfilo, aggiungiCodiceFiscale, chiediConsulente, inviaCandidatura, ordineDelProfilo, registraCliente } from "@/lib/profilo-cliente";
 import { creaSessione, DURATA_INCARICATO_ORE } from "@/lib/sessione";
-import { schemaSpedizione, schemaTelefono, testoObbligatorio } from "@/lib/spedizione";
+import { schemaCodiceFiscale, schemaSpedizione, schemaTelefono, testoObbligatorio } from "@/lib/spedizione";
 import { pagamentiAttivi } from "@/lib/stripe";
 import { normalizzaCodiceIncaricato } from "@/lib/validazioni";
 
@@ -25,6 +25,7 @@ import { normalizzaCodiceIncaricato } from "@/lib/validazioni";
 const schemaRegistrazione = z.object({
   nome: testoObbligatorio("Nome", 60),
   cognome: testoObbligatorio("Cognome", 60),
+  codiceFiscale: schemaCodiceFiscale,
   email: z.string().trim().toLowerCase().max(160).email("Email non valida"),
   telefono: schemaTelefono,
   password: schemaPassword,
@@ -46,11 +47,14 @@ export async function registratiCliente(_: EsitoModulo, formData: FormData): Pro
   if (esito.esito === "esiste") {
     return { messaggio: "Hai già un profilo con questa email: accedi, oppure recupera la password.", valori };
   }
+  if (esito.esito === "sede") {
+    return { messaggio: "Per attivare il profilo con questi dati contatta l'azienda: ti aiuteremo noi.", valori };
+  }
   if (esito.esito === "conferma") {
     return {
       ok: true,
       messaggio:
-        "Con questa email risultano già degli acquisti: per proteggerli ti abbiamo mandato un'email con il link per scegliere la password e attivare il profilo.",
+        "Con questi dati risultano già degli acquisti: per proteggerli abbiamo mandato all'email usata negli acquisti il link per attivare il profilo.",
     };
   }
   await creaSessione(esito.utenteId, { verificata: true, durataOre: DURATA_INCARICATO_ORE });
@@ -76,6 +80,13 @@ export async function salvaProfiloCliente(_: EsitoModulo, formData: FormData): P
   const valori = valoriDa(formData);
   const letto = schemaProfilo.safeParse(Object.fromEntries(formData));
   if (!letto.success) return { messaggio: "Controlla i campi evidenziati.", errori: erroriPerCampo(letto.error.issues), valori };
+  // Profili nati prima della decisione 36: il codice fiscale si aggiunge una volta sola.
+  if (!cliente.codiceFiscale) {
+    const cf = schemaCodiceFiscale.safeParse(String(formData.get("codiceFiscale") ?? ""));
+    if (!cf.success) return { messaggio: "Controlla i campi evidenziati.", errori: { codiceFiscale: "Codice fiscale non valido" }, valori };
+    const aggiunto = await aggiungiCodiceFiscale(cliente.id, cf.data);
+    if (!aggiunto.ok) return { messaggio: aggiunto.messaggio, errori: { codiceFiscale: aggiunto.messaggio }, valori };
+  }
   await aggiornaProfilo(cliente.id, { ...letto.data, consensoContatti: formData.get("consensoContatti") === "on" });
   revalidatePath("/cliente/profilo");
   return { ok: true, messaggio: "Dati salvati." };

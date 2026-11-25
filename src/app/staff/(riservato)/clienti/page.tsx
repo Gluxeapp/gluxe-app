@@ -59,6 +59,7 @@ async function Contenuto({ searchParams }: Pick<PageProps<"/staff/clienti">, "se
                   <Link href={`/staff/clienti/${c.id}`} className="text-oro-chiaro">
                     {c.nome} {c.cognome}
                   </Link>
+                  <span className="block text-xs text-testo-tenue">{c.codiceFiscale ?? "codice fiscale non indicato"}</span>
                   <span className="block text-xs text-testo-tenue">{c.email}</span>
                 </td>
                 <td className="p-3">

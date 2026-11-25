@@ -62,7 +62,7 @@ Rischi: lo stesso cliente creato due volte da due ordini contemporanei (e quindi
 
 | Garanzia | Come è ottenuta (migrazione 0008, attiva dalla Fase 7) |
 | --- | --- |
-| Un cliente esiste una volta sola | Email in minuscolo con chiave univoca; ordini contemporanei della stessa email si mettono in fila (blocco sull'email nella transazione): un solo cliente, un solo legame (prova con tre ordini insieme da due negozi) |
+| Un cliente esiste una volta sola | Il cliente si riconosce dal **codice fiscale** (decisione 36): chiave univoca, in maiuscolo con 16 caratteri (controllo del database), carattere di controllo verificato sul server; ordini contemporanei dello stesso codice fiscale si mettono in fila (blocco sul codice fiscale nella transazione, poi sull'email, sempre in quest'ordine): un solo cliente, un solo legame (prova con tre ordini insieme da due negozi). La stessa email con un altro codice fiscale è un altro cliente. I clienti nati prima, senza codice fiscale, restano uno per email (chiave univoca solo per loro) e ricevono il codice al primo acquisto con la loro email. Una volta scritto, il codice fiscale lo cambia solo la sede (intervento tracciato `app.correggi_codice_fiscale`, con motivo e registro modifiche); due clienti con lo stesso codice non si uniscono mai in automatico |
 | L'ordine va all'incaricata del cliente | Al primo ordine il cliente si lega all'incaricata del link; gli ordini dopo vanno a lei qualunque link usi. Incaricata e cliente dell'ordine sono fotografati: non cambiano più |
 | Il legame non cambia di nascosto | Il database rifiuta il cambio di incaricata di un cliente se non è dichiarato come intervento tracciato della sede; ogni spostamento lascia una riga nello storico dei legami (solo in aggiunta) e nel registro modifiche, e vale solo per gli ordini futuri |
 | Ordini online sempre con il cliente, e solo loro | Controllo nel database (tipo "online" ⇔ cliente presente) |
@@ -76,7 +76,7 @@ Profilo cliente e ordine per un cliente (migrazione 0010, decisione 32):
 | Garanzia | Come è ottenuta |
 | --- | --- |
 | Un cliente senza consulente si lega una volta sola, poi solo la sede lo sposta | Il database accetta il primo legame (codice al primo acquisto, link del negozio, ordine preparato da un'incaricata, assegnazione della sede) e da lì in poi solo gli spostamenti tracciati della sede; un cliente legato non torna mai senza consulente. Ogni legame va nello storico |
-| Nessuno entra nei dati di un altro cliente | Un profilo per email (chiave univoca); se l'email ha già acquisti, il profilo si attiva solo scegliendo la password dal link mandato a quella email; il profilo di un cliente non si scambia con un altro |
+| Nessuno entra nei dati di un altro cliente | Un profilo per email (chiave univoca); se il codice fiscale (o, per i clienti nati prima, l'email) ha già acquisti, il profilo si attiva solo scegliendo la password dal link mandato all'email degli acquisti, che resta quella del profilo; chi ha già un profilo riceve lì un promemoria, e lo schermo risponde allo stesso modo nei due casi; il profilo di un cliente non si scambia con un altro |
 | L'incaricata non prepara ordini ai clienti altrui | Controllo sul server nella stessa transazione (blocco sull'email del cliente) prima di creare l'ordine |
 | Il cliente accetta l'informativa | Gli ordini preparati dall'incaricata si pagano solo dopo la spunta dell'informativa, controllata sul server |
 

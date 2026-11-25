@@ -115,6 +115,7 @@ async function Contenuto() {
                     <span className="ml-2 inline-block rounded-full bg-oro px-2 py-0.5 align-middle text-[11px] font-semibold text-nero">VIP</span>
                   )}
                 </p>
+                {c.codiceFiscale && <p className="text-xs text-testo-tenue">Codice fiscale {c.codiceFiscale}</p>}
                 {c.vipFino && <p className="text-xs text-oro-chiaro">Cliente VIP fino al {dataItaliana(c.vipFino)}: prezzi VIP dal suo profilo</p>}
                 <p className="text-xs text-testo-tenue">
                   {c.ordini} {c.ordini === 1 ? "ordine pagato" : "ordini pagati"}

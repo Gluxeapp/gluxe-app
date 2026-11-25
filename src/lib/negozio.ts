@@ -74,10 +74,10 @@ export async function catalogoNegozio() {
   };
 }
 
-export type DatiCliente = { nome: string; cognome: string; email: string; telefono: string };
+export type DatiCliente = { nome: string; cognome: string; codiceFiscale: string; email: string; telefono: string };
 
 /**
- * Crea un ordine dal negozio. Il cliente si riconosce dall'email: se è nuovo si lega all'incaricata del link,
+ * Crea un ordine dal negozio. Il cliente si riconosce dal codice fiscale (decisione 36): se è nuovo si lega all'incaricata del link,
  * altrimenti l'ordine va all'incaricata a cui è già legato (decisione 29). Restituisce il codice segreto del link
  * con cui il cliente segue e paga l'ordine (nel database se ne salva solo l'impronta).
  */
@@ -95,13 +95,14 @@ export async function creaOrdineOnline(dati: {
   const email = dati.cliente.email.trim().toLowerCase();
   const codice = generaToken();
   const id = await db().transaction(async (tx) => {
-    let cliente = await clientePerEmail(tx, email);
+    let cliente = await clientePerCodiceFiscale(tx, dati.cliente.codiceFiscale, email);
     const ora = new Date();
     if (!cliente) {
       [cliente] = await tx
         .insert(clienti)
         .values({
           incaricatoId: negozio.id,
+          codiceFiscale: dati.cliente.codiceFiscale,
           email,
           nome: dati.cliente.nome,
           cognome: dati.cliente.cognome,
@@ -160,11 +161,27 @@ async function articoliDalCatalogo(richiesti: { prodottoId: string; quantita: nu
   });
 }
 
-/** Cliente con questa email, bloccato fino alla fine della transazione: due ordini contemporanei non creano due clienti né due legami. */
-async function clientePerEmail(tx: Esecutore, email: string) {
+/**
+ * Il cliente si riconosce dal codice fiscale (decisione 36), bloccato fino alla fine della transazione: due ordini
+ * contemporanei non creano due clienti né due legami. Un'email diversa non cambia il cliente (e non sostituisce
+ * quella salvata); la stessa email con un altro codice fiscale è un'altra persona.
+ * Passaggio per i clienti nati prima del codice fiscale: se nessuno ha quel codice ma c'è un cliente senza codice
+ * con la stessa email, è lui: gli si scrive il codice fiscale e resta il suo legame.
+ * Ordine dei blocchi sempre codice fiscale → email (anche nella registrazione del profilo), così non si incastrano.
+ */
+export async function clientePerCodiceFiscale(tx: Esecutore, codiceFiscale: string, email: string) {
+  await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended(${`cliente-cf:${codiceFiscale}`}, 0))`);
+  const [trovato] = await tx.select().from(clienti).where(eq(clienti.codiceFiscale, codiceFiscale)).for("update");
+  if (trovato) return trovato;
   await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended(${`cliente:${email}`}, 0))`);
-  const [esistente] = await tx.select().from(clienti).where(eq(clienti.email, email)).for("update");
-  return esistente;
+  const [senzaCodice] = await tx
+    .select()
+    .from(clienti)
+    .where(and(eq(clienti.email, email), isNull(clienti.codiceFiscale)))
+    .for("update");
+  if (!senzaCodice) return undefined;
+  const [aggiornato] = await tx.update(clienti).set({ codiceFiscale }).where(eq(clienti.id, senzaCodice.id)).returning();
+  return aggiornato;
 }
 
 async function controllaOrdiniAperti(tx: Esecutore, clienteId: string) {
@@ -207,13 +224,13 @@ export async function creaOrdinePerCliente(dati: {
   const email = dati.cliente.email.trim().toLowerCase();
   const codice = generaToken();
   const id = await db().transaction(async (tx) => {
-    let cliente = await clientePerEmail(tx, email);
+    let cliente = await clientePerCodiceFiscale(tx, dati.cliente.codiceFiscale, email);
     if (cliente?.incaricatoId && cliente.incaricatoId !== dati.incaricatoId) throw new ErroreOrdine(MESSAGGIO_CLIENTE_ALTRUI);
     const motivo = `Ordine preparato dalla consulente ${negozio.codice}`;
     if (!cliente) {
       [cliente] = await tx
         .insert(clienti)
-        .values({ incaricatoId: dati.incaricatoId, email, nome: dati.cliente.nome, cognome: dati.cliente.cognome, telefono: dati.cliente.telefono })
+        .values({ incaricatoId: dati.incaricatoId, codiceFiscale: dati.cliente.codiceFiscale, email, nome: dati.cliente.nome, cognome: dati.cliente.cognome, telefono: dati.cliente.telefono })
         .returning();
       await tx.insert(storicoLegamiClienti).values({ clienteId: cliente.id, incaricatoId: dati.incaricatoId, motivo });
     } else {
@@ -247,8 +264,14 @@ export async function creaOrdineDaProfilo(dati: {
   codiceConsulente?: string;
 }): Promise<{ id: string; codice: string }> {
   const articoli = await articoliDalCatalogo(dati.richiesti);
-  const [attuale] = await db().select({ email: clienti.email, incaricatoId: clienti.incaricatoId }).from(clienti).where(eq(clienti.id, dati.clienteId));
+  const [attuale] = await db()
+    .select({ codiceFiscale: clienti.codiceFiscale, email: clienti.email, incaricatoId: clienti.incaricatoId })
+    .from(clienti)
+    .where(eq(clienti.id, dati.clienteId));
   if (!attuale) throw new ErroreOrdine("Profilo non trovato.");
+  // Profili nati prima del codice fiscale (decisione 36): lo scrivono nel profilo prima di ordinare.
+  if (!attuale.codiceFiscale) throw new ErroreOrdine("Per ordinare aggiungi il tuo codice fiscale in \"I tuoi dati\" (Profilo).");
+  const codiceFiscale = attuale.codiceFiscale;
   let consulente: { id: string; codice: string } | undefined;
   if (!attuale.incaricatoId) {
     const negozio = dati.codiceConsulente ? await negozioDi(dati.codiceConsulente) : undefined;
@@ -259,7 +282,8 @@ export async function creaOrdineDaProfilo(dati: {
   }
   const codice = generaToken();
   const id = await db().transaction(async (tx) => {
-    let cliente = await clientePerEmail(tx, attuale.email);
+    let cliente = await clientePerCodiceFiscale(tx, codiceFiscale, attuale.email);
+    if (!cliente || cliente.id !== dati.clienteId) throw new ErroreOrdine("Profilo non trovato.");
     await controllaOrdiniAperti(tx, cliente.id);
     if (!cliente.incaricatoId) {
       if (!consulente) throw new ErroreOrdine("Per il primo acquisto serve il codice della tua consulente.");
@@ -310,13 +334,17 @@ export async function ordineDelCliente(id: string, codice: string) {
   };
 }
 
-/** Clienti di un'incaricata: email e telefono solo con il consenso del cliente, mai l'indirizzo (regola 16). */
+/**
+ * Clienti di un'incaricata: codice fiscale (decisione 36), email e telefono solo con il consenso del cliente,
+ * mai l'indirizzo (regola 16).
+ */
 export async function clientiDellIncaricata(incaricatoId: string) {
   const righe = await db()
     .select({
       id: clienti.id,
       nome: clienti.nome,
       cognome: clienti.cognome,
+      codiceFiscale: clienti.codiceFiscale,
       email: clienti.email,
       telefono: clienti.telefono,
       consenso: clienti.consensoContattiIl,

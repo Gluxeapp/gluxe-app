@@ -55,6 +55,7 @@ export function ModuloOrdinePerCliente({ prodotti, spedizione }: { prodotti: Pro
         <div className="grid gap-3 sm:grid-cols-2">
           <Campo etichetta="Nome" name="nome" esito={esito} />
           <Campo etichetta="Cognome" name="cognome" esito={esito} />
+          <Campo etichetta="Codice fiscale" name="codiceFiscale" esito={esito} autoCapitalize="characters" maxLength={16} aiuto="Riconosce il cliente: se è già di un'altra consulente l'ordine non si può preparare." />
           <Campo etichetta="Email" name="email" type="email" esito={esito} aiuto="Il cliente riceve qui il link per pagare." />
           <Campo etichetta="Telefono" name="telefono" type="tel" esito={esito} aiuto="Serve al corriere." />
         </div>
