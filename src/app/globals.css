@@ -42,6 +42,81 @@ body {
   color: transparent;
 }
 
+/* Pagina iniziale (accesso incaricate): campi a riga, pulsanti squadrati, ciocche d'oro che si disegnano una volta. */
+/* Fuori dai layer: valgono solo dentro .accesso e prevalgono sulle classi condivise dei moduli. */
+.accesso form input {
+  border-width: 0 0 1px;
+  border-radius: 0;
+  background: transparent;
+  padding-left: 0;
+  padding-right: 0;
+  font-size: 1.0625rem;
+  letter-spacing: 0.02em;
+}
+.accesso form input:focus {
+  border-color: var(--oro);
+  box-shadow: 0 1px 0 0 var(--oro);
+}
+.accesso form button[type="submit"] {
+  border-radius: 2px;
+  letter-spacing: 0.08em;
+  padding-top: 0.9rem;
+  padding-bottom: 0.9rem;
+  transition: background-color 0.2s, opacity 0.2s;
+}
+.accesso form button[type="submit"]:hover:not(:disabled) {
+  background: var(--oro-chiaro);
+}
+.accesso-pulsante-chiaro {
+  display: block;
+  border: 1px solid color-mix(in srgb, var(--oro) 60%, transparent);
+  border-radius: 2px;
+  padding: 0.8rem 1rem;
+  text-align: center;
+  color: var(--oro-chiaro);
+  transition: background-color 0.2s;
+}
+.accesso-pulsante-chiaro:hover {
+  background: color-mix(in srgb, var(--oro) 12%, transparent);
+}
+.accesso a:focus-visible,
+.accesso button:focus-visible {
+  outline: 2px solid var(--oro-chiaro);
+  outline-offset: 3px;
+}
+.accesso-ciocche {
+  opacity: 0.55;
+}
+/* Il logo ha lo sfondo nero pieno: "lighten" lo fa sparire sopra le ciocche, restano solo le lettere d'oro. */
+.accesso-logo {
+  mix-blend-mode: lighten;
+}
+@media (min-width: 1024px) {
+  /* Sul computer le ciocche scorrono nella parte alta, dietro al logo, e sfumano prima della frase. */
+  .accesso-ciocche {
+    opacity: 1;
+    height: 58%;
+    -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 55%, transparent 100%);
+  }
+}
+.accesso-ciocche path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: ciocca-disegna 2.6s cubic-bezier(0.45, 0, 0.2, 1) forwards;
+}
+@keyframes ciocca-disegna {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .accesso-ciocche path {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+}
+
 /* Organigramma Unilevel (pagina Carriera e rete della sede): linee che collegano ogni persona alle sue dirette. */
 /* In @layer components: le classi di Tailwind (per esempio hidden sm:flex) possono prevalere. */
 @layer components {
